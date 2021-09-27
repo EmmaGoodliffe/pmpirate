@@ -1,7 +1,10 @@
 <h1>PM Pirate</h1>
-<a href="./pdf/Further Mech.pdf">Further Mech</a>
-<a href="./pdf/Further Pure Year 1.pdf">Further Pure Year 1</a>
-<a href="./pdf/Further Stats.pdf">Further Stats</a>
+<div class="flex flex-col sm:flex-row">
+  <span class="flex-1 py-2"><a href="./pdf/Further Mech.pdf">Further Mech</a></span>
+  <span class="flex-1 py-2"><a href="./pdf/Further Pure Year 1.pdf">Further Pure Year 1</a></span>
+  <span class="flex-1 py-2"><a href="./pdf/Further Stats.pdf">Further Stats</a>
+  </span>
+</div>
 
 <script lang="ts">
   import { initializeApp } from "firebase/app";

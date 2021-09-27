@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-bg text-light-s;
+}
+
+h1 {
+  @apply my-8 text-3xl font-bold;
+}
+
+a:hover {
+  @apply underline;
+}
+
+.btn {
+  @apply w-11/12 sm:w-1/2 md:w-auto max-w-md mx-auto my-4 px-4 py-2 bg-p rounded transition-colors duration-long;
+}
+
+.btn:disabled {
+  @apply bg-dark-p text-dark-s cursor-not-allowed;
+}

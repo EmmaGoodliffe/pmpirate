@@ -27,6 +27,9 @@ var app = (function () {
     function is_empty(obj) {
         return Object.keys(obj).length === 0;
     }
+    function append(target, node) {
+        target.appendChild(node);
+    }
     function insert(target, node, anchor) {
         target.insertBefore(node, anchor || null);
     }
@@ -260,6 +263,10 @@ var app = (function () {
 
     function dispatch_dev(type, detail) {
         document.dispatchEvent(custom_event(type, Object.assign({ version: '3.43.0' }, detail), true));
+    }
+    function append_dev(target, node) {
+        dispatch_dev('SvelteDOMInsert', { target, node });
+        append(target, node);
     }
     function insert_dev(target, node, anchor) {
         dispatch_dev('SvelteDOMInsert', { target, node, anchor });
@@ -4087,10 +4094,14 @@ var app = (function () {
     function create_fragment(ctx) {
     	let h1;
     	let t1;
+    	let div;
+    	let span0;
     	let a0;
     	let t3;
+    	let span1;
     	let a1;
     	let t5;
+    	let span2;
     	let a2;
 
     	const block = {
@@ -4098,21 +4109,33 @@ var app = (function () {
     			h1 = element("h1");
     			h1.textContent = "PM Pirate";
     			t1 = space();
+    			div = element("div");
+    			span0 = element("span");
     			a0 = element("a");
     			a0.textContent = "Further Mech";
     			t3 = space();
+    			span1 = element("span");
     			a1 = element("a");
     			a1.textContent = "Further Pure Year 1";
     			t5 = space();
+    			span2 = element("span");
     			a2 = element("a");
     			a2.textContent = "Further Stats";
     			add_location(h1, file, 0, 0, 0);
     			attr_dev(a0, "href", "./pdf/Further Mech.pdf");
-    			add_location(a0, file, 1, 0, 19);
+    			add_location(a0, file, 2, 28, 87);
+    			attr_dev(span0, "class", "flex-1 py-2");
+    			add_location(span0, file, 2, 2, 61);
     			attr_dev(a1, "href", "./pdf/Further Pure Year 1.pdf");
-    			add_location(a1, file, 2, 0, 69);
+    			add_location(a1, file, 3, 28, 172);
+    			attr_dev(span1, "class", "flex-1 py-2");
+    			add_location(span1, file, 3, 2, 146);
     			attr_dev(a2, "href", "./pdf/Further Stats.pdf");
-    			add_location(a2, file, 3, 0, 133);
+    			add_location(a2, file, 4, 28, 271);
+    			attr_dev(span2, "class", "flex-1 py-2");
+    			add_location(span2, file, 4, 2, 245);
+    			attr_dev(div, "class", "flex flex-col sm:flex-row");
+    			add_location(div, file, 1, 0, 19);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4120,11 +4143,15 @@ var app = (function () {
     		m: function mount(target, anchor) {
     			insert_dev(target, h1, anchor);
     			insert_dev(target, t1, anchor);
-    			insert_dev(target, a0, anchor);
-    			insert_dev(target, t3, anchor);
-    			insert_dev(target, a1, anchor);
-    			insert_dev(target, t5, anchor);
-    			insert_dev(target, a2, anchor);
+    			insert_dev(target, div, anchor);
+    			append_dev(div, span0);
+    			append_dev(span0, a0);
+    			append_dev(div, t3);
+    			append_dev(div, span1);
+    			append_dev(span1, a1);
+    			append_dev(div, t5);
+    			append_dev(div, span2);
+    			append_dev(span2, a2);
     		},
     		p: noop,
     		i: noop,
@@ -4132,11 +4159,7 @@ var app = (function () {
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(h1);
     			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(a0);
-    			if (detaching) detach_dev(t3);
-    			if (detaching) detach_dev(a1);
-    			if (detaching) detach_dev(t5);
-    			if (detaching) detach_dev(a2);
+    			if (detaching) detach_dev(div);
     		}
     	};
 

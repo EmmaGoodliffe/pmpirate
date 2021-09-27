@@ -4,10 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm run build:scss && npm run build:svelte && npm run build:ts",
-    "build:scss": "sass src/index.scss temp/index.css && tailwindcss-cli build temp/index.css -o public/index.css",
+    "build": "npm run build:css && npm run build:svelte",
+    "build:css": "tailwindcss-cli build -i src/index.css -o public/index.css",
     "build:svelte": "rollup -c",
-    "build:ts": "tsc",
     "dev": "npm run dev:svelte",
     "dev:svelte": "rollup -c -w",
     "lint": "eslint \".\" --fix && prettier \".\" --write && svelte-check",
