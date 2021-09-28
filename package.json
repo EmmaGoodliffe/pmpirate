@@ -26,6 +26,7 @@
     "eslint-plugin-import": "^2.24.2",
     "eslint-plugin-ts-exports": "^1.2.5",
     "prettier": "^2.4.1",
+    "prettier-plugin-svelte": "^2.4.0",
     "rollup": "^2.3.4",
     "rollup-plugin-css-only": "^3.1.0",
     "rollup-plugin-livereload": "^2.0.0",
