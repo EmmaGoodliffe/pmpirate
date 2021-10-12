@@ -4,11 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm run build:css && npm run build:svelte",
     "build:css": "tailwindcss-cli build -i src/index.css -o public/index.css",
     "build:svelte": "rollup -c",
-    "dev": "npm run dev:svelte",
+    "build": "npm run build:css && npm run build:svelte",
+    "deploy": "firebase deploy",
     "dev:svelte": "rollup -c -w",
+    "dev": "npm run dev:svelte",
     "lint": "eslint \".\" --fix && prettier \".\" --write && svelte-check",
     "start": "echo \\\"No start script yet\\\"",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -17,6 +18,7 @@
   "license": "ISC",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^16.0.0",
+    "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^10.0.0",
     "@rollup/plugin-typescript": "^6.0.0",
     "@tsconfig/svelte": "^1.0.13",

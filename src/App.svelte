@@ -2,6 +2,8 @@
   import { initializeApp } from "firebase/app";
   import { getAnalytics } from "firebase/analytics";
 
+  export let memes: { otd: Record<string, string> };
+
   const firebaseConfig = {
     apiKey: "AIzaSyDfGaweLVDXcfxJDZ4ztoMoilhU9fv4uXU",
     authDomain: "pmpirate.firebaseapp.com",
@@ -13,7 +15,14 @@
   };
 
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+  getAnalytics(app);
+
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+  const date = today.getDate();
+  const otdCode = `${year}-${month}-${date}`;
+  const otdSrc = `../public/memes/${memes.otd[otdCode]}`;
 </script>
 
 <header class="my-8 flex">
@@ -23,19 +32,30 @@
     src="./favicon.png"
     alt="Logo"
   />
-  <h1 class="text-3xl font-bold inline-block ml-4">Physics & Maths Pirate</h1>
+  <h1 class="inline-block ml-4">Physics & Maths Pirate</h1>
 </header>
-<div class="flex flex-col sm:flex-row">
-  <span class="flex-1 py-2"
-    ><a href="./pdf/Further Mech.pdf">Further Mech</a></span
-  >
-  <span class="flex-1 py-2"
-    ><a href="./pdf/Further Pure Year 1.pdf">Further Pure Year 1</a></span
-  >
-  <span class="flex-1 py-2"
-    ><a href="./pdf/Further Stats.pdf">Further Stats</a></span
-  >
-</div>
-<p class="mt-12">
-  The pure and stats are dodgy older versions but I'll fix them soon.
-</p>
+<main>
+  <h2>Textbooks</h2>
+  <div class="flex flex-col sm:flex-row">
+    <span class="flex-1 py-2"
+      ><a href="./pdf/Further Mech.pdf">Further Mech</a></span
+    >
+    <span class="flex-1 py-2"
+      ><a href="./pdf/Further Pure Year 1.pdf">Further Pure Year 1</a></span
+    >
+    <span class="flex-1 py-2"
+      ><a href="./pdf/Further Stats.pdf">Further Stats</a></span
+    >
+  </div>
+  <p class="mt-12">
+    The pure and stats are dodgy older versions but I'll fix them soon.
+  </p>
+</main>
+<footer class="mt-48 mb-4">
+  <h2>Meme of the Day</h2>
+  <img
+    class="w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto"
+    src={otdSrc}
+    alt="Meme"
+  />
+</footer>

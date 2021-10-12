@@ -10,6 +10,14 @@ a:hover {
   @apply underline;
 }
 
+h1 {
+  @apply text-3xl font-bold;
+}
+
+h2 {
+  @apply text-xl font-bold my-4;
+}
+
 .btn {
   @apply w-11/12 sm:w-1/2 md:w-auto max-w-md mx-auto my-4 px-4 py-2 bg-p rounded transition-colors duration-long;
 }
