@@ -22,7 +22,7 @@
   const month = today.getMonth() + 1;
   const date = today.getDate();
   const otdCode = `${year}-${month}-${date}`;
-  const otdSrc = `../public/memes/${memes.otd[otdCode]}`;
+  const otdSrc = `memes/${memes.otd[otdCode]}`;
 </script>
 
 <header class="my-8 flex">
@@ -38,13 +38,13 @@
   <h2>Textbooks</h2>
   <div class="flex flex-col sm:flex-row">
     <span class="flex-1 py-2"
-      ><a href="./pdf/Further Mech.pdf">Further Mech</a></span
+      ><a href="pdf/Further Mech.pdf">Further Mech</a></span
     >
     <span class="flex-1 py-2"
-      ><a href="./pdf/Further Pure Year 1.pdf">Further Pure Year 1</a></span
+      ><a href="pdf/Further Pure Year 1.pdf">Further Pure Year 1</a></span
     >
     <span class="flex-1 py-2"
-      ><a href="./pdf/Further Stats.pdf">Further Stats</a></span
+      ><a href="pdf/Further Stats.pdf">Further Stats</a></span
     >
   </div>
   <p class="mt-12">
