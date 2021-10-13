@@ -6,10 +6,6 @@ body {
   @apply bg-bg text-light-s;
 }
 
-a:hover {
-  @apply underline;
-}
-
 h1 {
   @apply text-3xl font-bold;
 }

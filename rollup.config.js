@@ -31,14 +31,7 @@ function serve() {
   };
 }
 
-export default {
-  input: "src/index.ts",
-  output: {
-    sourcemap: true,
-    format: "iife",
-    name: "app",
-    file: "public/build/bundle.js",
-  },
+const options = {
   plugins: [
     svelte({
       preprocess: sveltePreprocess(),
@@ -83,3 +76,23 @@ export default {
     clearScreen: false,
   },
 };
+
+export default [{
+  input: "src/index.ts",
+  output: {
+    sourcemap: true,
+    format: "iife",
+    name: "app",
+    file: "public/build/index.js",
+  },
+  ...options,
+}, {
+  input: "src/archive.ts",
+  output: {
+    sourcemap: true,
+    format: "iife",
+    name: "archive",
+    file: "public/build/archive.js",
+  },
+  ...options,
+}];
