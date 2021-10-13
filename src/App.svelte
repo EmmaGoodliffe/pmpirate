@@ -23,7 +23,7 @@
 <section class="mt-48">
   <Otd src={otdSrc} />
   <p class="mt-12">
-    <a class="hover:underline" href="archive">Meme Archive</a>
+    <a class="hover:underline" href="archive.html">Meme Archive</a>
   </p>
 </section>
 <footer class="mb-4" />
