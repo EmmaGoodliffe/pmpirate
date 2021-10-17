@@ -77,22 +77,25 @@ const options = {
   },
 };
 
-export default [{
-  input: "src/index.ts",
-  output: {
-    sourcemap: true,
-    format: "iife",
-    name: "app",
-    file: "public/build/index.js",
+export default [
+  {
+    input: "src/index.ts",
+    output: {
+      sourcemap: true,
+      format: "iife",
+      name: "app",
+      file: "public/build/index.js",
+    },
+    ...options,
   },
-  ...options,
-}, {
-  input: "src/archive.ts",
-  output: {
-    sourcemap: true,
-    format: "iife",
-    name: "archive",
-    file: "public/build/archive.js",
+  {
+    input: "src/archive.ts",
+    output: {
+      sourcemap: true,
+      format: "iife",
+      name: "archive",
+      file: "public/build/archive.js",
+    },
+    ...options,
   },
-  ...options,
-}];
+];
