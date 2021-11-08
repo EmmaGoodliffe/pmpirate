@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { dateToString, stringToDate } from "./date";
   import Header from "./Header.svelte";
 
   export let memes: { otd: Record<string, string> };
@@ -6,62 +7,25 @@
   const today = new Date();
   const dates = Object.keys(memes.otd);
 
-  const toInt = (x: string) => {
-    const intX = parseInt(x);
-    if (!isNaN(intX)) return intX;
-    const numerals = [
-      "I",
-      "II",
-      "III",
-      "IV",
-      "V",
-      "VI",
-      "VII",
-      "VIII",
-      "IX",
-      "X",
-      "XI",
-      "XII",
-    ];
-    return numerals.indexOf(x) + 1;
-  };
-
-  const dateToString = (d: Date) => {
-    const date = d.getDate();
-    const month = d.getMonth() + 1;
-    const year = d.getFullYear();
-    return `${date}/${month}/${year}`;
-  };
-
-  const stringToDate = (d: string) => {
-    const splitters = ["/", "-", "."];
-    for (const splitter of splitters) {
-      const [date, month, year] = d.split(splitter).map(toInt);
-      const result = new Date(year, month - 1, date);
-      if (date <= 31 && `${result}` !== "Invalid Date") return result;
-    }
-    for (const splitter of splitters) {
-      const [year, month, date] = d.split(splitter).map(toInt);
-      const result = new Date(year, month - 1, date);
-      if (`${result}` !== "Invalid Date") return result;
-    }
-    return today;
-  };
-
   const isArchived = (date: string) => {
     const d = new Date(date);
     d.setDate(d.getDate() - 1);
     const weekBefore = new Date();
-    weekBefore.setDate(today.getDate() - 21);
+    weekBefore.setDate(today.getDate() - 28);
     return weekBefore <= new Date(d) && new Date(d) <= today;
   };
 
   let dateString = dateToString(today);
+  $: matchingDates = dates.filter(
+    date =>
+      dateToString(new Date(date)) === dateToString(stringToDate(dateString)),
+  );
 </script>
 
 <Header />
 <main>
   <h2>Meme archive</h2>
+  <p class="my-2">The last month</p>
   <table class="table-auto w-full max-w-4xl mx-auto border-white border-2">
     <thead>
       <tr>
@@ -97,18 +61,20 @@
   <h2>Specify a date</h2>
   <input
     type="text"
-    class="bg-bg border-white border"
+    class="bg-bg border-white border px-2 py-1"
     bind:value={dateString}
   />
-  {#each dates as date}
-    {#if dateToString(new Date(date)) === dateToString(stringToDate(dateString))}
-      <img
-        class="max-w-sm mx-auto w-1/2 sm:w-auto"
-        src={`memes/${memes.otd[date]}`}
-        alt="Meme"
-      />
-    {/if}
-  {/each}
+  {#if matchingDates.length}
+    <img
+      class="max-w-sm mx-auto w-1/2 sm:w-auto"
+      src={`memes/${memes.otd[matchingDates[0]]}`}
+      alt="Meme"
+    />
+  {:else}
+    <p class="w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto text-center">
+      No memes that day :(
+    </p>
+  {/if}
   <p class="mt-4">DVS-style dates accepted</p>
 </section>
 <footer class="mb-4" />
