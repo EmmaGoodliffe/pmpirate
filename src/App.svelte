@@ -25,7 +25,7 @@
   </p>
   <h2 class="mt-12">GBD Booklets</h2>
   <div class="flex flex-col sm:flex-row">
-    {#each ["Gravitational Fields", "Circular Motion", "Electric Fields"] as booklet}
+    {#each ["Gravitational Fields", "Circular Motion", "Electric Fields", "Simple Harmonic Motion"] as booklet}
       <Doc
         name={booklet}
         path={booklet.toLowerCase().split(" ").join("_") + "_GBD"}
