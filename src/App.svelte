@@ -1,11 +1,14 @@
 <script lang="ts">
-  import { dateToString } from "./date";
-
   import Header from "./Header.svelte";
   import Otd from "./Otd.svelte";
   import Doc from "./Doc.svelte";
 
   export let memes: { otd: Record<string, string> };
+  export let dateToString: (
+    d: Date,
+    splitter?: string,
+    reverse?: boolean,
+  ) => string;
 
   const today = new Date();
   const otdCode = dateToString(today, "-", true);

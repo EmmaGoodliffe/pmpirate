@@ -1,8 +1,13 @@
 <script lang="ts">
-  import { dateToString, stringToDate } from "./date";
   import Header from "./Header.svelte";
 
   export let memes: { otd: Record<string, string> };
+  export let dateToString: (
+    d: Date,
+    splitter?: string,
+    reverse?: boolean,
+  ) => string;
+  export let stringToDate: (d: string) => Date;
 
   const today = new Date();
   const dates = Object.keys(memes.otd);
