@@ -16,12 +16,12 @@
 <main>
   <h2>Textbooks</h2>
   <div class="flex flex-col sm:flex-row">
-    {#each ["Further Mech", "Further Pure Year 1", "Further Stats"] as book}
+    {#each ["Further Mech", "Further Pure Year 1", "Further Pure Year 2", "Further Stats"] as book}
       <Doc name={book} path={book} />
     {/each}
   </div>
   <p class="mt-12">
-    The pure and stats are dodgy older versions but I'll fix them soon.
+    The year 1 pure and stats are dodgy older versions but I'll fix them soon.
   </p>
   <h2 class="mt-12">GBD Booklets</h2>
   <div class="flex flex-col sm:flex-row">
