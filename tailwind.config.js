@@ -3,6 +3,7 @@ const colors = require("tailwindcss/colors");
 module.exports = {
   theme: {
     extend: {
+      // TOOO: check if colours actually get used
       colors: {
         bg: colors.coolGray[800],
         p: colors.cyan[500],
