@@ -1,16 +1,18 @@
 const colors = require("tailwindcss/colors");
 
 module.exports = {
+  mode: "jit",
+  content: ["./public/*.html", "./public/build/*.js"],
   theme: {
     extend: {
       // TODO: check if colours actually get used
       colors: {
-        bg: colors.coolGray[800],
+        bg: colors.gray[800],
         p: colors.cyan[500],
-        s: colors.coolGray[700],
+        s: colors.gray[700],
         "dark-p": colors.cyan[800],
-        "dark-s": colors.coolGray[400],
-        "light-s": colors.coolGray[200],
+        "dark-s": colors.gray[400],
+        "light-s": colors.gray[200],
         good: colors.green[500],
         bad: colors.red[500],
       },
@@ -20,6 +22,5 @@ module.exports = {
       },
     },
   },
-  variants: {},
   plugins: [],
 };
