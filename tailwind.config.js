@@ -1,5 +1,7 @@
 const colors = require("tailwindcss/colors");
 
+// TODO: uninstall sass
+
 module.exports = {
   mode: "jit",
   content: ["./public/*.html", "./public/build/*.js"],
