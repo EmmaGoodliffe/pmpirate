@@ -4,6 +4,7 @@ const colors = require("tailwindcss/colors");
 
 module.exports = {
   mode: "jit",
+  // TODO: change to src html
   content: ["./public/*.html", "./public/build/*.js"],
   theme: {
     extend: {
