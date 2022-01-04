@@ -23,9 +23,10 @@
   <p class="mt-12">
     The year 1 pure and stats are dodgy older versions but I'll fix them soon.
   </p>
-  <h2 class="mt-12">GBD Booklets</h2>
-  <div class="flex flex-col sm:flex-row">
-    {#each ["Gravitational Fields", "Circular Motion", "Electric Fields", "Simple Harmonic Motion"] as booklet}
+  <hr class="mx-auto my-8 text-dark-s opacity-50" />
+  <h2>GBD Booklets</h2>
+  <div class="flex flex-col sm:flex-row flex-wrap">
+    {#each ["Gravitational Fields", "Circular Motion", "Electric Fields", "Simple Harmonic Motion", "Capacitors", "Thermal Physics"] as booklet}
       <Doc
         name={booklet}
         path={booklet.toLowerCase().split(" ").join("_") + "_GBD"}
@@ -33,7 +34,8 @@
     {/each}
   </div>
 </main>
-<section class="mt-48">
+<hr class="mx-auto my-8 text-dark-s opacity-50" />
+<section>
   <Otd src={otdSrc} />
   <p class="mt-12">
     <a class="hover:underline" href="archive.html">Meme Archive</a>
