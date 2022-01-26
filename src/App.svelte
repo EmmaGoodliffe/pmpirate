@@ -15,7 +15,7 @@
 <Header />
 <main>
   <h2>Textbooks</h2>
-  <div class="flex flex-col sm:flex-row">
+  <div class="flex flex-col sm:flex-row flex-wrap">
     {#each ["Further Mech", "Further Pure Year 1", "Further Pure Year 2", "Further Stats"] as book}
       <Doc name={book} path={book} />
     {/each}
@@ -32,6 +32,11 @@
         path={booklet.toLowerCase().split(" ").join("_") + "_GBD"}
       />
     {/each}
+  </div>
+  <hr class="mx-auto my-8 text-dark-s opacity-50" />
+  <h2>PiP</h2>
+  <div class="flex flex-col sm:flex-row flex-wrap">
+    <Doc name="PiP" path="PiP" />
   </div>
 </main>
 <hr class="mx-auto my-8 text-dark-s opacity-50" />
