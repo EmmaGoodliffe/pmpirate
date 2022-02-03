@@ -11,13 +11,20 @@
 
   const isArchived = (date: string, month: number, year: number) => {
     const d = new Date(date);
-    d.setDate(d.getDate() - 1);
+    const goodDate = d <= today;
     // const weekBefore = new Date();
     // weekBefore.setDate(today.getDate() - 28);
     // return weekBefore <= new Date(d) && new Date(d) <= today;
     const goodMonth = d.getMonth() + 1 === month;
     const goodYear = d.getFullYear() === year;
-    return goodMonth && goodYear && new Date(d) <= today;
+    return goodDate && goodMonth && goodYear;
+  };
+
+  const isTomorrow = (date: string) => {
+    const diffInMilliseconds = Number(new Date(date)) - Number(today);
+    const diffInSeconds = diffInMilliseconds / 10 ** 3;
+    const diffInHours = diffInSeconds / 60 ** 2;
+    return 0 < diffInHours && diffInHours <= 24;
   };
 
   let month = today.getMonth() + 1;
@@ -83,12 +90,12 @@
     </thead>
     <tbody>
       {#each dates as date}
-        {#if isArchived(date, month, year)}
+        {#if isArchived(date, month, year) || (isTomorrow(date) && !forwardsEnabled)}
           <tr>
             <td class="text-center border-2 p-4">
               {date.split("-").reverse().join("/")}
               <br />
-              {#if new Date(date) > new Date()}
+              {#if isTomorrow(date)}
                 (Sneak peek)
               {/if}
             </td>
