@@ -16,8 +16,15 @@
 <main>
   <h2>Maths</h2>
   <div class="flex flex-col sm:flex-row flex-wrap">
+    {#each ["Pure Year 1", "Pure Year 2", "Applied Year 1", "Applied Year 2"] as book}
+      <Doc name={book} path={`maths/${book}`} />
+    {/each}
+  </div>
+  <hr class="mx-auto my-8 text-dark-s opacity-50" />
+  <h2>Further Maths</h2>
+  <div class="flex flex-col sm:flex-row flex-wrap">
     {#each ["Further Mech", "Further Pure Year 1", "Further Pure Year 2", "Further Stats"] as book}
-      <Doc name={book} path={book} />
+      <Doc name={book} path={`maths/${book}`} />
     {/each}
   </div>
   <p class="mt-12">
@@ -29,14 +36,14 @@
     {#each ["Gravitational Fields", "Circular Motion", "Electric Fields", "Simple Harmonic Motion", "Capacitors", "Thermal Physics", "Magnetism"] as booklet}
       <Doc
         name={booklet}
-        path={booklet.toLowerCase().split(" ").join("_") + "_GBD"}
+        path={`physics/${booklet.toLowerCase().split(" ").join("_")}_GBD`}
       />
     {/each}
   </div>
   <hr class="mx-auto my-8 text-dark-s opacity-50" />
   <h2>Physics</h2>
   <div class="flex flex-col sm:flex-row flex-wrap">
-    <Doc name="PiP" path="PiP" />
+    <Doc name="PiP" path="physics/PiP" />
   </div>
 </main>
 <hr class="mx-auto my-8 text-dark-s opacity-50" />
