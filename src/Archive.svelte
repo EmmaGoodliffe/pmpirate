@@ -128,4 +128,4 @@
   {/if}
   <p class="mt-4">DVS-style dates accepted</p>
 </section>
-<footer class="mb-4" />
+<footer />

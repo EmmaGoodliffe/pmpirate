@@ -15,24 +15,24 @@
 <Header />
 <main>
   <h2>Maths</h2>
-  <div class="flex flex-col sm:flex-row flex-wrap">
+  <div class="book-section">
     {#each ["Pure Year 1", "Pure Year 2", "Applied Year 1", "Applied Year 2"] as book}
       <Doc name={book} path={`maths/${book}`} />
     {/each}
   </div>
-  <hr class="mx-auto my-8 text-dark-s opacity-50" />
+  <hr />
   <h2>Further Maths</h2>
-  <div class="flex flex-col sm:flex-row flex-wrap">
+  <div class="book-section">
     {#each ["Further Mech", "Further Pure Year 1", "Further Pure Year 2", "Further Stats"] as book}
       <Doc name={book} path={`maths/${book}`} />
     {/each}
   </div>
-  <p class="mt-12">
+  <p class="epilogue">
     The year 1 pure and stats are dodgy older versions but I'll fix them soon.
   </p>
-  <hr class="mx-auto my-8 text-dark-s opacity-50" />
+  <hr />
   <h2>GBD Booklets</h2>
-  <div class="flex flex-col sm:flex-row flex-wrap">
+  <div class="book-section">
     {#each ["Gravitational Fields", "Circular Motion", "Electric Fields", "Simple Harmonic Motion", "Capacitors", "Thermal Physics", "Magnetism"] as booklet}
       <Doc
         name={booklet}
@@ -40,17 +40,18 @@
       />
     {/each}
   </div>
-  <hr class="mx-auto my-8 text-dark-s opacity-50" />
+  <hr />
   <h2>Physics</h2>
-  <div class="flex flex-col sm:flex-row flex-wrap">
+  <div class="book-section">
+    <Doc name="Physics Year 2" path="physics/Physics Year 2" />
     <Doc name="PiP" path="physics/PiP" />
   </div>
 </main>
-<hr class="mx-auto my-8 text-dark-s opacity-50" />
+<hr />
 <section>
   <Otd src={otdSrc} />
-  <p class="mt-12">
+  <p class="epilogue">
     <a class="hover:underline" href="archive.html">Meme Archive</a>
   </p>
 </section>
-<footer class="mb-4" />
+<footer />
