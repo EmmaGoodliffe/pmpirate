@@ -10,20 +10,45 @@
   const today = new Date();
   const otdCode = dateToString(today, "-", true);
   const otdSrc = memes.otd[otdCode] ? `memes/${memes.otd[otdCode]}` : undefined;
+
+  const mathsBooks = [
+    "Pure Year 1",
+    "Pure Year 2",
+    "Applied Year 1",
+    "Applied Year 2",
+  ];
+  const furtherMathsBooks = [
+    "Further Mech",
+    "Further Pure Year 1",
+    "Further Pure Year 2",
+    "Further Stats",
+  ];
+  const gbdBooklets = [
+    "Gravitational Fields",
+    "Circular Motion",
+    "Electric Fields",
+    "Simple Harmonic Motion",
+    "Capacitors",
+    "Thermal Physics",
+    "Magnetism",
+    "Nuclear Physics",
+    "Radioactivity",
+    "Astrophysics",
+  ];
 </script>
 
 <Header />
 <main>
   <h2>Maths</h2>
   <div class="book-section">
-    {#each ["Pure Year 1", "Pure Year 2", "Applied Year 1", "Applied Year 2"] as book}
+    {#each mathsBooks as book}
       <Doc name={book} path={`maths/${book}`} />
     {/each}
   </div>
   <hr />
   <h2>Further Maths</h2>
   <div class="book-section">
-    {#each ["Further Mech", "Further Pure Year 1", "Further Pure Year 2", "Further Stats"] as book}
+    {#each furtherMathsBooks as book}
       <Doc name={book} path={`maths/${book}`} />
     {/each}
   </div>
@@ -33,7 +58,7 @@
   <hr />
   <h2>GBD Booklets</h2>
   <div class="book-section">
-    {#each ["Gravitational Fields", "Circular Motion", "Electric Fields", "Simple Harmonic Motion", "Capacitors", "Thermal Physics", "Magnetism"] as booklet}
+    {#each gbdBooklets as booklet}
       <Doc
         name={booklet}
         path={`physics/${booklet.toLowerCase().split(" ").join("_")}_GBD`}
