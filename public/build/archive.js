@@ -1198,97 +1198,22 @@ var archive = (function () {
     	}
     }
 
-    /*! *****************************************************************************
-    Copyright (c) Microsoft Corporation.
-
-    Permission to use, copy, modify, and/or distribute this software for any
-    purpose with or without fee is hereby granted.
-
-    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
-    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
-    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
-    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
-    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-    PERFORMANCE OF THIS SOFTWARE.
-    ***************************************************************************** */
-
-    function __awaiter(thisArg, _arguments, P, generator) {
-        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-        return new (P || (P = Promise))(function (resolve, reject) {
-            function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-            function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-            function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-            step((generator = generator.apply(thisArg, _arguments || [])).next());
-        });
-    }
-
-    function __generator(thisArg, body) {
-        var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-        return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-        function verb(n) { return function (v) { return step([n, v]); }; }
-        function step(op) {
-            if (f) throw new TypeError("Generator is already executing.");
-            while (_) try {
-                if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-                if (y = 0, t) op = [op[0] & 2, t.value];
-                switch (op[0]) {
-                    case 0: case 1: t = op; break;
-                    case 4: _.label++; return { value: op[1], done: false };
-                    case 5: _.label++; y = op[1]; op = [0]; continue;
-                    case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                    default:
-                        if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                        if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                        if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                        if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                        if (t[2]) _.ops.pop();
-                        _.trys.pop(); continue;
-                }
-                op = body.call(thisArg, _);
-            } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-            if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-        }
-    }
-
-    function __values(o) {
-        var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
-        if (m) return m.call(o);
-        if (o && typeof o.length === "number") return {
-            next: function () {
-                if (o && i >= o.length) o = void 0;
-                return { value: o && o[i++], done: !o };
-            }
-        };
-        throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
-    }
-
-    function __read(o, n) {
-        var m = typeof Symbol === "function" && o[Symbol.iterator];
-        if (!m) return o;
-        var i = m.call(o), r, ar = [], e;
-        try {
-            while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
-        }
-        catch (error) { e = { error: error }; }
-        finally {
-            try {
-                if (r && !r.done && (m = i["return"])) m.call(i);
-            }
-            finally { if (e) throw e.error; }
-        }
-        return ar;
-    }
-
-    function __spreadArray(to, from, pack) {
-        if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-            if (ar || !(i in from)) {
-                if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-                ar[i] = from[i];
-            }
-        }
-        return to.concat(ar || Array.prototype.slice.call(from));
-    }
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
 
     /**
      * @license
@@ -1306,6 +1231,280 @@ var archive = (function () {
      * See the License for the specific language governing permissions and
      * limitations under the License.
      */
+    const stringToByteArray$1 = function (str) {
+        // TODO(user): Use native implementations if/when available
+        const out = [];
+        let p = 0;
+        for (let i = 0; i < str.length; i++) {
+            let c = str.charCodeAt(i);
+            if (c < 128) {
+                out[p++] = c;
+            }
+            else if (c < 2048) {
+                out[p++] = (c >> 6) | 192;
+                out[p++] = (c & 63) | 128;
+            }
+            else if ((c & 0xfc00) === 0xd800 &&
+                i + 1 < str.length &&
+                (str.charCodeAt(i + 1) & 0xfc00) === 0xdc00) {
+                // Surrogate Pair
+                c = 0x10000 + ((c & 0x03ff) << 10) + (str.charCodeAt(++i) & 0x03ff);
+                out[p++] = (c >> 18) | 240;
+                out[p++] = ((c >> 12) & 63) | 128;
+                out[p++] = ((c >> 6) & 63) | 128;
+                out[p++] = (c & 63) | 128;
+            }
+            else {
+                out[p++] = (c >> 12) | 224;
+                out[p++] = ((c >> 6) & 63) | 128;
+                out[p++] = (c & 63) | 128;
+            }
+        }
+        return out;
+    };
+    /**
+     * Turns an array of numbers into the string given by the concatenation of the
+     * characters to which the numbers correspond.
+     * @param bytes Array of numbers representing characters.
+     * @return Stringification of the array.
+     */
+    const byteArrayToString = function (bytes) {
+        // TODO(user): Use native implementations if/when available
+        const out = [];
+        let pos = 0, c = 0;
+        while (pos < bytes.length) {
+            const c1 = bytes[pos++];
+            if (c1 < 128) {
+                out[c++] = String.fromCharCode(c1);
+            }
+            else if (c1 > 191 && c1 < 224) {
+                const c2 = bytes[pos++];
+                out[c++] = String.fromCharCode(((c1 & 31) << 6) | (c2 & 63));
+            }
+            else if (c1 > 239 && c1 < 365) {
+                // Surrogate Pair
+                const c2 = bytes[pos++];
+                const c3 = bytes[pos++];
+                const c4 = bytes[pos++];
+                const u = (((c1 & 7) << 18) | ((c2 & 63) << 12) | ((c3 & 63) << 6) | (c4 & 63)) -
+                    0x10000;
+                out[c++] = String.fromCharCode(0xd800 + (u >> 10));
+                out[c++] = String.fromCharCode(0xdc00 + (u & 1023));
+            }
+            else {
+                const c2 = bytes[pos++];
+                const c3 = bytes[pos++];
+                out[c++] = String.fromCharCode(((c1 & 15) << 12) | ((c2 & 63) << 6) | (c3 & 63));
+            }
+        }
+        return out.join('');
+    };
+    // We define it as an object literal instead of a class because a class compiled down to es5 can't
+    // be treeshaked. https://github.com/rollup/rollup/issues/1691
+    // Static lookup maps, lazily populated by init_()
+    const base64 = {
+        /**
+         * Maps bytes to characters.
+         */
+        byteToCharMap_: null,
+        /**
+         * Maps characters to bytes.
+         */
+        charToByteMap_: null,
+        /**
+         * Maps bytes to websafe characters.
+         * @private
+         */
+        byteToCharMapWebSafe_: null,
+        /**
+         * Maps websafe characters to bytes.
+         * @private
+         */
+        charToByteMapWebSafe_: null,
+        /**
+         * Our default alphabet, shared between
+         * ENCODED_VALS and ENCODED_VALS_WEBSAFE
+         */
+        ENCODED_VALS_BASE: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + 'abcdefghijklmnopqrstuvwxyz' + '0123456789',
+        /**
+         * Our default alphabet. Value 64 (=) is special; it means "nothing."
+         */
+        get ENCODED_VALS() {
+            return this.ENCODED_VALS_BASE + '+/=';
+        },
+        /**
+         * Our websafe alphabet.
+         */
+        get ENCODED_VALS_WEBSAFE() {
+            return this.ENCODED_VALS_BASE + '-_.';
+        },
+        /**
+         * Whether this browser supports the atob and btoa functions. This extension
+         * started at Mozilla but is now implemented by many browsers. We use the
+         * ASSUME_* variables to avoid pulling in the full useragent detection library
+         * but still allowing the standard per-browser compilations.
+         *
+         */
+        HAS_NATIVE_SUPPORT: typeof atob === 'function',
+        /**
+         * Base64-encode an array of bytes.
+         *
+         * @param input An array of bytes (numbers with
+         *     value in [0, 255]) to encode.
+         * @param webSafe Boolean indicating we should use the
+         *     alternative alphabet.
+         * @return The base64 encoded string.
+         */
+        encodeByteArray(input, webSafe) {
+            if (!Array.isArray(input)) {
+                throw Error('encodeByteArray takes an array as a parameter');
+            }
+            this.init_();
+            const byteToCharMap = webSafe
+                ? this.byteToCharMapWebSafe_
+                : this.byteToCharMap_;
+            const output = [];
+            for (let i = 0; i < input.length; i += 3) {
+                const byte1 = input[i];
+                const haveByte2 = i + 1 < input.length;
+                const byte2 = haveByte2 ? input[i + 1] : 0;
+                const haveByte3 = i + 2 < input.length;
+                const byte3 = haveByte3 ? input[i + 2] : 0;
+                const outByte1 = byte1 >> 2;
+                const outByte2 = ((byte1 & 0x03) << 4) | (byte2 >> 4);
+                let outByte3 = ((byte2 & 0x0f) << 2) | (byte3 >> 6);
+                let outByte4 = byte3 & 0x3f;
+                if (!haveByte3) {
+                    outByte4 = 64;
+                    if (!haveByte2) {
+                        outByte3 = 64;
+                    }
+                }
+                output.push(byteToCharMap[outByte1], byteToCharMap[outByte2], byteToCharMap[outByte3], byteToCharMap[outByte4]);
+            }
+            return output.join('');
+        },
+        /**
+         * Base64-encode a string.
+         *
+         * @param input A string to encode.
+         * @param webSafe If true, we should use the
+         *     alternative alphabet.
+         * @return The base64 encoded string.
+         */
+        encodeString(input, webSafe) {
+            // Shortcut for Mozilla browsers that implement
+            // a native base64 encoder in the form of "btoa/atob"
+            if (this.HAS_NATIVE_SUPPORT && !webSafe) {
+                return btoa(input);
+            }
+            return this.encodeByteArray(stringToByteArray$1(input), webSafe);
+        },
+        /**
+         * Base64-decode a string.
+         *
+         * @param input to decode.
+         * @param webSafe True if we should use the
+         *     alternative alphabet.
+         * @return string representing the decoded value.
+         */
+        decodeString(input, webSafe) {
+            // Shortcut for Mozilla browsers that implement
+            // a native base64 encoder in the form of "btoa/atob"
+            if (this.HAS_NATIVE_SUPPORT && !webSafe) {
+                return atob(input);
+            }
+            return byteArrayToString(this.decodeStringToByteArray(input, webSafe));
+        },
+        /**
+         * Base64-decode a string.
+         *
+         * In base-64 decoding, groups of four characters are converted into three
+         * bytes.  If the encoder did not apply padding, the input length may not
+         * be a multiple of 4.
+         *
+         * In this case, the last group will have fewer than 4 characters, and
+         * padding will be inferred.  If the group has one or two characters, it decodes
+         * to one byte.  If the group has three characters, it decodes to two bytes.
+         *
+         * @param input Input to decode.
+         * @param webSafe True if we should use the web-safe alphabet.
+         * @return bytes representing the decoded value.
+         */
+        decodeStringToByteArray(input, webSafe) {
+            this.init_();
+            const charToByteMap = webSafe
+                ? this.charToByteMapWebSafe_
+                : this.charToByteMap_;
+            const output = [];
+            for (let i = 0; i < input.length;) {
+                const byte1 = charToByteMap[input.charAt(i++)];
+                const haveByte2 = i < input.length;
+                const byte2 = haveByte2 ? charToByteMap[input.charAt(i)] : 0;
+                ++i;
+                const haveByte3 = i < input.length;
+                const byte3 = haveByte3 ? charToByteMap[input.charAt(i)] : 64;
+                ++i;
+                const haveByte4 = i < input.length;
+                const byte4 = haveByte4 ? charToByteMap[input.charAt(i)] : 64;
+                ++i;
+                if (byte1 == null || byte2 == null || byte3 == null || byte4 == null) {
+                    throw Error();
+                }
+                const outByte1 = (byte1 << 2) | (byte2 >> 4);
+                output.push(outByte1);
+                if (byte3 !== 64) {
+                    const outByte2 = ((byte2 << 4) & 0xf0) | (byte3 >> 2);
+                    output.push(outByte2);
+                    if (byte4 !== 64) {
+                        const outByte3 = ((byte3 << 6) & 0xc0) | byte4;
+                        output.push(outByte3);
+                    }
+                }
+            }
+            return output;
+        },
+        /**
+         * Lazy static initialization function. Called before
+         * accessing any of the static map variables.
+         * @private
+         */
+        init_() {
+            if (!this.byteToCharMap_) {
+                this.byteToCharMap_ = {};
+                this.charToByteMap_ = {};
+                this.byteToCharMapWebSafe_ = {};
+                this.charToByteMapWebSafe_ = {};
+                // We want quick mappings back and forth, so we precompute two maps.
+                for (let i = 0; i < this.ENCODED_VALS.length; i++) {
+                    this.byteToCharMap_[i] = this.ENCODED_VALS.charAt(i);
+                    this.charToByteMap_[this.byteToCharMap_[i]] = i;
+                    this.byteToCharMapWebSafe_[i] = this.ENCODED_VALS_WEBSAFE.charAt(i);
+                    this.charToByteMapWebSafe_[this.byteToCharMapWebSafe_[i]] = i;
+                    // Be forgiving when decoding and correctly decode both encodings.
+                    if (i >= this.ENCODED_VALS_BASE.length) {
+                        this.charToByteMap_[this.ENCODED_VALS_WEBSAFE.charAt(i)] = i;
+                        this.charToByteMapWebSafe_[this.ENCODED_VALS.charAt(i)] = i;
+                    }
+                }
+            }
+        }
+    };
+    /**
+     * URL-safe base64 encoding
+     */
+    const base64Encode = function (str) {
+        const utf8Bytes = stringToByteArray$1(str);
+        return base64.encodeByteArray(utf8Bytes, true);
+    };
+    /**
+     * URL-safe base64 encoding (without "." padding in the end).
+     * e.g. Used in JSON Web Token (JWT) parts.
+     */
+    const base64urlEncodeWithoutPadding = function (str) {
+        // Use base64url encoding and remove padding in the end (dot characters).
+        return base64Encode(str).replace(/\./g, '');
+    };
 
     /**
      * @license
@@ -1482,10 +1681,15 @@ var archive = (function () {
     // Based on code from:
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error#Custom_Error_Types
     class FirebaseError extends Error {
-        constructor(code, message, customData) {
+        constructor(
+        /** The error code for this error. */
+        code, message, 
+        /** Custom data for this error. */
+        customData) {
             super(message);
             this.code = code;
             this.customData = customData;
+            /** The custom name for all FirebaseErrors. */
             this.name = ERROR_NAME;
             // Fix For ES5
             // https://github.com/Microsoft/TypeScript-wiki/blob/master/Breaking-Changes.md#extending-built-ins-like-error-array-and-map-may-no-longer-work
@@ -1649,14 +1853,14 @@ var archive = (function () {
     /**
      * Component for service name T, e.g. `auth`, `auth-internal`
      */
-    var Component = /** @class */ (function () {
+    class Component {
         /**
          *
          * @param name The public service name, e.g. app, auth, firestore, database
          * @param instanceFactory Service factory responsible for creating the public interface
          * @param type whether the service provided by the component is public or private
          */
-        function Component(name, instanceFactory, type) {
+        constructor(name, instanceFactory, type) {
             this.name = name;
             this.instanceFactory = instanceFactory;
             this.type = type;
@@ -1668,24 +1872,23 @@ var archive = (function () {
             this.instantiationMode = "LAZY" /* LAZY */;
             this.onInstanceCreated = null;
         }
-        Component.prototype.setInstantiationMode = function (mode) {
+        setInstantiationMode(mode) {
             this.instantiationMode = mode;
             return this;
-        };
-        Component.prototype.setMultipleInstances = function (multipleInstances) {
+        }
+        setMultipleInstances(multipleInstances) {
             this.multipleInstances = multipleInstances;
             return this;
-        };
-        Component.prototype.setServiceProps = function (props) {
+        }
+        setServiceProps(props) {
             this.serviceProps = props;
             return this;
-        };
-        Component.prototype.setInstanceCreatedCallback = function (callback) {
+        }
+        setInstanceCreatedCallback(callback) {
             this.onInstanceCreated = callback;
             return this;
-        };
-        return Component;
-    }());
+        }
+    }
 
     /**
      * @license
@@ -1703,7 +1906,7 @@ var archive = (function () {
      * See the License for the specific language governing permissions and
      * limitations under the License.
      */
-    var DEFAULT_ENTRY_NAME$1 = '[DEFAULT]';
+    const DEFAULT_ENTRY_NAME$1 = '[DEFAULT]';
 
     /**
      * @license
@@ -1725,8 +1928,8 @@ var archive = (function () {
      * Provider for instance for service name T, e.g. 'auth', 'auth-internal'
      * NameServiceMapping[T] is an alias for the type of the instance
      */
-    var Provider = /** @class */ (function () {
-        function Provider(name, container) {
+    class Provider {
+        constructor(name, container) {
             this.name = name;
             this.container = container;
             this.component = null;
@@ -1739,17 +1942,17 @@ var archive = (function () {
          * @param identifier A provider can provide mulitple instances of a service
          * if this.component.multipleInstances is true.
          */
-        Provider.prototype.get = function (identifier) {
+        get(identifier) {
             // if multipleInstances is not supported, use the default name
-            var normalizedIdentifier = this.normalizeInstanceIdentifier(identifier);
+            const normalizedIdentifier = this.normalizeInstanceIdentifier(identifier);
             if (!this.instancesDeferred.has(normalizedIdentifier)) {
-                var deferred = new Deferred();
+                const deferred = new Deferred();
                 this.instancesDeferred.set(normalizedIdentifier, deferred);
                 if (this.isInitialized(normalizedIdentifier) ||
                     this.shouldAutoInitialize()) {
                     // initialize the service if it can be auto-initialized
                     try {
-                        var instance = this.getOrInitializeService({
+                        const instance = this.getOrInitializeService({
                             instanceIdentifier: normalizedIdentifier
                         });
                         if (instance) {
@@ -1763,12 +1966,12 @@ var archive = (function () {
                 }
             }
             return this.instancesDeferred.get(normalizedIdentifier).promise;
-        };
-        Provider.prototype.getImmediate = function (options) {
+        }
+        getImmediate(options) {
             var _a;
             // if multipleInstances is not supported, use the default name
-            var normalizedIdentifier = this.normalizeInstanceIdentifier(options === null || options === void 0 ? void 0 : options.identifier);
-            var optional = (_a = options === null || options === void 0 ? void 0 : options.optional) !== null && _a !== void 0 ? _a : false;
+            const normalizedIdentifier = this.normalizeInstanceIdentifier(options === null || options === void 0 ? void 0 : options.identifier);
+            const optional = (_a = options === null || options === void 0 ? void 0 : options.optional) !== null && _a !== void 0 ? _a : false;
             if (this.isInitialized(normalizedIdentifier) ||
                 this.shouldAutoInitialize()) {
                 try {
@@ -1791,20 +1994,19 @@ var archive = (function () {
                     return null;
                 }
                 else {
-                    throw Error("Service " + this.name + " is not available");
+                    throw Error(`Service ${this.name} is not available`);
                 }
             }
-        };
-        Provider.prototype.getComponent = function () {
+        }
+        getComponent() {
             return this.component;
-        };
-        Provider.prototype.setComponent = function (component) {
-            var e_1, _a;
+        }
+        setComponent(component) {
             if (component.name !== this.name) {
-                throw Error("Mismatching Component " + component.name + " for Provider " + this.name + ".");
+                throw Error(`Mismatching Component ${component.name} for Provider ${this.name}.`);
             }
             if (this.component) {
-                throw Error("Component for " + this.name + " has already been provided");
+                throw Error(`Component for ${this.name} has already been provided`);
             }
             this.component = component;
             // return early without attempting to initialize the component if the component requires explicit initialization (calling `Provider.initialize()`)
@@ -1823,108 +2025,75 @@ var archive = (function () {
                     // a fatal error in this case?
                 }
             }
-            try {
-                // Create service instances for the pending promises and resolve them
-                // NOTE: if this.multipleInstances is false, only the default instance will be created
-                // and all promises with resolve with it regardless of the identifier.
-                for (var _b = __values(this.instancesDeferred.entries()), _c = _b.next(); !_c.done; _c = _b.next()) {
-                    var _d = __read(_c.value, 2), instanceIdentifier = _d[0], instanceDeferred = _d[1];
-                    var normalizedIdentifier = this.normalizeInstanceIdentifier(instanceIdentifier);
-                    try {
-                        // `getOrInitializeService()` should always return a valid instance since a component is guaranteed. use ! to make typescript happy.
-                        var instance = this.getOrInitializeService({
-                            instanceIdentifier: normalizedIdentifier
-                        });
-                        instanceDeferred.resolve(instance);
-                    }
-                    catch (e) {
-                        // when the instance factory throws an exception, it should not cause
-                        // a fatal error. We just leave the promise unresolved.
-                    }
-                }
-            }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
-            finally {
+            // Create service instances for the pending promises and resolve them
+            // NOTE: if this.multipleInstances is false, only the default instance will be created
+            // and all promises with resolve with it regardless of the identifier.
+            for (const [instanceIdentifier, instanceDeferred] of this.instancesDeferred.entries()) {
+                const normalizedIdentifier = this.normalizeInstanceIdentifier(instanceIdentifier);
                 try {
-                    if (_c && !_c.done && (_a = _b.return)) _a.call(_b);
+                    // `getOrInitializeService()` should always return a valid instance since a component is guaranteed. use ! to make typescript happy.
+                    const instance = this.getOrInitializeService({
+                        instanceIdentifier: normalizedIdentifier
+                    });
+                    instanceDeferred.resolve(instance);
                 }
-                finally { if (e_1) throw e_1.error; }
+                catch (e) {
+                    // when the instance factory throws an exception, it should not cause
+                    // a fatal error. We just leave the promise unresolved.
+                }
             }
-        };
-        Provider.prototype.clearInstance = function (identifier) {
-            if (identifier === void 0) { identifier = DEFAULT_ENTRY_NAME$1; }
+        }
+        clearInstance(identifier = DEFAULT_ENTRY_NAME$1) {
             this.instancesDeferred.delete(identifier);
             this.instancesOptions.delete(identifier);
             this.instances.delete(identifier);
-        };
+        }
         // app.delete() will call this method on every provider to delete the services
         // TODO: should we mark the provider as deleted?
-        Provider.prototype.delete = function () {
-            return __awaiter(this, void 0, void 0, function () {
-                var services;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            services = Array.from(this.instances.values());
-                            return [4 /*yield*/, Promise.all(__spreadArray(__spreadArray([], __read(services
-                                    .filter(function (service) { return 'INTERNAL' in service; }) // legacy services
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    .map(function (service) { return service.INTERNAL.delete(); }))), __read(services
-                                    .filter(function (service) { return '_delete' in service; }) // modularized services
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    .map(function (service) { return service._delete(); }))))];
-                        case 1:
-                            _a.sent();
-                            return [2 /*return*/];
-                    }
-                });
-            });
-        };
-        Provider.prototype.isComponentSet = function () {
+        async delete() {
+            const services = Array.from(this.instances.values());
+            await Promise.all([
+                ...services
+                    .filter(service => 'INTERNAL' in service) // legacy services
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    .map(service => service.INTERNAL.delete()),
+                ...services
+                    .filter(service => '_delete' in service) // modularized services
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    .map(service => service._delete())
+            ]);
+        }
+        isComponentSet() {
             return this.component != null;
-        };
-        Provider.prototype.isInitialized = function (identifier) {
-            if (identifier === void 0) { identifier = DEFAULT_ENTRY_NAME$1; }
+        }
+        isInitialized(identifier = DEFAULT_ENTRY_NAME$1) {
             return this.instances.has(identifier);
-        };
-        Provider.prototype.getOptions = function (identifier) {
-            if (identifier === void 0) { identifier = DEFAULT_ENTRY_NAME$1; }
+        }
+        getOptions(identifier = DEFAULT_ENTRY_NAME$1) {
             return this.instancesOptions.get(identifier) || {};
-        };
-        Provider.prototype.initialize = function (opts) {
-            var e_2, _a;
-            if (opts === void 0) { opts = {}; }
-            var _b = opts.options, options = _b === void 0 ? {} : _b;
-            var normalizedIdentifier = this.normalizeInstanceIdentifier(opts.instanceIdentifier);
+        }
+        initialize(opts = {}) {
+            const { options = {} } = opts;
+            const normalizedIdentifier = this.normalizeInstanceIdentifier(opts.instanceIdentifier);
             if (this.isInitialized(normalizedIdentifier)) {
-                throw Error(this.name + "(" + normalizedIdentifier + ") has already been initialized");
+                throw Error(`${this.name}(${normalizedIdentifier}) has already been initialized`);
             }
             if (!this.isComponentSet()) {
-                throw Error("Component " + this.name + " has not been registered yet");
+                throw Error(`Component ${this.name} has not been registered yet`);
             }
-            var instance = this.getOrInitializeService({
+            const instance = this.getOrInitializeService({
                 instanceIdentifier: normalizedIdentifier,
-                options: options
+                options
             });
-            try {
-                // resolve any pending promise waiting for the service instance
-                for (var _c = __values(this.instancesDeferred.entries()), _d = _c.next(); !_d.done; _d = _c.next()) {
-                    var _e = __read(_d.value, 2), instanceIdentifier = _e[0], instanceDeferred = _e[1];
-                    var normalizedDeferredIdentifier = this.normalizeInstanceIdentifier(instanceIdentifier);
-                    if (normalizedIdentifier === normalizedDeferredIdentifier) {
-                        instanceDeferred.resolve(instance);
-                    }
+            // resolve any pending promise waiting for the service instance
+            for (const [instanceIdentifier, instanceDeferred] of this.instancesDeferred.entries()) {
+                const normalizedDeferredIdentifier = this.normalizeInstanceIdentifier(instanceIdentifier);
+                if (normalizedIdentifier === normalizedDeferredIdentifier) {
+                    instanceDeferred.resolve(instance);
                 }
-            }
-            catch (e_2_1) { e_2 = { error: e_2_1 }; }
-            finally {
-                try {
-                    if (_d && !_d.done && (_a = _c.return)) _a.call(_c);
-                }
-                finally { if (e_2) throw e_2.error; }
             }
             return instance;
-        };
+        }
         /**
          *
          * @param callback - a function that will be invoked  after the provider has been initialized by calling provider.initialize().
@@ -1933,56 +2102,44 @@ var archive = (function () {
          * @param identifier An optional instance identifier
          * @returns a function to unregister the callback
          */
-        Provider.prototype.onInit = function (callback, identifier) {
+        onInit(callback, identifier) {
             var _a;
-            var normalizedIdentifier = this.normalizeInstanceIdentifier(identifier);
-            var existingCallbacks = (_a = this.onInitCallbacks.get(normalizedIdentifier)) !== null && _a !== void 0 ? _a : new Set();
+            const normalizedIdentifier = this.normalizeInstanceIdentifier(identifier);
+            const existingCallbacks = (_a = this.onInitCallbacks.get(normalizedIdentifier)) !== null && _a !== void 0 ? _a : new Set();
             existingCallbacks.add(callback);
             this.onInitCallbacks.set(normalizedIdentifier, existingCallbacks);
-            var existingInstance = this.instances.get(normalizedIdentifier);
+            const existingInstance = this.instances.get(normalizedIdentifier);
             if (existingInstance) {
                 callback(existingInstance, normalizedIdentifier);
             }
-            return function () {
+            return () => {
                 existingCallbacks.delete(callback);
             };
-        };
+        }
         /**
          * Invoke onInit callbacks synchronously
          * @param instance the service instance`
          */
-        Provider.prototype.invokeOnInitCallbacks = function (instance, identifier) {
-            var e_3, _a;
-            var callbacks = this.onInitCallbacks.get(identifier);
+        invokeOnInitCallbacks(instance, identifier) {
+            const callbacks = this.onInitCallbacks.get(identifier);
             if (!callbacks) {
                 return;
             }
-            try {
-                for (var callbacks_1 = __values(callbacks), callbacks_1_1 = callbacks_1.next(); !callbacks_1_1.done; callbacks_1_1 = callbacks_1.next()) {
-                    var callback = callbacks_1_1.value;
-                    try {
-                        callback(instance, identifier);
-                    }
-                    catch (_b) {
-                        // ignore errors in the onInit callback
-                    }
-                }
-            }
-            catch (e_3_1) { e_3 = { error: e_3_1 }; }
-            finally {
+            for (const callback of callbacks) {
                 try {
-                    if (callbacks_1_1 && !callbacks_1_1.done && (_a = callbacks_1.return)) _a.call(callbacks_1);
+                    callback(instance, identifier);
                 }
-                finally { if (e_3) throw e_3.error; }
+                catch (_a) {
+                    // ignore errors in the onInit callback
+                }
             }
-        };
-        Provider.prototype.getOrInitializeService = function (_a) {
-            var instanceIdentifier = _a.instanceIdentifier, _b = _a.options, options = _b === void 0 ? {} : _b;
-            var instance = this.instances.get(instanceIdentifier);
+        }
+        getOrInitializeService({ instanceIdentifier, options = {} }) {
+            let instance = this.instances.get(instanceIdentifier);
             if (!instance && this.component) {
                 instance = this.component.instanceFactory(this.container, {
                     instanceIdentifier: normalizeIdentifierForFactory(instanceIdentifier),
-                    options: options
+                    options
                 });
                 this.instances.set(instanceIdentifier, instance);
                 this.instancesOptions.set(instanceIdentifier, options);
@@ -2001,28 +2158,26 @@ var archive = (function () {
                     try {
                         this.component.onInstanceCreated(this.container, instanceIdentifier, instance);
                     }
-                    catch (_c) {
+                    catch (_a) {
                         // ignore errors in the onInstanceCreatedCallback
                     }
                 }
             }
             return instance || null;
-        };
-        Provider.prototype.normalizeInstanceIdentifier = function (identifier) {
-            if (identifier === void 0) { identifier = DEFAULT_ENTRY_NAME$1; }
+        }
+        normalizeInstanceIdentifier(identifier = DEFAULT_ENTRY_NAME$1) {
             if (this.component) {
                 return this.component.multipleInstances ? identifier : DEFAULT_ENTRY_NAME$1;
             }
             else {
                 return identifier; // assume multiple instances are supported before the component is provided.
             }
-        };
-        Provider.prototype.shouldAutoInitialize = function () {
+        }
+        shouldAutoInitialize() {
             return (!!this.component &&
                 this.component.instantiationMode !== "EXPLICIT" /* EXPLICIT */);
-        };
-        return Provider;
-    }());
+        }
+    }
     // undefined should be passed to the service factory for the default instance
     function normalizeIdentifierForFactory(identifier) {
         return identifier === DEFAULT_ENTRY_NAME$1 ? undefined : identifier;
@@ -2050,8 +2205,8 @@ var archive = (function () {
     /**
      * ComponentContainer that provides Providers for service name T, e.g. `auth`, `auth-internal`
      */
-    var ComponentContainer = /** @class */ (function () {
-        function ComponentContainer(name) {
+    class ComponentContainer {
+        constructor(name) {
             this.name = name;
             this.providers = new Map();
         }
@@ -2064,21 +2219,21 @@ var archive = (function () {
          * for different tests.
          * if overwrite is false: throw an exception
          */
-        ComponentContainer.prototype.addComponent = function (component) {
-            var provider = this.getProvider(component.name);
+        addComponent(component) {
+            const provider = this.getProvider(component.name);
             if (provider.isComponentSet()) {
-                throw new Error("Component " + component.name + " has already been registered with " + this.name);
+                throw new Error(`Component ${component.name} has already been registered with ${this.name}`);
             }
             provider.setComponent(component);
-        };
-        ComponentContainer.prototype.addOrOverwriteComponent = function (component) {
-            var provider = this.getProvider(component.name);
+        }
+        addOrOverwriteComponent(component) {
+            const provider = this.getProvider(component.name);
             if (provider.isComponentSet()) {
                 // delete the existing provider from the container, so we can register the new component
                 this.providers.delete(component.name);
             }
             this.addComponent(component);
-        };
+        }
         /**
          * getProvider provides a type safe interface where it can only be called with a field name
          * present in NameServiceMapping interface.
@@ -2086,20 +2241,19 @@ var archive = (function () {
          * Firebase SDKs providing services should extend NameServiceMapping interface to register
          * themselves.
          */
-        ComponentContainer.prototype.getProvider = function (name) {
+        getProvider(name) {
             if (this.providers.has(name)) {
                 return this.providers.get(name);
             }
             // create a Provider for a service that hasn't registered with Firebase
-            var provider = new Provider(name, this);
+            const provider = new Provider(name, this);
             this.providers.set(name, provider);
             return provider;
-        };
-        ComponentContainer.prototype.getProviders = function () {
+        }
+        getProviders() {
             return Array.from(this.providers.values());
-        };
-        return ComponentContainer;
-    }());
+        }
+    }
 
     /**
      * @license
@@ -2257,6 +2411,263 @@ var archive = (function () {
         }
     }
 
+    const instanceOfAny = (object, constructors) => constructors.some((c) => object instanceof c);
+
+    let idbProxyableTypes;
+    let cursorAdvanceMethods;
+    // This is a function to prevent it throwing up in node environments.
+    function getIdbProxyableTypes() {
+        return (idbProxyableTypes ||
+            (idbProxyableTypes = [
+                IDBDatabase,
+                IDBObjectStore,
+                IDBIndex,
+                IDBCursor,
+                IDBTransaction,
+            ]));
+    }
+    // This is a function to prevent it throwing up in node environments.
+    function getCursorAdvanceMethods() {
+        return (cursorAdvanceMethods ||
+            (cursorAdvanceMethods = [
+                IDBCursor.prototype.advance,
+                IDBCursor.prototype.continue,
+                IDBCursor.prototype.continuePrimaryKey,
+            ]));
+    }
+    const cursorRequestMap = new WeakMap();
+    const transactionDoneMap = new WeakMap();
+    const transactionStoreNamesMap = new WeakMap();
+    const transformCache = new WeakMap();
+    const reverseTransformCache = new WeakMap();
+    function promisifyRequest(request) {
+        const promise = new Promise((resolve, reject) => {
+            const unlisten = () => {
+                request.removeEventListener('success', success);
+                request.removeEventListener('error', error);
+            };
+            const success = () => {
+                resolve(wrap(request.result));
+                unlisten();
+            };
+            const error = () => {
+                reject(request.error);
+                unlisten();
+            };
+            request.addEventListener('success', success);
+            request.addEventListener('error', error);
+        });
+        promise
+            .then((value) => {
+            // Since cursoring reuses the IDBRequest (*sigh*), we cache it for later retrieval
+            // (see wrapFunction).
+            if (value instanceof IDBCursor) {
+                cursorRequestMap.set(value, request);
+            }
+            // Catching to avoid "Uncaught Promise exceptions"
+        })
+            .catch(() => { });
+        // This mapping exists in reverseTransformCache but doesn't doesn't exist in transformCache. This
+        // is because we create many promises from a single IDBRequest.
+        reverseTransformCache.set(promise, request);
+        return promise;
+    }
+    function cacheDonePromiseForTransaction(tx) {
+        // Early bail if we've already created a done promise for this transaction.
+        if (transactionDoneMap.has(tx))
+            return;
+        const done = new Promise((resolve, reject) => {
+            const unlisten = () => {
+                tx.removeEventListener('complete', complete);
+                tx.removeEventListener('error', error);
+                tx.removeEventListener('abort', error);
+            };
+            const complete = () => {
+                resolve();
+                unlisten();
+            };
+            const error = () => {
+                reject(tx.error || new DOMException('AbortError', 'AbortError'));
+                unlisten();
+            };
+            tx.addEventListener('complete', complete);
+            tx.addEventListener('error', error);
+            tx.addEventListener('abort', error);
+        });
+        // Cache it for later retrieval.
+        transactionDoneMap.set(tx, done);
+    }
+    let idbProxyTraps = {
+        get(target, prop, receiver) {
+            if (target instanceof IDBTransaction) {
+                // Special handling for transaction.done.
+                if (prop === 'done')
+                    return transactionDoneMap.get(target);
+                // Polyfill for objectStoreNames because of Edge.
+                if (prop === 'objectStoreNames') {
+                    return target.objectStoreNames || transactionStoreNamesMap.get(target);
+                }
+                // Make tx.store return the only store in the transaction, or undefined if there are many.
+                if (prop === 'store') {
+                    return receiver.objectStoreNames[1]
+                        ? undefined
+                        : receiver.objectStore(receiver.objectStoreNames[0]);
+                }
+            }
+            // Else transform whatever we get back.
+            return wrap(target[prop]);
+        },
+        set(target, prop, value) {
+            target[prop] = value;
+            return true;
+        },
+        has(target, prop) {
+            if (target instanceof IDBTransaction &&
+                (prop === 'done' || prop === 'store')) {
+                return true;
+            }
+            return prop in target;
+        },
+    };
+    function replaceTraps(callback) {
+        idbProxyTraps = callback(idbProxyTraps);
+    }
+    function wrapFunction(func) {
+        // Due to expected object equality (which is enforced by the caching in `wrap`), we
+        // only create one new func per func.
+        // Edge doesn't support objectStoreNames (booo), so we polyfill it here.
+        if (func === IDBDatabase.prototype.transaction &&
+            !('objectStoreNames' in IDBTransaction.prototype)) {
+            return function (storeNames, ...args) {
+                const tx = func.call(unwrap(this), storeNames, ...args);
+                transactionStoreNamesMap.set(tx, storeNames.sort ? storeNames.sort() : [storeNames]);
+                return wrap(tx);
+            };
+        }
+        // Cursor methods are special, as the behaviour is a little more different to standard IDB. In
+        // IDB, you advance the cursor and wait for a new 'success' on the IDBRequest that gave you the
+        // cursor. It's kinda like a promise that can resolve with many values. That doesn't make sense
+        // with real promises, so each advance methods returns a new promise for the cursor object, or
+        // undefined if the end of the cursor has been reached.
+        if (getCursorAdvanceMethods().includes(func)) {
+            return function (...args) {
+                // Calling the original function with the proxy as 'this' causes ILLEGAL INVOCATION, so we use
+                // the original object.
+                func.apply(unwrap(this), args);
+                return wrap(cursorRequestMap.get(this));
+            };
+        }
+        return function (...args) {
+            // Calling the original function with the proxy as 'this' causes ILLEGAL INVOCATION, so we use
+            // the original object.
+            return wrap(func.apply(unwrap(this), args));
+        };
+    }
+    function transformCachableValue(value) {
+        if (typeof value === 'function')
+            return wrapFunction(value);
+        // This doesn't return, it just creates a 'done' promise for the transaction,
+        // which is later returned for transaction.done (see idbObjectHandler).
+        if (value instanceof IDBTransaction)
+            cacheDonePromiseForTransaction(value);
+        if (instanceOfAny(value, getIdbProxyableTypes()))
+            return new Proxy(value, idbProxyTraps);
+        // Return the same value back if we're not going to transform it.
+        return value;
+    }
+    function wrap(value) {
+        // We sometimes generate multiple promises from a single IDBRequest (eg when cursoring), because
+        // IDB is weird and a single IDBRequest can yield many responses, so these can't be cached.
+        if (value instanceof IDBRequest)
+            return promisifyRequest(value);
+        // If we've already transformed this value before, reuse the transformed value.
+        // This is faster, but it also provides object equality.
+        if (transformCache.has(value))
+            return transformCache.get(value);
+        const newValue = transformCachableValue(value);
+        // Not all types are transformed.
+        // These may be primitive types, so they can't be WeakMap keys.
+        if (newValue !== value) {
+            transformCache.set(value, newValue);
+            reverseTransformCache.set(newValue, value);
+        }
+        return newValue;
+    }
+    const unwrap = (value) => reverseTransformCache.get(value);
+
+    /**
+     * Open a database.
+     *
+     * @param name Name of the database.
+     * @param version Schema version.
+     * @param callbacks Additional callbacks.
+     */
+    function openDB(name, version, { blocked, upgrade, blocking, terminated } = {}) {
+        const request = indexedDB.open(name, version);
+        const openPromise = wrap(request);
+        if (upgrade) {
+            request.addEventListener('upgradeneeded', (event) => {
+                upgrade(wrap(request.result), event.oldVersion, event.newVersion, wrap(request.transaction));
+            });
+        }
+        if (blocked)
+            request.addEventListener('blocked', () => blocked());
+        openPromise
+            .then((db) => {
+            if (terminated)
+                db.addEventListener('close', () => terminated());
+            if (blocking)
+                db.addEventListener('versionchange', () => blocking());
+        })
+            .catch(() => { });
+        return openPromise;
+    }
+
+    const readMethods = ['get', 'getKey', 'getAll', 'getAllKeys', 'count'];
+    const writeMethods = ['put', 'add', 'delete', 'clear'];
+    const cachedMethods = new Map();
+    function getMethod(target, prop) {
+        if (!(target instanceof IDBDatabase &&
+            !(prop in target) &&
+            typeof prop === 'string')) {
+            return;
+        }
+        if (cachedMethods.get(prop))
+            return cachedMethods.get(prop);
+        const targetFuncName = prop.replace(/FromIndex$/, '');
+        const useIndex = prop !== targetFuncName;
+        const isWrite = writeMethods.includes(targetFuncName);
+        if (
+        // Bail if the target doesn't exist on the target. Eg, getAll isn't in Edge.
+        !(targetFuncName in (useIndex ? IDBIndex : IDBObjectStore).prototype) ||
+            !(isWrite || readMethods.includes(targetFuncName))) {
+            return;
+        }
+        const method = async function (storeName, ...args) {
+            // isWrite ? 'readwrite' : undefined gzipps better, but fails in Edge :(
+            const tx = this.transaction(storeName, isWrite ? 'readwrite' : 'readonly');
+            let target = tx.store;
+            if (useIndex)
+                target = target.index(args.shift());
+            // Must reject if op rejects.
+            // If it's a write operation, must reject if tx.done rejects.
+            // Must reject with op rejection first.
+            // Must resolve with op value.
+            // Must handle both promises (no unhandled rejections)
+            return (await Promise.all([
+                target[targetFuncName](...args),
+                isWrite && tx.done,
+            ]))[0];
+        };
+        cachedMethods.set(prop, method);
+        return method;
+    }
+    replaceTraps((oldTraps) => ({
+        ...oldTraps,
+        get: (target, prop, receiver) => getMethod(target, prop) || oldTraps.get(target, prop, receiver),
+        has: (target, prop) => !!getMethod(target, prop) || oldTraps.has(target, prop),
+    }));
+
     /**
      * @license
      * Copyright 2019 Google LLC
@@ -2311,7 +2722,7 @@ var archive = (function () {
     }
 
     const name$o = "@firebase/app";
-    const version$1$1 = "0.7.1";
+    const version$1$1 = "0.7.24";
 
     /**
      * @license
@@ -2500,6 +2911,12 @@ var archive = (function () {
      * @internal
      */
     function _getProvider(app, name) {
+        const heartbeatController = app.container
+            .getProvider('heartbeat')
+            .getImmediate({ optional: true });
+        if (heartbeatController) {
+            void heartbeatController.triggerHeartbeat();
+        }
         return app.container.getProvider(name);
     }
 
@@ -2527,7 +2944,11 @@ var archive = (function () {
         ["app-deleted" /* APP_DELETED */]: "Firebase App named '{$appName}' already deleted",
         ["invalid-app-argument" /* INVALID_APP_ARGUMENT */]: 'firebase.{$appName}() takes either no argument or a ' +
             'Firebase App instance.',
-        ["invalid-log-argument" /* INVALID_LOG_ARGUMENT */]: 'First argument to `onLog` must be null or a function.'
+        ["invalid-log-argument" /* INVALID_LOG_ARGUMENT */]: 'First argument to `onLog` must be null or a function.',
+        ["storage-open" /* STORAGE_OPEN */]: 'Error thrown when opening storage. Original error: {$originalErrorMessage}.',
+        ["storage-get" /* STORAGE_GET */]: 'Error thrown when reading from storage. Original error: {$originalErrorMessage}.',
+        ["storage-set" /* STORAGE_WRITE */]: 'Error thrown when writing to storage. Original error: {$originalErrorMessage}.',
+        ["storage-delete" /* STORAGE_DELETE */]: 'Error thrown when deleting from storage. Original error: {$originalErrorMessage}.'
     };
     const ERROR_FACTORY$2 = new ErrorFactory('app', 'Firebase', ERRORS$1);
 
@@ -2703,6 +3124,312 @@ var archive = (function () {
 
     /**
      * @license
+     * Copyright 2021 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    const DB_NAME = 'firebase-heartbeat-database';
+    const DB_VERSION = 1;
+    const STORE_NAME = 'firebase-heartbeat-store';
+    let dbPromise$1 = null;
+    function getDbPromise$1() {
+        if (!dbPromise$1) {
+            dbPromise$1 = openDB(DB_NAME, DB_VERSION, {
+                upgrade: (db, oldVersion) => {
+                    // We don't use 'break' in this switch statement, the fall-through
+                    // behavior is what we want, because if there are multiple versions between
+                    // the old version and the current version, we want ALL the migrations
+                    // that correspond to those versions to run, not only the last one.
+                    // eslint-disable-next-line default-case
+                    switch (oldVersion) {
+                        case 0:
+                            db.createObjectStore(STORE_NAME);
+                    }
+                }
+            }).catch(e => {
+                throw ERROR_FACTORY$2.create("storage-open" /* STORAGE_OPEN */, {
+                    originalErrorMessage: e.message
+                });
+            });
+        }
+        return dbPromise$1;
+    }
+    async function readHeartbeatsFromIndexedDB(app) {
+        try {
+            const db = await getDbPromise$1();
+            return db
+                .transaction(STORE_NAME)
+                .objectStore(STORE_NAME)
+                .get(computeKey(app));
+        }
+        catch (e) {
+            throw ERROR_FACTORY$2.create("storage-get" /* STORAGE_GET */, {
+                originalErrorMessage: e.message
+            });
+        }
+    }
+    async function writeHeartbeatsToIndexedDB(app, heartbeatObject) {
+        try {
+            const db = await getDbPromise$1();
+            const tx = db.transaction(STORE_NAME, 'readwrite');
+            const objectStore = tx.objectStore(STORE_NAME);
+            await objectStore.put(heartbeatObject, computeKey(app));
+            return tx.done;
+        }
+        catch (e) {
+            throw ERROR_FACTORY$2.create("storage-set" /* STORAGE_WRITE */, {
+                originalErrorMessage: e.message
+            });
+        }
+    }
+    function computeKey(app) {
+        return `${app.name}!${app.options.appId}`;
+    }
+
+    /**
+     * @license
+     * Copyright 2021 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    const MAX_HEADER_BYTES = 1024;
+    // 30 days
+    const STORED_HEARTBEAT_RETENTION_MAX_MILLIS = 30 * 24 * 60 * 60 * 1000;
+    class HeartbeatServiceImpl {
+        constructor(container) {
+            this.container = container;
+            /**
+             * In-memory cache for heartbeats, used by getHeartbeatsHeader() to generate
+             * the header string.
+             * Stores one record per date. This will be consolidated into the standard
+             * format of one record per user agent string before being sent as a header.
+             * Populated from indexedDB when the controller is instantiated and should
+             * be kept in sync with indexedDB.
+             * Leave public for easier testing.
+             */
+            this._heartbeatsCache = null;
+            const app = this.container.getProvider('app').getImmediate();
+            this._storage = new HeartbeatStorageImpl(app);
+            this._heartbeatsCachePromise = this._storage.read().then(result => {
+                this._heartbeatsCache = result;
+                return result;
+            });
+        }
+        /**
+         * Called to report a heartbeat. The function will generate
+         * a HeartbeatsByUserAgent object, update heartbeatsCache, and persist it
+         * to IndexedDB.
+         * Note that we only store one heartbeat per day. So if a heartbeat for today is
+         * already logged, subsequent calls to this function in the same day will be ignored.
+         */
+        async triggerHeartbeat() {
+            const platformLogger = this.container
+                .getProvider('platform-logger')
+                .getImmediate();
+            // This is the "Firebase user agent" string from the platform logger
+            // service, not the browser user agent.
+            const agent = platformLogger.getPlatformInfoString();
+            const date = getUTCDateString();
+            if (this._heartbeatsCache === null) {
+                this._heartbeatsCache = await this._heartbeatsCachePromise;
+            }
+            // Do not store a heartbeat if one is already stored for this day
+            // or if a header has already been sent today.
+            if (this._heartbeatsCache.lastSentHeartbeatDate === date ||
+                this._heartbeatsCache.heartbeats.some(singleDateHeartbeat => singleDateHeartbeat.date === date)) {
+                return;
+            }
+            else {
+                // There is no entry for this date. Create one.
+                this._heartbeatsCache.heartbeats.push({ date, agent });
+            }
+            // Remove entries older than 30 days.
+            this._heartbeatsCache.heartbeats = this._heartbeatsCache.heartbeats.filter(singleDateHeartbeat => {
+                const hbTimestamp = new Date(singleDateHeartbeat.date).valueOf();
+                const now = Date.now();
+                return now - hbTimestamp <= STORED_HEARTBEAT_RETENTION_MAX_MILLIS;
+            });
+            return this._storage.overwrite(this._heartbeatsCache);
+        }
+        /**
+         * Returns a base64 encoded string which can be attached to the heartbeat-specific header directly.
+         * It also clears all heartbeats from memory as well as in IndexedDB.
+         *
+         * NOTE: Consuming product SDKs should not send the header if this method
+         * returns an empty string.
+         */
+        async getHeartbeatsHeader() {
+            if (this._heartbeatsCache === null) {
+                await this._heartbeatsCachePromise;
+            }
+            // If it's still null or the array is empty, there is no data to send.
+            if (this._heartbeatsCache === null ||
+                this._heartbeatsCache.heartbeats.length === 0) {
+                return '';
+            }
+            const date = getUTCDateString();
+            // Extract as many heartbeats from the cache as will fit under the size limit.
+            const { heartbeatsToSend, unsentEntries } = extractHeartbeatsForHeader(this._heartbeatsCache.heartbeats);
+            const headerString = base64urlEncodeWithoutPadding(JSON.stringify({ version: 2, heartbeats: heartbeatsToSend }));
+            // Store last sent date to prevent another being logged/sent for the same day.
+            this._heartbeatsCache.lastSentHeartbeatDate = date;
+            if (unsentEntries.length > 0) {
+                // Store any unsent entries if they exist.
+                this._heartbeatsCache.heartbeats = unsentEntries;
+                // This seems more likely than emptying the array (below) to lead to some odd state
+                // since the cache isn't empty and this will be called again on the next request,
+                // and is probably safest if we await it.
+                await this._storage.overwrite(this._heartbeatsCache);
+            }
+            else {
+                this._heartbeatsCache.heartbeats = [];
+                // Do not wait for this, to reduce latency.
+                void this._storage.overwrite(this._heartbeatsCache);
+            }
+            return headerString;
+        }
+    }
+    function getUTCDateString() {
+        const today = new Date();
+        // Returns date format 'YYYY-MM-DD'
+        return today.toISOString().substring(0, 10);
+    }
+    function extractHeartbeatsForHeader(heartbeatsCache, maxSize = MAX_HEADER_BYTES) {
+        // Heartbeats grouped by user agent in the standard format to be sent in
+        // the header.
+        const heartbeatsToSend = [];
+        // Single date format heartbeats that are not sent.
+        let unsentEntries = heartbeatsCache.slice();
+        for (const singleDateHeartbeat of heartbeatsCache) {
+            // Look for an existing entry with the same user agent.
+            const heartbeatEntry = heartbeatsToSend.find(hb => hb.agent === singleDateHeartbeat.agent);
+            if (!heartbeatEntry) {
+                // If no entry for this user agent exists, create one.
+                heartbeatsToSend.push({
+                    agent: singleDateHeartbeat.agent,
+                    dates: [singleDateHeartbeat.date]
+                });
+                if (countBytes(heartbeatsToSend) > maxSize) {
+                    // If the header would exceed max size, remove the added heartbeat
+                    // entry and stop adding to the header.
+                    heartbeatsToSend.pop();
+                    break;
+                }
+            }
+            else {
+                heartbeatEntry.dates.push(singleDateHeartbeat.date);
+                // If the header would exceed max size, remove the added date
+                // and stop adding to the header.
+                if (countBytes(heartbeatsToSend) > maxSize) {
+                    heartbeatEntry.dates.pop();
+                    break;
+                }
+            }
+            // Pop unsent entry from queue. (Skipped if adding the entry exceeded
+            // quota and the loop breaks early.)
+            unsentEntries = unsentEntries.slice(1);
+        }
+        return {
+            heartbeatsToSend,
+            unsentEntries
+        };
+    }
+    class HeartbeatStorageImpl {
+        constructor(app) {
+            this.app = app;
+            this._canUseIndexedDBPromise = this.runIndexedDBEnvironmentCheck();
+        }
+        async runIndexedDBEnvironmentCheck() {
+            if (!isIndexedDBAvailable()) {
+                return false;
+            }
+            else {
+                return validateIndexedDBOpenable()
+                    .then(() => true)
+                    .catch(() => false);
+            }
+        }
+        /**
+         * Read all heartbeats.
+         */
+        async read() {
+            const canUseIndexedDB = await this._canUseIndexedDBPromise;
+            if (!canUseIndexedDB) {
+                return { heartbeats: [] };
+            }
+            else {
+                const idbHeartbeatObject = await readHeartbeatsFromIndexedDB(this.app);
+                return idbHeartbeatObject || { heartbeats: [] };
+            }
+        }
+        // overwrite the storage with the provided heartbeats
+        async overwrite(heartbeatsObject) {
+            var _a;
+            const canUseIndexedDB = await this._canUseIndexedDBPromise;
+            if (!canUseIndexedDB) {
+                return;
+            }
+            else {
+                const existingHeartbeatsObject = await this.read();
+                return writeHeartbeatsToIndexedDB(this.app, {
+                    lastSentHeartbeatDate: (_a = heartbeatsObject.lastSentHeartbeatDate) !== null && _a !== void 0 ? _a : existingHeartbeatsObject.lastSentHeartbeatDate,
+                    heartbeats: heartbeatsObject.heartbeats
+                });
+            }
+        }
+        // add heartbeats
+        async add(heartbeatsObject) {
+            var _a;
+            const canUseIndexedDB = await this._canUseIndexedDBPromise;
+            if (!canUseIndexedDB) {
+                return;
+            }
+            else {
+                const existingHeartbeatsObject = await this.read();
+                return writeHeartbeatsToIndexedDB(this.app, {
+                    lastSentHeartbeatDate: (_a = heartbeatsObject.lastSentHeartbeatDate) !== null && _a !== void 0 ? _a : existingHeartbeatsObject.lastSentHeartbeatDate,
+                    heartbeats: [
+                        ...existingHeartbeatsObject.heartbeats,
+                        ...heartbeatsObject.heartbeats
+                    ]
+                });
+            }
+        }
+    }
+    /**
+     * Calculate bytes of a HeartbeatsByUserAgent array after being wrapped
+     * in a platform logging header JSON object, stringified, and converted
+     * to base 64.
+     */
+    function countBytes(heartbeatsCache) {
+        // base64 has a restricted set of characters, all of which should be 1 byte.
+        return base64urlEncodeWithoutPadding(
+        // heartbeatsCache wrapper properties
+        JSON.stringify({ version: 2, heartbeats: heartbeatsCache })).length;
+    }
+
+    /**
+     * @license
      * Copyright 2019 Google LLC
      *
      * Licensed under the Apache License, Version 2.0 (the "License");
@@ -2719,8 +3446,11 @@ var archive = (function () {
      */
     function registerCoreComponents(variant) {
         _registerComponent(new Component('platform-logger', container => new PlatformLoggerServiceImpl(container), "PRIVATE" /* PRIVATE */));
+        _registerComponent(new Component('heartbeat', container => new HeartbeatServiceImpl(container), "PRIVATE" /* PRIVATE */));
         // Register `app` package.
         registerVersion(name$o, version$1$1, variant);
+        // BUILD_TARGET will be replaced by values like esm5, esm2017, cjs5, etc during the compilation
+        registerVersion(name$o, version$1$1, 'esm2017');
         // Register platform SDK identifier (no version).
         registerVersion('fire-js', '');
     }
@@ -2731,342 +3461,10 @@ var archive = (function () {
      * @remarks This package coordinates the communication between the different Firebase components
      * @packageDocumentation
      */
-    registerCoreComponents();
-
-    var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
-
-    function createCommonjsModule(fn, basedir, module) {
-    	return module = {
-    		path: basedir,
-    		exports: {},
-    		require: function (path, base) {
-    			return commonjsRequire(path, (base === undefined || base === null) ? module.path : base);
-    		}
-    	}, fn(module, module.exports), module.exports;
-    }
-
-    function commonjsRequire () {
-    	throw new Error('Dynamic requires are not currently supported by @rollup/plugin-commonjs');
-    }
-
-    var idb = createCommonjsModule(function (module, exports) {
-    (function (global, factory) {
-      factory(exports) ;
-    }(commonjsGlobal, function (exports) {
-      function toArray(arr) {
-        return Array.prototype.slice.call(arr);
-      }
-
-      function promisifyRequest(request) {
-        return new Promise(function(resolve, reject) {
-          request.onsuccess = function() {
-            resolve(request.result);
-          };
-
-          request.onerror = function() {
-            reject(request.error);
-          };
-        });
-      }
-
-      function promisifyRequestCall(obj, method, args) {
-        var request;
-        var p = new Promise(function(resolve, reject) {
-          request = obj[method].apply(obj, args);
-          promisifyRequest(request).then(resolve, reject);
-        });
-
-        p.request = request;
-        return p;
-      }
-
-      function promisifyCursorRequestCall(obj, method, args) {
-        var p = promisifyRequestCall(obj, method, args);
-        return p.then(function(value) {
-          if (!value) return;
-          return new Cursor(value, p.request);
-        });
-      }
-
-      function proxyProperties(ProxyClass, targetProp, properties) {
-        properties.forEach(function(prop) {
-          Object.defineProperty(ProxyClass.prototype, prop, {
-            get: function() {
-              return this[targetProp][prop];
-            },
-            set: function(val) {
-              this[targetProp][prop] = val;
-            }
-          });
-        });
-      }
-
-      function proxyRequestMethods(ProxyClass, targetProp, Constructor, properties) {
-        properties.forEach(function(prop) {
-          if (!(prop in Constructor.prototype)) return;
-          ProxyClass.prototype[prop] = function() {
-            return promisifyRequestCall(this[targetProp], prop, arguments);
-          };
-        });
-      }
-
-      function proxyMethods(ProxyClass, targetProp, Constructor, properties) {
-        properties.forEach(function(prop) {
-          if (!(prop in Constructor.prototype)) return;
-          ProxyClass.prototype[prop] = function() {
-            return this[targetProp][prop].apply(this[targetProp], arguments);
-          };
-        });
-      }
-
-      function proxyCursorRequestMethods(ProxyClass, targetProp, Constructor, properties) {
-        properties.forEach(function(prop) {
-          if (!(prop in Constructor.prototype)) return;
-          ProxyClass.prototype[prop] = function() {
-            return promisifyCursorRequestCall(this[targetProp], prop, arguments);
-          };
-        });
-      }
-
-      function Index(index) {
-        this._index = index;
-      }
-
-      proxyProperties(Index, '_index', [
-        'name',
-        'keyPath',
-        'multiEntry',
-        'unique'
-      ]);
-
-      proxyRequestMethods(Index, '_index', IDBIndex, [
-        'get',
-        'getKey',
-        'getAll',
-        'getAllKeys',
-        'count'
-      ]);
-
-      proxyCursorRequestMethods(Index, '_index', IDBIndex, [
-        'openCursor',
-        'openKeyCursor'
-      ]);
-
-      function Cursor(cursor, request) {
-        this._cursor = cursor;
-        this._request = request;
-      }
-
-      proxyProperties(Cursor, '_cursor', [
-        'direction',
-        'key',
-        'primaryKey',
-        'value'
-      ]);
-
-      proxyRequestMethods(Cursor, '_cursor', IDBCursor, [
-        'update',
-        'delete'
-      ]);
-
-      // proxy 'next' methods
-      ['advance', 'continue', 'continuePrimaryKey'].forEach(function(methodName) {
-        if (!(methodName in IDBCursor.prototype)) return;
-        Cursor.prototype[methodName] = function() {
-          var cursor = this;
-          var args = arguments;
-          return Promise.resolve().then(function() {
-            cursor._cursor[methodName].apply(cursor._cursor, args);
-            return promisifyRequest(cursor._request).then(function(value) {
-              if (!value) return;
-              return new Cursor(value, cursor._request);
-            });
-          });
-        };
-      });
-
-      function ObjectStore(store) {
-        this._store = store;
-      }
-
-      ObjectStore.prototype.createIndex = function() {
-        return new Index(this._store.createIndex.apply(this._store, arguments));
-      };
-
-      ObjectStore.prototype.index = function() {
-        return new Index(this._store.index.apply(this._store, arguments));
-      };
-
-      proxyProperties(ObjectStore, '_store', [
-        'name',
-        'keyPath',
-        'indexNames',
-        'autoIncrement'
-      ]);
-
-      proxyRequestMethods(ObjectStore, '_store', IDBObjectStore, [
-        'put',
-        'add',
-        'delete',
-        'clear',
-        'get',
-        'getAll',
-        'getKey',
-        'getAllKeys',
-        'count'
-      ]);
-
-      proxyCursorRequestMethods(ObjectStore, '_store', IDBObjectStore, [
-        'openCursor',
-        'openKeyCursor'
-      ]);
-
-      proxyMethods(ObjectStore, '_store', IDBObjectStore, [
-        'deleteIndex'
-      ]);
-
-      function Transaction(idbTransaction) {
-        this._tx = idbTransaction;
-        this.complete = new Promise(function(resolve, reject) {
-          idbTransaction.oncomplete = function() {
-            resolve();
-          };
-          idbTransaction.onerror = function() {
-            reject(idbTransaction.error);
-          };
-          idbTransaction.onabort = function() {
-            reject(idbTransaction.error);
-          };
-        });
-      }
-
-      Transaction.prototype.objectStore = function() {
-        return new ObjectStore(this._tx.objectStore.apply(this._tx, arguments));
-      };
-
-      proxyProperties(Transaction, '_tx', [
-        'objectStoreNames',
-        'mode'
-      ]);
-
-      proxyMethods(Transaction, '_tx', IDBTransaction, [
-        'abort'
-      ]);
-
-      function UpgradeDB(db, oldVersion, transaction) {
-        this._db = db;
-        this.oldVersion = oldVersion;
-        this.transaction = new Transaction(transaction);
-      }
-
-      UpgradeDB.prototype.createObjectStore = function() {
-        return new ObjectStore(this._db.createObjectStore.apply(this._db, arguments));
-      };
-
-      proxyProperties(UpgradeDB, '_db', [
-        'name',
-        'version',
-        'objectStoreNames'
-      ]);
-
-      proxyMethods(UpgradeDB, '_db', IDBDatabase, [
-        'deleteObjectStore',
-        'close'
-      ]);
-
-      function DB(db) {
-        this._db = db;
-      }
-
-      DB.prototype.transaction = function() {
-        return new Transaction(this._db.transaction.apply(this._db, arguments));
-      };
-
-      proxyProperties(DB, '_db', [
-        'name',
-        'version',
-        'objectStoreNames'
-      ]);
-
-      proxyMethods(DB, '_db', IDBDatabase, [
-        'close'
-      ]);
-
-      // Add cursor iterators
-      // TODO: remove this once browsers do the right thing with promises
-      ['openCursor', 'openKeyCursor'].forEach(function(funcName) {
-        [ObjectStore, Index].forEach(function(Constructor) {
-          // Don't create iterateKeyCursor if openKeyCursor doesn't exist.
-          if (!(funcName in Constructor.prototype)) return;
-
-          Constructor.prototype[funcName.replace('open', 'iterate')] = function() {
-            var args = toArray(arguments);
-            var callback = args[args.length - 1];
-            var nativeObject = this._store || this._index;
-            var request = nativeObject[funcName].apply(nativeObject, args.slice(0, -1));
-            request.onsuccess = function() {
-              callback(request.result);
-            };
-          };
-        });
-      });
-
-      // polyfill getAll
-      [Index, ObjectStore].forEach(function(Constructor) {
-        if (Constructor.prototype.getAll) return;
-        Constructor.prototype.getAll = function(query, count) {
-          var instance = this;
-          var items = [];
-
-          return new Promise(function(resolve) {
-            instance.iterateCursor(query, function(cursor) {
-              if (!cursor) {
-                resolve(items);
-                return;
-              }
-              items.push(cursor.value);
-
-              if (count !== undefined && items.length == count) {
-                resolve(items);
-                return;
-              }
-              cursor.continue();
-            });
-          });
-        };
-      });
-
-      function openDb(name, version, upgradeCallback) {
-        var p = promisifyRequestCall(indexedDB, 'open', [name, version]);
-        var request = p.request;
-
-        if (request) {
-          request.onupgradeneeded = function(event) {
-            if (upgradeCallback) {
-              upgradeCallback(new UpgradeDB(request.result, event.oldVersion, request.transaction));
-            }
-          };
-        }
-
-        return p.then(function(db) {
-          return new DB(db);
-        });
-      }
-
-      function deleteDb(name) {
-        return promisifyRequestCall(indexedDB, 'deleteDatabase', [name]);
-      }
-
-      exports.openDb = openDb;
-      exports.deleteDb = deleteDb;
-
-      Object.defineProperty(exports, '__esModule', { value: true });
-
-    }));
-    });
+    registerCoreComponents('');
 
     const name$2 = "@firebase/installations";
-    const version$2 = "0.5.1";
+    const version$2 = "0.5.9";
 
     /**
      * @license
@@ -3209,9 +3607,19 @@ var archive = (function () {
      * See the License for the specific language governing permissions and
      * limitations under the License.
      */
-    async function createInstallationRequest(appConfig, { fid }) {
+    async function createInstallationRequest({ appConfig, heartbeatServiceProvider }, { fid }) {
         const endpoint = getInstallationsEndpoint(appConfig);
         const headers = getHeaders$1(appConfig);
+        // If heartbeat service exists, add the heartbeat string to the header.
+        const heartbeatService = heartbeatServiceProvider.getImmediate({
+            optional: true
+        });
+        if (heartbeatService) {
+            const heartbeatsHeader = await heartbeatService.getHeartbeatsHeader();
+            if (heartbeatsHeader) {
+                headers.append('x-firebase-client', heartbeatsHeader);
+            }
+        }
         const body = {
             fid,
             authVersion: INTERNAL_AUTH_VERSION,
@@ -3433,15 +3841,17 @@ var archive = (function () {
     let dbPromise = null;
     function getDbPromise() {
         if (!dbPromise) {
-            dbPromise = idb.openDb(DATABASE_NAME, DATABASE_VERSION, upgradeDB => {
-                // We don't use 'break' in this switch statement, the fall-through
-                // behavior is what we want, because if there are multiple versions between
-                // the old version and the current version, we want ALL the migrations
-                // that correspond to those versions to run, not only the last one.
-                // eslint-disable-next-line default-case
-                switch (upgradeDB.oldVersion) {
-                    case 0:
-                        upgradeDB.createObjectStore(OBJECT_STORE_NAME);
+            dbPromise = openDB(DATABASE_NAME, DATABASE_VERSION, {
+                upgrade: (db, oldVersion) => {
+                    // We don't use 'break' in this switch statement, the fall-through
+                    // behavior is what we want, because if there are multiple versions between
+                    // the old version and the current version, we want ALL the migrations
+                    // that correspond to those versions to run, not only the last one.
+                    // eslint-disable-next-line default-case
+                    switch (oldVersion) {
+                        case 0:
+                            db.createObjectStore(OBJECT_STORE_NAME);
+                    }
                 }
             });
         }
@@ -3453,9 +3863,9 @@ var archive = (function () {
         const db = await getDbPromise();
         const tx = db.transaction(OBJECT_STORE_NAME, 'readwrite');
         const objectStore = tx.objectStore(OBJECT_STORE_NAME);
-        const oldValue = await objectStore.get(key);
+        const oldValue = (await objectStore.get(key));
         await objectStore.put(value, key);
-        await tx.complete;
+        await tx.done;
         if (!oldValue || oldValue.fid !== value.fid) {
             fidChanged(appConfig, value.fid);
         }
@@ -3467,7 +3877,7 @@ var archive = (function () {
         const db = await getDbPromise();
         const tx = db.transaction(OBJECT_STORE_NAME, 'readwrite');
         await tx.objectStore(OBJECT_STORE_NAME).delete(key);
-        await tx.complete;
+        await tx.done;
     }
     /**
      * Atomically updates a record with the result of updateFn, which gets
@@ -3480,7 +3890,7 @@ var archive = (function () {
         const db = await getDbPromise();
         const tx = db.transaction(OBJECT_STORE_NAME, 'readwrite');
         const store = tx.objectStore(OBJECT_STORE_NAME);
-        const oldValue = await store.get(key);
+        const oldValue = (await store.get(key));
         const newValue = updateFn(oldValue);
         if (newValue === undefined) {
             await store.delete(key);
@@ -3488,7 +3898,7 @@ var archive = (function () {
         else {
             await store.put(newValue, key);
         }
-        await tx.complete;
+        await tx.done;
         if (newValue && (!oldValue || oldValue.fid !== newValue.fid)) {
             fidChanged(appConfig, newValue.fid);
         }
@@ -3515,11 +3925,11 @@ var archive = (function () {
      * Updates and returns the InstallationEntry from the database.
      * Also triggers a registration request if it is necessary and possible.
      */
-    async function getInstallationEntry(appConfig) {
+    async function getInstallationEntry(installations) {
         let registrationPromise;
-        const installationEntry = await update(appConfig, oldEntry => {
+        const installationEntry = await update(installations.appConfig, oldEntry => {
             const installationEntry = updateOrCreateInstallationEntry(oldEntry);
-            const entryWithPromise = triggerRegistrationIfNecessary(appConfig, installationEntry);
+            const entryWithPromise = triggerRegistrationIfNecessary(installations, installationEntry);
             registrationPromise = entryWithPromise.registrationPromise;
             return entryWithPromise.installationEntry;
         });
@@ -3550,7 +3960,7 @@ var archive = (function () {
      * If registrationPromise does not exist, the installationEntry is guaranteed
      * to be registered.
      */
-    function triggerRegistrationIfNecessary(appConfig, installationEntry) {
+    function triggerRegistrationIfNecessary(installations, installationEntry) {
         if (installationEntry.registrationStatus === 0 /* NOT_STARTED */) {
             if (!navigator.onLine) {
                 // Registration required but app is offline.
@@ -3566,13 +3976,13 @@ var archive = (function () {
                 registrationStatus: 1 /* IN_PROGRESS */,
                 registrationTime: Date.now()
             };
-            const registrationPromise = registerInstallation(appConfig, inProgressEntry);
+            const registrationPromise = registerInstallation(installations, inProgressEntry);
             return { installationEntry: inProgressEntry, registrationPromise };
         }
         else if (installationEntry.registrationStatus === 1 /* IN_PROGRESS */) {
             return {
                 installationEntry,
-                registrationPromise: waitUntilFidRegistration(appConfig)
+                registrationPromise: waitUntilFidRegistration(installations)
             };
         }
         else {
@@ -3580,20 +3990,20 @@ var archive = (function () {
         }
     }
     /** This will be executed only once for each new Firebase Installation. */
-    async function registerInstallation(appConfig, installationEntry) {
+    async function registerInstallation(installations, installationEntry) {
         try {
-            const registeredInstallationEntry = await createInstallationRequest(appConfig, installationEntry);
-            return set(appConfig, registeredInstallationEntry);
+            const registeredInstallationEntry = await createInstallationRequest(installations, installationEntry);
+            return set(installations.appConfig, registeredInstallationEntry);
         }
         catch (e) {
             if (isServerError(e) && e.customData.serverCode === 409) {
                 // Server returned a "FID can not be used" error.
                 // Generate a new ID next time.
-                await remove(appConfig);
+                await remove(installations.appConfig);
             }
             else {
                 // Registration failed. Set FID as not registered.
-                await set(appConfig, {
+                await set(installations.appConfig, {
                     fid: installationEntry.fid,
                     registrationStatus: 0 /* NOT_STARTED */
                 });
@@ -3602,19 +4012,19 @@ var archive = (function () {
         }
     }
     /** Call if FID registration is pending in another request. */
-    async function waitUntilFidRegistration(appConfig) {
+    async function waitUntilFidRegistration(installations) {
         // Unfortunately, there is no way of reliably observing when a value in
         // IndexedDB changes (yet, see https://github.com/WICG/indexed-db-observers),
         // so we need to poll.
-        let entry = await updateInstallationRequest(appConfig);
+        let entry = await updateInstallationRequest(installations.appConfig);
         while (entry.registrationStatus === 1 /* IN_PROGRESS */) {
             // createInstallation request still in progress.
             await sleep(100);
-            entry = await updateInstallationRequest(appConfig);
+            entry = await updateInstallationRequest(installations.appConfig);
         }
         if (entry.registrationStatus === 0 /* NOT_STARTED */) {
             // The request timed out or failed in a different call. Try again.
-            const { installationEntry, registrationPromise } = await getInstallationEntry(appConfig);
+            const { installationEntry, registrationPromise } = await getInstallationEntry(installations);
             if (registrationPromise) {
                 return registrationPromise;
             }
@@ -3671,19 +4081,23 @@ var archive = (function () {
      * See the License for the specific language governing permissions and
      * limitations under the License.
      */
-    async function generateAuthTokenRequest({ appConfig, platformLoggerProvider }, installationEntry) {
+    async function generateAuthTokenRequest({ appConfig, heartbeatServiceProvider }, installationEntry) {
         const endpoint = getGenerateAuthTokenEndpoint(appConfig, installationEntry);
         const headers = getHeadersWithAuth(appConfig, installationEntry);
-        // If platform logger exists, add the platform info string to the header.
-        const platformLogger = platformLoggerProvider.getImmediate({
+        // If heartbeat service exists, add the heartbeat string to the header.
+        const heartbeatService = heartbeatServiceProvider.getImmediate({
             optional: true
         });
-        if (platformLogger) {
-            headers.append('x-firebase-client', platformLogger.getPlatformInfoString());
+        if (heartbeatService) {
+            const heartbeatsHeader = await heartbeatService.getHeartbeatsHeader();
+            if (heartbeatsHeader) {
+                headers.append('x-firebase-client', heartbeatsHeader);
+            }
         }
         const body = {
             installation: {
-                sdkVersion: PACKAGE_VERSION
+                sdkVersion: PACKAGE_VERSION,
+                appId: appConfig.appId
             }
         };
         const request = {
@@ -3875,7 +4289,7 @@ var archive = (function () {
      */
     async function getId(installations) {
         const installationsImpl = installations;
-        const { installationEntry, registrationPromise } = await getInstallationEntry(installationsImpl.appConfig);
+        const { installationEntry, registrationPromise } = await getInstallationEntry(installationsImpl);
         if (registrationPromise) {
             registrationPromise.catch(console.error);
         }
@@ -3913,14 +4327,14 @@ var archive = (function () {
      */
     async function getToken(installations, forceRefresh = false) {
         const installationsImpl = installations;
-        await completeInstallationRegistration(installationsImpl.appConfig);
+        await completeInstallationRegistration(installationsImpl);
         // At this point we either have a Registered Installation in the DB, or we've
         // already thrown an error.
         const authToken = await refreshAuthToken(installationsImpl, forceRefresh);
         return authToken.token;
     }
-    async function completeInstallationRegistration(appConfig) {
-        const { registrationPromise } = await getInstallationEntry(appConfig);
+    async function completeInstallationRegistration(installations) {
+        const { registrationPromise } = await getInstallationEntry(installations);
         if (registrationPromise) {
             // A createInstallation request is in progress. Wait until it finishes.
             await registrationPromise;
@@ -3996,11 +4410,11 @@ var archive = (function () {
         const app = container.getProvider('app').getImmediate();
         // Throws if app isn't configured properly.
         const appConfig = extractAppConfig(app);
-        const platformLoggerProvider = _getProvider(app, 'platform-logger');
+        const heartbeatServiceProvider = _getProvider(app, 'heartbeat');
         const installationsImpl = {
             app,
             appConfig,
-            platformLoggerProvider,
+            heartbeatServiceProvider,
             _delete: () => Promise.resolve()
         };
         return installationsImpl;
@@ -4027,6 +4441,8 @@ var archive = (function () {
      */
     registerInstallations();
     registerVersion(name$2, version$2);
+    // BUILD_TARGET will be replaced by values like esm5, esm2017, cjs5, etc during the compilation
+    registerVersion(name$2, version$2, 'esm2017');
 
     /**
      * @license
@@ -4921,7 +5337,7 @@ var archive = (function () {
     }
 
     const name$1 = "@firebase/analytics";
-    const version$1 = "0.7.1";
+    const version$1 = "0.7.9";
 
     /**
      * Firebase Analytics
@@ -4939,6 +5355,8 @@ var archive = (function () {
         }, "PUBLIC" /* PUBLIC */));
         _registerComponent(new Component('analytics-internal', internalFactory, "PRIVATE" /* PRIVATE */));
         registerVersion(name$1, version$1);
+        // BUILD_TARGET will be replaced by values like esm5, esm2017, cjs5, etc during the compilation
+        registerVersion(name$1, version$1, 'esm2017');
         function internalFactory(container) {
             try {
                 const analytics = container.getProvider(ANALYTICS_TYPE).getImmediate();
@@ -4956,7 +5374,7 @@ var archive = (function () {
     registerAnalytics();
 
     var name = "firebase";
-    var version = "9.1.0";
+    var version = "9.8.1";
 
     /**
      * @license
