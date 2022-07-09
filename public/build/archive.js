@@ -490,7 +490,7 @@ var archive = (function () {
     	return child_ctx;
     }
 
-    // (78:8) {#if isArchived(date, month, year) || (isTomorrow(date) && !forwardsEnabled)}
+    // (78:8) {#if isArchivedHere(date, month, year) || (isTomorrow(date) && !forwardsEnabled)}
     function create_if_block_1(ctx) {
     	let tr;
     	let td0;
@@ -520,16 +520,16 @@ var archive = (function () {
     			td1 = element("td");
     			img = element("img");
     			t4 = space();
-    			add_location(br, file, 81, 14, 2562);
+    			add_location(br, file, 81, 14, 2570);
     			attr_dev(td0, "class", "text-center border-2 p-4");
-    			add_location(td0, file, 79, 12, 2458);
+    			add_location(td0, file, 79, 12, 2466);
     			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
     			if (!src_url_equal(img.src, img_src_value = `memes/${/*memes*/ ctx[0].otd[/*date*/ ctx[16]]}`)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file, 87, 14, 2725);
+    			add_location(img, file, 87, 14, 2733);
     			attr_dev(td1, "class", "border-2 p-4");
-    			add_location(td1, file, 86, 12, 2685);
-    			add_location(tr, file, 78, 10, 2441);
+    			add_location(td1, file, 86, 12, 2693);
+    			add_location(tr, file, 78, 10, 2449);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr, anchor);
@@ -559,7 +559,7 @@ var archive = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(78:8) {#if isArchived(date, month, year) || (isTomorrow(date) && !forwardsEnabled)}",
+    		source: "(78:8) {#if isArchivedHere(date, month, year) || (isTomorrow(date) && !forwardsEnabled)}",
     		ctx
     	});
 
@@ -595,7 +595,7 @@ var archive = (function () {
 
     // (77:6) {#each dates as date}
     function create_each_block(ctx) {
-    	let show_if = /*isArchived*/ ctx[8](/*date*/ ctx[16], /*month*/ ctx[1], /*year*/ ctx[2]) || /*isTomorrow*/ ctx[9](/*date*/ ctx[16]) && !/*forwardsEnabled*/ ctx[4];
+    	let show_if = /*isArchivedHere*/ ctx[8](/*date*/ ctx[16], /*month*/ ctx[1], /*year*/ ctx[2]) || /*isTomorrow*/ ctx[9](/*date*/ ctx[16]) && !/*forwardsEnabled*/ ctx[4];
     	let if_block_anchor;
     	let if_block = show_if && create_if_block_1(ctx);
 
@@ -609,7 +609,7 @@ var archive = (function () {
     			insert_dev(target, if_block_anchor, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*month, year, forwardsEnabled*/ 22) show_if = /*isArchived*/ ctx[8](/*date*/ ctx[16], /*month*/ ctx[1], /*year*/ ctx[2]) || /*isTomorrow*/ ctx[9](/*date*/ ctx[16]) && !/*forwardsEnabled*/ ctx[4];
+    			if (dirty & /*month, year, forwardsEnabled*/ 22) show_if = /*isArchivedHere*/ ctx[8](/*date*/ ctx[16], /*month*/ ctx[1], /*year*/ ctx[2]) || /*isTomorrow*/ ctx[9](/*date*/ ctx[16]) && !/*forwardsEnabled*/ ctx[4];
 
     			if (show_if) {
     				if (if_block) {
@@ -650,7 +650,7 @@ var archive = (function () {
     			p = element("p");
     			p.textContent = "No memes that day :(";
     			attr_dev(p, "class", "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto text-center");
-    			add_location(p, file, 109, 4, 3246);
+    			add_location(p, file, 109, 4, 3254);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -683,7 +683,7 @@ var archive = (function () {
     			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
     			if (!src_url_equal(img.src, img_src_value = `memes/${/*memes*/ ctx[0].otd[/*matchingDates*/ ctx[6][0]]}`)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file, 103, 4, 3105);
+    			add_location(img, file, 103, 4, 3113);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
@@ -822,43 +822,43 @@ var archive = (function () {
     			p1.textContent = "DVS-style dates accepted";
     			t21 = space();
     			footer = element("footer");
-    			add_location(h20, file, 44, 2, 1479);
+    			add_location(h20, file, 44, 2, 1483);
     			attr_dev(span0, "class", "-mt-1.5");
-    			add_location(span0, file, 52, 8, 1712);
+    			add_location(span0, file, 52, 8, 1716);
     			attr_dev(div0, "class", "flex-1 btn");
     			attr_dev(div0, "disabled", div0_disabled_value = !/*backwardsEnabled*/ ctx[5]);
-    			add_location(div0, file, 47, 6, 1574);
+    			add_location(div0, file, 47, 6, 1578);
     			attr_dev(div1, "class", "w-1/4");
-    			add_location(div1, file, 46, 4, 1548);
+    			add_location(div1, file, 46, 4, 1552);
     			attr_dev(p0, "class", "flex-1 my-2 text-lg text-center");
-    			add_location(p0, file, 55, 4, 1774);
+    			add_location(p0, file, 55, 4, 1778);
     			attr_dev(span1, "class", "-mt-1.5");
-    			add_location(span1, file, 64, 8, 2036);
+    			add_location(span1, file, 64, 8, 2040);
     			attr_dev(div2, "class", "flex-1 btn");
     			attr_dev(div2, "disabled", div2_disabled_value = !/*forwardsEnabled*/ ctx[4]);
-    			add_location(div2, file, 59, 6, 1900);
+    			add_location(div2, file, 59, 6, 1904);
     			attr_dev(div3, "class", "w-1/4");
-    			add_location(div3, file, 58, 4, 1874);
+    			add_location(div3, file, 58, 4, 1878);
     			attr_dev(div4, "class", "flex sm:w-1/4 mx-auto my-4");
-    			add_location(div4, file, 45, 2, 1503);
+    			add_location(div4, file, 45, 2, 1507);
     			attr_dev(th0, "class", "border-2");
-    			add_location(th0, file, 71, 8, 2210);
+    			add_location(th0, file, 71, 8, 2214);
     			attr_dev(th1, "class", "border-2");
-    			add_location(th1, file, 72, 8, 2249);
-    			add_location(tr, file, 70, 6, 2197);
-    			add_location(thead, file, 69, 4, 2183);
-    			add_location(tbody, file, 75, 4, 2309);
+    			add_location(th1, file, 72, 8, 2253);
+    			add_location(tr, file, 70, 6, 2201);
+    			add_location(thead, file, 69, 4, 2187);
+    			add_location(tbody, file, 75, 4, 2313);
     			attr_dev(table, "class", "table-auto w-full max-w-4xl mx-auto border-white border-2");
-    			add_location(table, file, 68, 2, 2105);
-    			add_location(main, file, 43, 0, 1470);
-    			add_location(h21, file, 100, 2, 3000);
+    			add_location(table, file, 68, 2, 2109);
+    			add_location(main, file, 43, 0, 1474);
+    			add_location(h21, file, 100, 2, 3008);
     			attr_dev(input, "type", "text");
-    			add_location(input, file, 101, 2, 3026);
+    			add_location(input, file, 101, 2, 3034);
     			attr_dev(p1, "class", "mt-4");
-    			add_location(p1, file, 113, 2, 3358);
+    			add_location(p1, file, 113, 2, 3366);
     			attr_dev(section, "class", "mt-48");
-    			add_location(section, file, 99, 0, 2974);
-    			add_location(footer, file, 115, 0, 3414);
+    			add_location(section, file, 99, 0, 2982);
+    			add_location(footer, file, 115, 0, 3422);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -932,7 +932,7 @@ var archive = (function () {
     				attr_dev(div2, "disabled", div2_disabled_value);
     			}
 
-    			if (dirty & /*memes, dates, isTomorrow, isArchived, month, year, forwardsEnabled*/ 919) {
+    			if (dirty & /*memes, dates, isTomorrow, isArchivedHere, month, year, forwardsEnabled*/ 919) {
     				each_value = /*dates*/ ctx[7];
     				validate_each_argument(each_value);
     				let i;
@@ -1017,7 +1017,7 @@ var archive = (function () {
     	const today = new Date();
     	const dates = Object.keys(memes.otd);
 
-    	const isArchived = (date, month, year) => {
+    	const isArchivedHere = (date, month, year) => {
     		const d = new Date(date);
     		const goodDate = d <= today;
 
@@ -1069,7 +1069,7 @@ var archive = (function () {
     		stringToDate,
     		today,
     		dates,
-    		isArchived,
+    		isArchivedHere,
     		isTomorrow,
     		month,
     		year,
@@ -1130,7 +1130,7 @@ var archive = (function () {
     		backwardsEnabled,
     		matchingDates,
     		dates,
-    		isArchived,
+    		isArchivedHere,
     		isTomorrow,
     		dateToString,
     		stringToDate,

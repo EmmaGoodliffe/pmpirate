@@ -9,7 +9,7 @@
   const today = new Date();
   const dates = Object.keys(memes.otd);
 
-  const isArchived = (date: string, month: number, year: number) => {
+  const isArchivedHere = (date: string, month: number, year: number) => {
     const d = new Date(date);
     const goodDate = d <= today;
     // const weekBefore = new Date();
@@ -90,7 +90,7 @@
     </thead>
     <tbody>
       {#each dates as date}
-        {#if isArchived(date, month, year) || (isTomorrow(date) && !forwardsEnabled)}
+        {#if isArchivedHere(date, month, year) || (isTomorrow(date) && !forwardsEnabled)}
           <tr>
             <td class="text-center border-2 p-4">
               {date.split("-").reverse().join("/")}
