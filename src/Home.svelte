@@ -73,7 +73,7 @@
   </div>
 </main>
 <hr />
-<section>
+<section id="otd">
   <Otd src={otdSrc} />
   <p class="epilogue">
     <a class="hover:underline" href="archive.html">Meme Archive</a>

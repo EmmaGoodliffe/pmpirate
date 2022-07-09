@@ -57,6 +57,7 @@ const options = {
     typescript({
       sourceMap: true,
       inlineSources: true,
+      exclude: ["cypress"]
     }),
     json(),
 
@@ -79,6 +80,7 @@ const options = {
 
 export default [
   {
+    ...options,
     input: "src/index.ts",
     output: {
       sourcemap: true,
@@ -86,9 +88,9 @@ export default [
       name: "app",
       file: "public/build/index.js",
     },
-    ...options,
   },
   {
+    ...options,
     input: "src/archive.ts",
     output: {
       sourcemap: true,
@@ -96,6 +98,5 @@ export default [
       name: "archive",
       file: "public/build/archive.js",
     },
-    ...options,
   },
 ];

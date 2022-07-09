@@ -1,8 +1,7 @@
 import { dateToString, stringToDate } from "../../src/date";
 
-// cy.visit('https://example.cypress.io')
 
-describe("date spec", () => {
+describe("dates", () => {
   it("converts date to string", () => {
     expect(dateToString(new Date("1 Sep 2022"), "-", true)).to.equal(
       "2022-09-01",

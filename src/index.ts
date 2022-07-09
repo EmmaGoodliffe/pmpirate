@@ -1,9 +1,9 @@
-import App from "./App.svelte";
 import "./common";
 import { dateToString } from "./date";
+import Home from "./Home.svelte";
 import memes from "./memes.json";
 
-const app = new App({
+const home = new Home({
   target: document.body,
   props: {
     memes,
@@ -11,4 +11,4 @@ const app = new App({
   },
 });
 
-export default app;
+export default home;
