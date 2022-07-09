@@ -23,8 +23,8 @@ export const dateToString = (d: Date, splitter = "/", reverse = false) => {
   const month = `${d.getMonth() + 1}`.padStart(2, "0");
   const year = d.getFullYear();
   const ogOrder = [date, month, year];
-  const order = reverse ? ogOrder.reverse() : ogOrder;
-  return order.join(splitter);
+  const ordered = reverse ? ogOrder.reverse() : ogOrder;
+  return ordered.join(splitter);
 };
 
 export const stringToDate = (d: string) => {

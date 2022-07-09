@@ -1,6 +1,6 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
-  "exclude": ["public/build"],
+  "exclude": ["public/build", "cypress"],
   "compilerOptions": {
     "resolveJsonModule": true
   }
