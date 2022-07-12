@@ -1,8 +1,8 @@
 describe("home", () => {
   it("displays memes", () => {
     cy.visit("http://localhost:3000");
-    cy.get("header").should("contain", "Pirate");
     cy.get("section#otd a").should("contain", "Archive").click();
+    cy.get("header").should("contain", "Pirate");
     cy.get("table")
       .children()
       .then(children => {
@@ -30,12 +30,26 @@ describe("home", () => {
       .then(text => {
         const [month, year] = text.split("/").map(x => parseInt(x));
         const today = new Date();
-        const currentMonth = today.getUTCMonth() + 1;
-        const currentYear = today.getUTCFullYear();
+        const currentMonth = today.getMonth() + 1;
+        const currentYear = today.getFullYear();
         const correctYear = currentMonth - 1 ? currentYear : currentYear - 1;
-        const correctMonth = currentMonth - 1 ?? 12;
+        const correctMonth = currentMonth - 1 || 12;
         expect(month).to.equal(correctMonth);
         expect(year).to.equal(correctYear);
       });
+  });
+  it("specifies a meme date", () => {
+    const expectMeme = () =>
+      cy
+        .get("section")
+        .last()
+        .find("img")
+        .should("have.attr", "src")
+        .should("have.lengthOf.above", 0);
+    const expectMemeForDate = (date: string) => {
+      cy.get("input").clear().type(date);
+      expectMeme();
+    };
+    expectMemeForDate("02/02/2022");
   });
 });

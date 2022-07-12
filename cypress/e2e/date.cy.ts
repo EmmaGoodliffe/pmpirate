@@ -7,8 +7,11 @@ describe("dates", () => {
     );
   });
   it("converts string to date", () => {
-    expect(stringToDate("01/09/2022").toLocaleDateString()).to.equal(
-      new Date("1 Sep 2022").toLocaleDateString(),
-    );
+    const example = new Date("1 Sep 2022").toLocaleDateString();
+    expect(stringToDate("1 Sep 2022").toLocaleDateString()).to.equal(example);
+    expect(stringToDate("01/09/2022").toLocaleDateString()).to.equal(example);
+    expect(stringToDate("01-09-2022").toLocaleDateString()).to.equal(example);
+    expect(stringToDate("1.9.22").toLocaleDateString()).to.equal(example);
+    expect(stringToDate("01-IX-2022").toLocaleDateString()).to.equal(example);
   });
 });

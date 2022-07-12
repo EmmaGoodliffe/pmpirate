@@ -1,11 +1,8 @@
 <script lang="ts">
-  import type { dateToString as dts, stringToDate as std } from "./date";
+  import { dateToString, stringToDate } from "./date";
   import Header from "./Header.svelte";
 
   export let memes: { otd: Record<string, string> };
-  export let dateToString: typeof dts;
-  export let stringToDate: typeof std;
-
   const today = new Date();
   const dates = Object.keys(memes.otd);
 
@@ -15,8 +12,8 @@
     // const weekBefore = new Date();
     // weekBefore.setDate(today.getDate() - 28);
     // return weekBefore <= new Date(d) && new Date(d) <= today;
-    const goodMonth = d.getUTCMonth() + 1 === month;
-    const goodYear = d.getUTCFullYear() === year;
+    const goodMonth = d.getMonth() + 1 === month;
+    const goodYear = d.getFullYear() === year;
     return goodDate && goodMonth && goodYear;
   };
 
@@ -27,8 +24,8 @@
     return 0 < diffInHours && diffInHours <= 24;
   };
 
-  let month = today.getUTCMonth() + 1;
-  let year = today.getUTCFullYear();
+  let month = today.getMonth() + 1;
+  let year = today.getFullYear();
   let dateString = dateToString(today);
   let forwardsEnabled = true;
   let backwardsEnabled = true;
@@ -44,7 +41,7 @@
   }
 
   $: forwardsEnabled = !(
-    today.getUTCMonth() + 1 === month && today.getUTCFullYear() === year
+    today.getMonth() + 1 === month && today.getFullYear() === year
   );
 
   $: backwardsEnabled = new Date(2021, 9 - 1, 1) < new Date(year, month - 1, 1);

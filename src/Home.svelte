@@ -1,11 +1,10 @@
 <script lang="ts">
-  import type { dateToString as dts } from "./date";
+  import { dateToString } from "./date";
   import Doc from "./Doc.svelte";
   import Header from "./Header.svelte";
   import Otd from "./Otd.svelte";
 
   export let memes: { otd: Record<string, string> };
-  export let dateToString: typeof dts;
 
   const today = new Date();
   const otdCode = dateToString(today, "-", true);
