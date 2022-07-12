@@ -10,7 +10,15 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:import/typescript"
   ],
-  "ignorePatterns": ["*.config.js", "public/build/*.js"],
+  "ignorePatterns": ["*.config.js", "*.config.ts", "public/build/*.js"],
+  "overrides": [
+    {
+      "files": ["cypress/**/*.ts"],
+      "env": { "cypress/globals": true },
+      "parserOptions": { "project": "cypress/tsconfig.json" },
+      "plugins": ["cypress"]
+    }
+  ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaFeatures": {

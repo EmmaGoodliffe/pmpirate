@@ -59,9 +59,6 @@ var archive = (function () {
     function space() {
         return text(' ');
     }
-    function empty() {
-        return text('');
-    }
     function listen(node, event, handler, options) {
         node.addEventListener(event, handler, options);
         return () => node.removeEventListener(event, handler, options);
@@ -486,20 +483,47 @@ var archive = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[16] = list[i];
+    	child_ctx[17] = list[i];
     	return child_ctx;
     }
 
-    // (78:8) {#if isArchivedHere(date, month, year) || (isTomorrow(date) && !forwardsEnabled)}
-    function create_if_block_1(ctx) {
+    // (84:12) {#if isTomorrow(date)}
+    function create_if_block_2(ctx) {
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			t = text("(Sneak peek)");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2.name,
+    		type: "if",
+    		source: "(84:12) {#if isTomorrow(date)}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (79:6) {#each archivedDates as date}
+    function create_each_block(ctx) {
     	let tr;
     	let td0;
-    	let t0_value = /*date*/ ctx[16].split("-").reverse().join("/") + "";
+    	let t0_value = /*date*/ ctx[17].split("-").reverse().join("/") + "";
     	let t0;
     	let t1;
     	let br;
     	let t2;
-    	let show_if = /*isTomorrow*/ ctx[9](/*date*/ ctx[16]);
+    	let show_if = /*isTomorrow*/ ctx[8](/*date*/ ctx[17]);
     	let t3;
     	let td1;
     	let img;
@@ -520,16 +544,15 @@ var archive = (function () {
     			td1 = element("td");
     			img = element("img");
     			t4 = space();
-    			add_location(br, file, 81, 14, 2570);
-    			attr_dev(td0, "class", "text-center border-2 p-4");
-    			add_location(td0, file, 79, 12, 2466);
+    			add_location(br, file, 82, 12, 2607);
+    			attr_dev(td0, "class", "text-center");
+    			add_location(td0, file, 80, 10, 2520);
     			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
-    			if (!src_url_equal(img.src, img_src_value = `memes/${/*memes*/ ctx[0].otd[/*date*/ ctx[16]]}`)) attr_dev(img, "src", img_src_value);
+    			if (!src_url_equal(img.src, img_src_value = `memes/${/*memes*/ ctx[0].otd[/*date*/ ctx[17]]}`)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file, 87, 14, 2733);
-    			attr_dev(td1, "class", "border-2 p-4");
-    			add_location(td1, file, 86, 12, 2693);
-    			add_location(tr, file, 78, 10, 2449);
+    			add_location(img, file, 88, 12, 2737);
+    			add_location(td1, file, 87, 10, 2720);
+    			add_location(tr, file, 79, 8, 2505);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr, anchor);
@@ -545,7 +568,21 @@ var archive = (function () {
     			append_dev(tr, t4);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*memes*/ 1 && !src_url_equal(img.src, img_src_value = `memes/${/*memes*/ ctx[0].otd[/*date*/ ctx[16]]}`)) {
+    			if (dirty & /*archivedDates*/ 128 && t0_value !== (t0_value = /*date*/ ctx[17].split("-").reverse().join("/") + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*archivedDates*/ 128) show_if = /*isTomorrow*/ ctx[8](/*date*/ ctx[17]);
+
+    			if (show_if) {
+    				if (if_block) ; else {
+    					if_block = create_if_block_2(ctx);
+    					if_block.c();
+    					if_block.m(td0, null);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
+    			}
+
+    			if (dirty & /*memes, archivedDates*/ 129 && !src_url_equal(img.src, img_src_value = `memes/${/*memes*/ ctx[0].otd[/*date*/ ctx[17]]}`)) {
     				attr_dev(img, "src", img_src_value);
     			}
     		},
@@ -557,91 +594,46 @@ var archive = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_if_block_1.name,
-    		type: "if",
-    		source: "(78:8) {#if isArchivedHere(date, month, year) || (isTomorrow(date) && !forwardsEnabled)}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (83:14) {#if isTomorrow(date)}
-    function create_if_block_2(ctx) {
-    	let t;
-
-    	const block = {
-    		c: function create() {
-    			t = text("(Sneak peek)");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, t, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(t);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_2.name,
-    		type: "if",
-    		source: "(83:14) {#if isTomorrow(date)}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (77:6) {#each dates as date}
-    function create_each_block(ctx) {
-    	let show_if = /*isArchivedHere*/ ctx[8](/*date*/ ctx[16], /*month*/ ctx[1], /*year*/ ctx[2]) || /*isTomorrow*/ ctx[9](/*date*/ ctx[16]) && !/*forwardsEnabled*/ ctx[4];
-    	let if_block_anchor;
-    	let if_block = show_if && create_if_block_1(ctx);
-
-    	const block = {
-    		c: function create() {
-    			if (if_block) if_block.c();
-    			if_block_anchor = empty();
-    		},
-    		m: function mount(target, anchor) {
-    			if (if_block) if_block.m(target, anchor);
-    			insert_dev(target, if_block_anchor, anchor);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*month, year, forwardsEnabled*/ 22) show_if = /*isArchivedHere*/ ctx[8](/*date*/ ctx[16], /*month*/ ctx[1], /*year*/ ctx[2]) || /*isTomorrow*/ ctx[9](/*date*/ ctx[16]) && !/*forwardsEnabled*/ ctx[4];
-
-    			if (show_if) {
-    				if (if_block) {
-    					if_block.p(ctx, dirty);
-    				} else {
-    					if_block = create_if_block_1(ctx);
-    					if_block.c();
-    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
-    				}
-    			} else if (if_block) {
-    				if_block.d(1);
-    				if_block = null;
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (if_block) if_block.d(detaching);
-    			if (detaching) detach_dev(if_block_anchor);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(77:6) {#each dates as date}",
+    		source: "(79:6) {#each archivedDates as date}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (109:2) {:else}
+    // (98:4) {#if !archivedDates.length}
+    function create_if_block_1(ctx) {
+    	let tfoot;
+
+    	const block = {
+    		c: function create() {
+    			tfoot = element("tfoot");
+    			tfoot.textContent = "No memes that month";
+    			attr_dev(tfoot, "class", "p-4 inline-block text-center");
+    			add_location(tfoot, file, 98, 6, 2979);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, tfoot, anchor);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(tfoot);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1.name,
+    		type: "if",
+    		source: "(98:4) {#if !archivedDates.length}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (112:2) {:else}
     function create_else_block(ctx) {
     	let p;
 
@@ -650,7 +642,7 @@ var archive = (function () {
     			p = element("p");
     			p.textContent = "No memes that day :(";
     			attr_dev(p, "class", "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto text-center");
-    			add_location(p, file, 109, 4, 3254);
+    			add_location(p, file, 112, 4, 3352);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -665,14 +657,14 @@ var archive = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(109:2) {:else}",
+    		source: "(112:2) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (103:2) {#if matchingDates.length}
+    // (106:2) {#if matchingDates.length}
     function create_if_block(ctx) {
     	let img;
     	let img_src_value;
@@ -683,7 +675,7 @@ var archive = (function () {
     			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
     			if (!src_url_equal(img.src, img_src_value = `memes/${/*memes*/ ctx[0].otd[/*matchingDates*/ ctx[6][0]]}`)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file, 103, 4, 3113);
+    			add_location(img, file, 106, 4, 3211);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
@@ -702,7 +694,7 @@ var archive = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(103:2) {#if matchingDates.length}",
+    		source: "(106:2) {#if matchingDates.length}",
     		ctx
     	});
 
@@ -741,20 +733,21 @@ var archive = (function () {
     	let t14;
     	let tbody;
     	let t15;
+    	let t16;
     	let section;
     	let h21;
-    	let t17;
-    	let input;
     	let t18;
+    	let input;
     	let t19;
+    	let t20;
     	let p1;
-    	let t21;
+    	let t22;
     	let footer;
     	let current;
     	let mounted;
     	let dispose;
     	header = new Header({ $$inline: true });
-    	let each_value = /*dates*/ ctx[7];
+    	let each_value = /*archivedDates*/ ctx[7];
     	validate_each_argument(each_value);
     	let each_blocks = [];
 
@@ -762,13 +755,15 @@ var archive = (function () {
     		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
     	}
 
+    	let if_block0 = !/*archivedDates*/ ctx[7].length && create_if_block_1(ctx);
+
     	function select_block_type(ctx, dirty) {
     		if (/*matchingDates*/ ctx[6].length) return create_if_block;
     		return create_else_block;
     	}
 
     	let current_block_type = select_block_type(ctx);
-    	let if_block = current_block_type(ctx);
+    	let if_block1 = current_block_type(ctx);
 
     	const block = {
     		c: function create() {
@@ -810,55 +805,57 @@ var archive = (function () {
     			}
 
     			t15 = space();
+    			if (if_block0) if_block0.c();
+    			t16 = space();
     			section = element("section");
     			h21 = element("h2");
     			h21.textContent = "Specify a date";
-    			t17 = space();
-    			input = element("input");
     			t18 = space();
-    			if_block.c();
+    			input = element("input");
     			t19 = space();
+    			if_block1.c();
+    			t20 = space();
     			p1 = element("p");
     			p1.textContent = "DVS-style dates accepted";
-    			t21 = space();
+    			t22 = space();
     			footer = element("footer");
-    			add_location(h20, file, 44, 2, 1483);
+    			add_location(h20, file, 46, 2, 1623);
     			attr_dev(span0, "class", "-mt-1.5");
-    			add_location(span0, file, 52, 8, 1716);
+    			add_location(span0, file, 54, 8, 1856);
     			attr_dev(div0, "class", "flex-1 btn");
     			attr_dev(div0, "disabled", div0_disabled_value = !/*backwardsEnabled*/ ctx[5]);
-    			add_location(div0, file, 47, 6, 1578);
+    			add_location(div0, file, 49, 6, 1718);
     			attr_dev(div1, "class", "w-1/4");
-    			add_location(div1, file, 46, 4, 1552);
+    			add_location(div1, file, 48, 4, 1692);
     			attr_dev(p0, "class", "flex-1 my-2 text-lg text-center");
-    			add_location(p0, file, 55, 4, 1778);
+    			add_location(p0, file, 57, 4, 1918);
     			attr_dev(span1, "class", "-mt-1.5");
-    			add_location(span1, file, 64, 8, 2040);
+    			add_location(span1, file, 66, 8, 2180);
     			attr_dev(div2, "class", "flex-1 btn");
     			attr_dev(div2, "disabled", div2_disabled_value = !/*forwardsEnabled*/ ctx[4]);
-    			add_location(div2, file, 59, 6, 1904);
+    			add_location(div2, file, 61, 6, 2044);
     			attr_dev(div3, "class", "w-1/4");
-    			add_location(div3, file, 58, 4, 1878);
+    			add_location(div3, file, 60, 4, 2018);
     			attr_dev(div4, "class", "flex sm:w-1/4 mx-auto my-4");
-    			add_location(div4, file, 45, 2, 1507);
+    			add_location(div4, file, 47, 2, 1647);
     			attr_dev(th0, "class", "border-2");
-    			add_location(th0, file, 71, 8, 2214);
+    			add_location(th0, file, 73, 8, 2354);
     			attr_dev(th1, "class", "border-2");
-    			add_location(th1, file, 72, 8, 2253);
-    			add_location(tr, file, 70, 6, 2201);
-    			add_location(thead, file, 69, 4, 2187);
-    			add_location(tbody, file, 75, 4, 2313);
+    			add_location(th1, file, 74, 8, 2393);
+    			add_location(tr, file, 72, 6, 2341);
+    			add_location(thead, file, 71, 4, 2327);
+    			add_location(tbody, file, 77, 4, 2453);
     			attr_dev(table, "class", "table-auto w-full max-w-4xl mx-auto border-white border-2");
-    			add_location(table, file, 68, 2, 2109);
-    			add_location(main, file, 43, 0, 1474);
-    			add_location(h21, file, 100, 2, 3008);
+    			add_location(table, file, 70, 2, 2249);
+    			add_location(main, file, 45, 0, 1614);
+    			add_location(h21, file, 103, 2, 3106);
     			attr_dev(input, "type", "text");
-    			add_location(input, file, 101, 2, 3034);
+    			add_location(input, file, 104, 2, 3132);
     			attr_dev(p1, "class", "mt-4");
-    			add_location(p1, file, 113, 2, 3366);
+    			add_location(p1, file, 116, 2, 3464);
     			attr_dev(section, "class", "mt-48");
-    			add_location(section, file, 99, 0, 2982);
-    			add_location(footer, file, 115, 0, 3422);
+    			add_location(section, file, 102, 0, 3080);
+    			add_location(footer, file, 118, 0, 3520);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -896,25 +893,27 @@ var archive = (function () {
     				each_blocks[i].m(tbody, null);
     			}
 
-    			insert_dev(target, t15, anchor);
+    			append_dev(table, t15);
+    			if (if_block0) if_block0.m(table, null);
+    			insert_dev(target, t16, anchor);
     			insert_dev(target, section, anchor);
     			append_dev(section, h21);
-    			append_dev(section, t17);
+    			append_dev(section, t18);
     			append_dev(section, input);
     			set_input_value(input, /*dateString*/ ctx[3]);
-    			append_dev(section, t18);
-    			if_block.m(section, null);
     			append_dev(section, t19);
+    			if_block1.m(section, null);
+    			append_dev(section, t20);
     			append_dev(section, p1);
-    			insert_dev(target, t21, anchor);
+    			insert_dev(target, t22, anchor);
     			insert_dev(target, footer, anchor);
     			current = true;
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(div0, "click", /*click_handler*/ ctx[12], false, false, false),
-    					listen_dev(div2, "click", /*click_handler_1*/ ctx[13], false, false, false),
-    					listen_dev(input, "input", /*input_input_handler*/ ctx[14])
+    					listen_dev(div0, "click", /*click_handler*/ ctx[11], false, false, false),
+    					listen_dev(div2, "click", /*click_handler_1*/ ctx[12], false, false, false),
+    					listen_dev(input, "input", /*input_input_handler*/ ctx[13])
     				];
 
     				mounted = true;
@@ -932,8 +931,8 @@ var archive = (function () {
     				attr_dev(div2, "disabled", div2_disabled_value);
     			}
 
-    			if (dirty & /*memes, dates, isTomorrow, isArchivedHere, month, year, forwardsEnabled*/ 919) {
-    				each_value = /*dates*/ ctx[7];
+    			if (dirty & /*memes, archivedDates, isTomorrow*/ 385) {
+    				each_value = /*archivedDates*/ ctx[7];
     				validate_each_argument(each_value);
     				let i;
 
@@ -956,19 +955,30 @@ var archive = (function () {
     				each_blocks.length = each_value.length;
     			}
 
+    			if (!/*archivedDates*/ ctx[7].length) {
+    				if (if_block0) ; else {
+    					if_block0 = create_if_block_1(ctx);
+    					if_block0.c();
+    					if_block0.m(table, null);
+    				}
+    			} else if (if_block0) {
+    				if_block0.d(1);
+    				if_block0 = null;
+    			}
+
     			if (dirty & /*dateString*/ 8 && input.value !== /*dateString*/ ctx[3]) {
     				set_input_value(input, /*dateString*/ ctx[3]);
     			}
 
-    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
-    				if_block.p(ctx, dirty);
+    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block1) {
+    				if_block1.p(ctx, dirty);
     			} else {
-    				if_block.d(1);
-    				if_block = current_block_type(ctx);
+    				if_block1.d(1);
+    				if_block1 = current_block_type(ctx);
 
-    				if (if_block) {
-    					if_block.c();
-    					if_block.m(section, t19);
+    				if (if_block1) {
+    					if_block1.c();
+    					if_block1.m(section, t20);
     				}
     			}
     		},
@@ -986,10 +996,11 @@ var archive = (function () {
     			if (detaching) detach_dev(t0);
     			if (detaching) detach_dev(main);
     			destroy_each(each_blocks, detaching);
-    			if (detaching) detach_dev(t15);
+    			if (if_block0) if_block0.d();
+    			if (detaching) detach_dev(t16);
     			if (detaching) detach_dev(section);
-    			if_block.d();
-    			if (detaching) detach_dev(t21);
+    			if_block1.d();
+    			if (detaching) detach_dev(t22);
     			if (detaching) detach_dev(footer);
     			mounted = false;
     			run_all(dispose);
@@ -1008,6 +1019,7 @@ var archive = (function () {
     }
 
     function instance($$self, $$props, $$invalidate) {
+    	let archivedDates;
     	let matchingDates;
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Archive', slots, []);
@@ -1024,9 +1036,9 @@ var archive = (function () {
     		// const weekBefore = new Date();
     		// weekBefore.setDate(today.getDate() - 28);
     		// return weekBefore <= new Date(d) && new Date(d) <= today;
-    		const goodMonth = d.getMonth() + 1 === month;
+    		const goodMonth = d.getUTCMonth() + 1 === month;
 
-    		const goodYear = d.getFullYear() === year;
+    		const goodYear = d.getUTCFullYear() === year;
     		return goodDate && goodMonth && goodYear;
     	};
 
@@ -1037,8 +1049,8 @@ var archive = (function () {
     		return 0 < diffInHours && diffInHours <= 24;
     	};
 
-    	let month = today.getMonth() + 1;
-    	let year = today.getFullYear();
+    	let month = today.getUTCMonth() + 1;
+    	let year = today.getUTCFullYear();
     	let dateString = dateToString(today);
     	let forwardsEnabled = true;
     	let backwardsEnabled = true;
@@ -1058,8 +1070,8 @@ var archive = (function () {
 
     	$$self.$$set = $$props => {
     		if ('memes' in $$props) $$invalidate(0, memes = $$props.memes);
-    		if ('dateToString' in $$props) $$invalidate(10, dateToString = $$props.dateToString);
-    		if ('stringToDate' in $$props) $$invalidate(11, stringToDate = $$props.stringToDate);
+    		if ('dateToString' in $$props) $$invalidate(9, dateToString = $$props.dateToString);
+    		if ('stringToDate' in $$props) $$invalidate(10, stringToDate = $$props.stringToDate);
     	};
 
     	$$self.$capture_state = () => ({
@@ -1076,19 +1088,21 @@ var archive = (function () {
     		dateString,
     		forwardsEnabled,
     		backwardsEnabled,
-    		matchingDates
+    		matchingDates,
+    		archivedDates
     	});
 
     	$$self.$inject_state = $$props => {
     		if ('memes' in $$props) $$invalidate(0, memes = $$props.memes);
-    		if ('dateToString' in $$props) $$invalidate(10, dateToString = $$props.dateToString);
-    		if ('stringToDate' in $$props) $$invalidate(11, stringToDate = $$props.stringToDate);
+    		if ('dateToString' in $$props) $$invalidate(9, dateToString = $$props.dateToString);
+    		if ('stringToDate' in $$props) $$invalidate(10, stringToDate = $$props.stringToDate);
     		if ('month' in $$props) $$invalidate(1, month = $$props.month);
     		if ('year' in $$props) $$invalidate(2, year = $$props.year);
     		if ('dateString' in $$props) $$invalidate(3, dateString = $$props.dateString);
     		if ('forwardsEnabled' in $$props) $$invalidate(4, forwardsEnabled = $$props.forwardsEnabled);
     		if ('backwardsEnabled' in $$props) $$invalidate(5, backwardsEnabled = $$props.backwardsEnabled);
     		if ('matchingDates' in $$props) $$invalidate(6, matchingDates = $$props.matchingDates);
+    		if ('archivedDates' in $$props) $$invalidate(7, archivedDates = $$props.archivedDates);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -1109,14 +1123,18 @@ var archive = (function () {
     		}
 
     		if ($$self.$$.dirty & /*month, year*/ 6) {
-    			$$invalidate(4, forwardsEnabled = !(today.getMonth() + 1 === month && today.getFullYear() === year));
+    			$$invalidate(4, forwardsEnabled = !(today.getUTCMonth() + 1 === month && today.getUTCFullYear() === year));
     		}
 
     		if ($$self.$$.dirty & /*year, month*/ 6) {
     			$$invalidate(5, backwardsEnabled = new Date(2021, 9 - 1, 1) < new Date(year, month - 1, 1));
     		}
 
-    		if ($$self.$$.dirty & /*dateToString, stringToDate, dateString*/ 3080) {
+    		if ($$self.$$.dirty & /*month, year, forwardsEnabled*/ 22) {
+    			$$invalidate(7, archivedDates = dates.filter(date => isArchivedHere(date, month, year) || isTomorrow(date) && !forwardsEnabled));
+    		}
+
+    		if ($$self.$$.dirty & /*dateToString, stringToDate, dateString*/ 1544) {
     			$$invalidate(6, matchingDates = dates.filter(date => dateToString(new Date(date)) === dateToString(stringToDate(dateString))));
     		}
     	};
@@ -1129,8 +1147,7 @@ var archive = (function () {
     		forwardsEnabled,
     		backwardsEnabled,
     		matchingDates,
-    		dates,
-    		isArchivedHere,
+    		archivedDates,
     		isTomorrow,
     		dateToString,
     		stringToDate,
@@ -1146,8 +1163,8 @@ var archive = (function () {
 
     		init(this, options, instance, create_fragment, safe_not_equal, {
     			memes: 0,
-    			dateToString: 10,
-    			stringToDate: 11
+    			dateToString: 9,
+    			stringToDate: 10
     		});
 
     		dispatch_dev("SvelteRegisterComponent", {
@@ -1164,11 +1181,11 @@ var archive = (function () {
     			console.warn("<Archive> was created without expected prop 'memes'");
     		}
 
-    		if (/*dateToString*/ ctx[10] === undefined && !('dateToString' in props)) {
+    		if (/*dateToString*/ ctx[9] === undefined && !('dateToString' in props)) {
     			console.warn("<Archive> was created without expected prop 'dateToString'");
     		}
 
-    		if (/*stringToDate*/ ctx[11] === undefined && !('stringToDate' in props)) {
+    		if (/*stringToDate*/ ctx[10] === undefined && !('stringToDate' in props)) {
     			console.warn("<Archive> was created without expected prop 'stringToDate'");
     		}
     	}
@@ -5427,9 +5444,9 @@ var archive = (function () {
         return numerals.indexOf(x) + 1;
     };
     const dateToString = (d, splitter = "/", reverse = false) => {
-        const date = `${d.getDate()}`.padStart(2, "0");
-        const month = `${d.getMonth() + 1}`.padStart(2, "0");
-        const year = d.getFullYear();
+        const date = `${d.getUTCDate()}`.padStart(2, "0");
+        const month = `${d.getUTCMonth() + 1}`.padStart(2, "0");
+        const year = d.getUTCFullYear();
         const ogOrder = [date, month, year];
         const ordered = reverse ? ogOrder.reverse() : ogOrder;
         return ordered.join(splitter);

@@ -19,9 +19,9 @@ const toInt = (x: string) => {
 };
 
 export const dateToString = (d: Date, splitter = "/", reverse = false) => {
-  const date = `${d.getDate()}`.padStart(2, "0");
-  const month = `${d.getMonth() + 1}`.padStart(2, "0");
-  const year = d.getFullYear();
+  const date = `${d.getUTCDate()}`.padStart(2, "0");
+  const month = `${d.getUTCMonth() + 1}`.padStart(2, "0");
+  const year = d.getUTCFullYear();
   const ogOrder = [date, month, year];
   const ordered = reverse ? ogOrder.reverse() : ogOrder;
   return ordered.join(splitter);

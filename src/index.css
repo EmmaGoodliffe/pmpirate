@@ -44,3 +44,7 @@ input[type="text"] {
 .btn[disabled="true"] {
   @apply bg-dark-p text-dark-s cursor-not-allowed;
 }
+
+table tbody tr td {
+  @apply border-2 p-4;
+}

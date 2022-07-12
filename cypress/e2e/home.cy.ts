@@ -4,8 +4,8 @@ describe("home", () => {
     cy.get("header").should("contain", "Pirate");
     cy.get("main .book-section span:first").should("contain", "Pure Year 1");
     const otd = () => cy.get("section#otd");
-    otd().should("contain", "Meme");
     otd()
+      .should("contain", "Meme")
       .children()
       .then(children => {
         if (Array.from(children)[1].tagName === "IMG") {

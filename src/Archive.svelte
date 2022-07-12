@@ -15,8 +15,8 @@
     // const weekBefore = new Date();
     // weekBefore.setDate(today.getDate() - 28);
     // return weekBefore <= new Date(d) && new Date(d) <= today;
-    const goodMonth = d.getMonth() + 1 === month;
-    const goodYear = d.getFullYear() === year;
+    const goodMonth = d.getUTCMonth() + 1 === month;
+    const goodYear = d.getUTCFullYear() === year;
     return goodDate && goodMonth && goodYear;
   };
 
@@ -27,8 +27,8 @@
     return 0 < diffInHours && diffInHours <= 24;
   };
 
-  let month = today.getMonth() + 1;
-  let year = today.getFullYear();
+  let month = today.getUTCMonth() + 1;
+  let year = today.getUTCFullYear();
   let dateString = dateToString(today);
   let forwardsEnabled = true;
   let backwardsEnabled = true;
@@ -44,10 +44,16 @@
   }
 
   $: forwardsEnabled = !(
-    today.getMonth() + 1 === month && today.getFullYear() === year
+    today.getUTCMonth() + 1 === month && today.getUTCFullYear() === year
   );
 
   $: backwardsEnabled = new Date(2021, 9 - 1, 1) < new Date(year, month - 1, 1);
+
+  $: archivedDates = dates.filter(
+    date =>
+      isArchivedHere(date, month, year) ||
+      (isTomorrow(date) && !forwardsEnabled),
+  );
 
   $: matchingDates = dates.filter(
     date =>
@@ -89,27 +95,28 @@
       </tr>
     </thead>
     <tbody>
-      {#each dates as date}
-        {#if isArchivedHere(date, month, year) || (isTomorrow(date) && !forwardsEnabled)}
-          <tr>
-            <td class="text-center border-2 p-4">
-              {date.split("-").reverse().join("/")}
-              <br />
-              {#if isTomorrow(date)}
-                (Sneak peek)
-              {/if}
-            </td>
-            <td class="border-2 p-4">
-              <img
-                class="max-w-sm mx-auto w-1/2 sm:w-auto"
-                src={`memes/${memes.otd[date]}`}
-                alt="Meme"
-              />
-            </td>
-          </tr>
-        {/if}
+      {#each archivedDates as date}
+        <tr>
+          <td class="text-center">
+            {date.split("-").reverse().join("/")}
+            <br />
+            {#if isTomorrow(date)}
+              (Sneak peek)
+            {/if}
+          </td>
+          <td>
+            <img
+              class="max-w-sm mx-auto w-1/2 sm:w-auto"
+              src={`memes/${memes.otd[date]}`}
+              alt="Meme"
+            />
+          </td>
+        </tr>
       {/each}
     </tbody>
+    {#if !archivedDates.length}
+      <tfoot class="p-4 inline-block text-center">No memes that month</tfoot>
+    {/if}
   </table>
 </main>
 <section class="mt-48">

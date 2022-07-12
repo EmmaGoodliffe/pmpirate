@@ -57,7 +57,6 @@ const options = {
     typescript({
       sourceMap: true,
       inlineSources: true,
-      exclude: ["cypress"]
     }),
     json(),
 

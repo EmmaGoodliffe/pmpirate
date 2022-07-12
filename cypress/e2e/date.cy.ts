@@ -1,6 +1,5 @@
 import { dateToString, stringToDate } from "../../src/date";
 
-
 describe("dates", () => {
   it("converts date to string", () => {
     expect(dateToString(new Date("1 Sep 2022"), "-", true)).to.equal(
