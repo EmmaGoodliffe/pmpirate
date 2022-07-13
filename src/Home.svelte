@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { dateToString } from "./date";
   import { getMemeOtd } from "./db";
   import Doc from "./Doc.svelte";
   import Header from "./Header.svelte";
