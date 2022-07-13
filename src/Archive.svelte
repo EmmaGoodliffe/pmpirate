@@ -1,24 +1,14 @@
 <script lang="ts">
   import { dateToString, stringToDate } from "./date";
+  import { getMemeOtd, getMemesOfMonth, memeExists } from "./db";
   import Header from "./Header.svelte";
 
-  export let memes: { otd: Record<string, string> };
   const today = new Date();
-  const dates = Object.keys(memes.otd);
+  const tomorrow = new Date(Number(today) + 24 * 60 ** 2 * 10 ** 3);
+  // const dates = Object.keys(memes.otd);
 
-  const isArchivedHere = (date: string, month: number, year: number) => {
-    const d = new Date(date);
-    const goodDate = d <= today;
-    // const weekBefore = new Date();
-    // weekBefore.setDate(today.getDate() - 28);
-    // return weekBefore <= new Date(d) && new Date(d) <= today;
-    const goodMonth = d.getMonth() + 1 === month;
-    const goodYear = d.getFullYear() === year;
-    return goodDate && goodMonth && goodYear;
-  };
-
-  const isTomorrow = (date: string) => {
-    const diffInMilliseconds = Number(new Date(date)) - Number(today);
+  const isTomorrow = (date: Date) => {
+    const diffInMilliseconds = Number(date) - Number(today);
     const diffInSeconds = diffInMilliseconds / 10 ** 3;
     const diffInHours = diffInSeconds / 60 ** 2;
     return 0 < diffInHours && diffInHours <= 24;
@@ -46,16 +36,22 @@
 
   $: backwardsEnabled = new Date(2021, 9 - 1, 1) < new Date(year, month - 1, 1);
 
-  $: archivedDates = dates.filter(
-    date =>
-      isArchivedHere(date, month, year) ||
-      (isTomorrow(date) && !forwardsEnabled),
-  );
+  $: tomorrowMeme = getMemeOtd(tomorrow);
 
-  $: matchingDates = dates.filter(
-    date =>
-      dateToString(new Date(date)) === dateToString(stringToDate(dateString)),
-  );
+  $: archivedMemes = [
+    ...getMemesOfMonth(year, month),
+    // ...dates.filter(date => isTomorrow(date) && !forwardsEnabled),
+    ...(tomorrowMeme ? [{ date: tomorrow, meme: tomorrowMeme }] : []),
+  ];
+
+  // $: matchingDates = dates.filter(
+  //   date =>
+  //     dateToString(new Date(date)) === dateToString(stringToDate(dateString)),
+  // );
+
+  $: matchingDate = memeExists(dateString)
+    ? dateToString(stringToDate(dateString))
+    : null;
 </script>
 
 <Header />
@@ -92,7 +88,7 @@
       </tr>
     </thead>
     <tbody>
-      {#each archivedDates as date}
+      <!-- {#each archivedDates as date}
         <tr>
           <td class="text-center">
             {date.split("-").reverse().join("/")}
@@ -104,14 +100,32 @@
           <td>
             <img
               class="max-w-sm mx-auto w-1/2 sm:w-auto"
-              src={`memes/${memes.otd[date]}`}
+              src={getMemeOtd(date)}
+              alt="Meme"
+            />
+          </td>
+        </tr>
+      {/each} -->
+      {#each archivedMemes as meme}
+        <tr>
+          <td class="text-center">
+            {dateToString(meme.date, "/")}
+            {#if isTomorrow(meme.date)}
+              <br />
+              (Sneak peek)
+            {/if}
+          </td>
+          <td>
+            <img
+              class="max-w-sm mx-auto w-1/2 sm:w-auto"
+              src={meme.meme}
               alt="Meme"
             />
           </td>
         </tr>
       {/each}
     </tbody>
-    {#if !archivedDates.length}
+    {#if !archivedMemes.length}
       <tfoot class="p-4 inline-block text-center">No memes that month</tfoot>
     {/if}
   </table>
@@ -119,10 +133,10 @@
 <section class="mt-48">
   <h2>Specify a date</h2>
   <input type="text" bind:value={dateString} />
-  {#if matchingDates.length}
+  {#if matchingDate}
     <img
       class="max-w-sm mx-auto w-1/2 sm:w-auto"
-      src={`memes/${memes.otd[matchingDates[0]]}`}
+      src={getMemeOtd(stringToDate(matchingDate))}
       alt="Meme"
     />
   {:else}

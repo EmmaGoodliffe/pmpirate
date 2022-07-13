@@ -1,14 +1,12 @@
 <script lang="ts">
   import { dateToString } from "./date";
+  import { getMemeOtd } from "./db";
   import Doc from "./Doc.svelte";
   import Header from "./Header.svelte";
   import Otd from "./Otd.svelte";
 
-  export let memes: { otd: Record<string, string> };
-
   const today = new Date();
-  const otdCode = dateToString(today, "-", true);
-  const otdSrc = memes.otd[otdCode] ? `memes/${memes.otd[otdCode]}` : undefined;
+  const otdSrc = getMemeOtd(today);
 
   const mathsBooks = [
     "Pure Year 1",

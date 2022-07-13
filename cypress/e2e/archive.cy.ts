@@ -53,3 +53,5 @@ describe("home", () => {
     expectMemeForDate("02/02/2022");
   });
 });
+
+export {};
