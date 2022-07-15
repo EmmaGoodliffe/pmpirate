@@ -1,5 +1,5 @@
 
-(function(l, r) { if (!l || l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (self.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(self.document);
+(function(l, r) { if (!l || l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (self.location.host || 'localhost').split(':')[0] + ':35730/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(self.document);
 var archive = (function () {
     'use strict';
 
@@ -403,11 +403,15 @@ var archive = (function () {
         ];
         return numerals.indexOf(x) + 1;
     };
+    const separateDate = (date) => [
+        date.getDate(),
+        date.getMonth() + 1,
+        date.getFullYear(),
+    ];
+    const compoundDate = (date, month, year) => new Date(year, month - 1, date);
     const dateToString = (d, splitter = "/", reverse = false) => {
-        const date = `${d.getDate()}`.padStart(2, "0");
-        const month = `${d.getMonth() + 1}`.padStart(2, "0");
-        const year = d.getFullYear();
-        const ogOrder = [date, month, year];
+        const [date, month, year] = separateDate(d).map(x => `${x}`);
+        const ogOrder = [date.padStart(2, "0"), month.padStart(2, "0"), year];
         const ordered = reverse ? ogOrder.reverse() : ogOrder;
         return ordered.join(splitter);
     };
@@ -424,13 +428,13 @@ var archive = (function () {
         const splitters = ["/", "-", "."];
         for (const splitter of splitters) {
             const [date, month, year] = d.split(splitter).map(toInt);
-            const result = new Date(fixYear(year), month - 1, date);
+            const result = compoundDate(date, month, fixYear(year));
             if (date <= 31 && `${result}` !== "Invalid Date")
                 return result;
         }
         for (const splitter of splitters) {
             const [year, month, date] = d.split(splitter).map(toInt);
-            const result = new Date(fixYear(year), month - 1, date);
+            const result = compoundDate(date, month, fixYear(year));
             if (`${result}` !== "Invalid Date")
                 return result;
         }
@@ -439,6 +443,7 @@ var archive = (function () {
             return result;
         return today;
     };
+    const getLengthOfMonth = (year, month) => new Date(year, month, 0).getDate();
 
     var otd = {
     	"2021-10-12": "mugs.png",
@@ -497,30 +502,75 @@ var archive = (function () {
     };
 
     const dates = Object.keys(memes.otd);
-    const getMemeOtd = (date) => {
-        const key = typeof date === "string" ? date : dateToString(date, "-", true);
-        const url = memes.otd[key] ? `memes/${memes.otd[key]}` : undefined;
-        return url;
+    const cache = {
+        2022: {
+            7: {
+                15: "memes/mugs.png",
+            },
+        },
     };
-    const isArchivedHere = (date, month, year) => {
-        const d = new Date(date);
+    const getMemeOtdFromCache = (d) => {
+        const [date, month, year] = separateDate(d);
+        // TODO: return `null` for no meme and `undefined` for cache miss
+        try {
+            return cache[year][month][date];
+        }
+        catch (err) {
+            return undefined;
+        }
+    };
+    const cacheMeme = (d, meme) => {
+        const [date, month, year] = separateDate(d);
+        if (!cache[year]) {
+            cache[year] = {};
+        }
+        if (!cache[year][month]) {
+            cache[year][month] = {};
+        }
+        cache[year][month][date] = meme;
+        console.log(cache);
+    };
+    const getMemeOtdFromDb = (date) => {
+        const key = dateToString(date, "-", true);
+        const meme = memes.otd[key] ? `memes/${memes.otd[key]}` : null;
+        cacheMeme(date, meme);
+        return meme;
+    };
+    const getMemeOtd = (date) => {
+        const fromCache = getMemeOtdFromCache(date);
+        if (fromCache !== undefined)
+            return fromCache;
+        return getMemeOtdFromDb(date);
+    };
+    const isArchivedHere = (d, month, year) => {
+        const date = stringToDate(d);
         const today = new Date();
-        const goodDate = d <= today;
-        // const weekBefore = new Date();
-        // weekBefore.setDate(today.getDate() - 28);
-        // return weekBefore <= new Date(d) && new Date(d) <= today;
-        const goodMonth = d.getMonth() + 1 === month;
-        const goodYear = d.getFullYear() === year;
+        const goodDate = date <= today;
+        const [, dMonth, dYear] = separateDate(date);
+        const goodMonth = dMonth === month;
+        const goodYear = dYear === year;
         return goodDate && goodMonth && goodYear;
     };
     const getMemesOfMonth = (year, month) => {
-        const archivedDates = dates.filter(date => isArchivedHere(date, month, year));
-        return archivedDates.map(date => ({
-            date: stringToDate(date),
-            meme: getMemeOtd(date),
-        }));
+        const archivedDates = dates
+            .filter(date => isArchivedHere(date, month, year))
+            .map(x => dateToString(stringToDate(x)));
+        const memes = new Array(getLengthOfMonth(year, month))
+            .fill(null)
+            .map((x, i) => {
+            const date = compoundDate(i + 1, month, year);
+            return {
+                date,
+                meme: archivedDates.includes(dateToString(date))
+                    ? getMemeOtd(date)
+                    : null,
+            };
+        });
+        for (const meme of memes) {
+            cacheMeme(meme.date, meme.meme);
+        }
+        return memes;
     };
-    const memeExists = (query) => dates.some(date => dateToString(new Date(date)) === dateToString(stringToDate(query)));
 
     /* src/Header.svelte generated by Svelte v3.43.0 */
 
@@ -618,7 +668,7 @@ var archive = (function () {
     	return child_ctx;
     }
 
-    // (101:12) {#if isTomorrow(meme.date)}
+    // (95:12) {#if isTomorrow(meme.date)}
     function create_if_block_2(ctx) {
     	let br;
     	let t;
@@ -627,7 +677,7 @@ var archive = (function () {
     		c: function create() {
     			br = element("br");
     			t = text("\n              (Sneak peek)");
-    			add_location(br, file, 101, 14, 3045);
+    			add_location(br, file, 95, 14, 2817);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, br, anchor);
@@ -643,14 +693,14 @@ var archive = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(101:12) {#if isTomorrow(meme.date)}",
+    		source: "(95:12) {#if isTomorrow(meme.date)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (97:6) {#each archivedMemes as meme}
+    // (91:6) {#each archivedMemes as meme}
     function create_each_block(ctx) {
     	let tr;
     	let td0;
@@ -677,13 +727,13 @@ var archive = (function () {
     			img = element("img");
     			t3 = space();
     			attr_dev(td0, "class", "text-center");
-    			add_location(td0, file, 98, 10, 2923);
+    			add_location(td0, file, 92, 10, 2695);
     			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
     			if (!src_url_equal(img.src, img_src_value = /*meme*/ ctx[14].meme)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file, 106, 12, 3140);
-    			add_location(td1, file, 105, 10, 3123);
-    			add_location(tr, file, 97, 8, 2908);
+    			add_location(img, file, 100, 12, 2912);
+    			add_location(td1, file, 99, 10, 2895);
+    			add_location(tr, file, 91, 8, 2680);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr, anchor);
@@ -725,14 +775,14 @@ var archive = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(97:6) {#each archivedMemes as meme}",
+    		source: "(91:6) {#each archivedMemes as meme}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (116:4) {#if !archivedMemes.length}
+    // (110:4) {#if !archivedMemes.length}
     function create_if_block_1(ctx) {
     	let tfoot;
 
@@ -741,7 +791,7 @@ var archive = (function () {
     			tfoot = element("tfoot");
     			tfoot.textContent = "No memes that month :(";
     			attr_dev(tfoot, "class", "p-4 inline-block text-center");
-    			add_location(tfoot, file, 116, 6, 3365);
+    			add_location(tfoot, file, 110, 6, 3137);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tfoot, anchor);
@@ -755,14 +805,14 @@ var archive = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(116:4) {#if !archivedMemes.length}",
+    		source: "(110:4) {#if !archivedMemes.length}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (130:2) {:else}
+    // (124:2) {:else}
     function create_else_block(ctx) {
     	let p;
 
@@ -771,7 +821,7 @@ var archive = (function () {
     			p = element("p");
     			p.textContent = "No memes that day :(";
     			attr_dev(p, "class", "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto text-center");
-    			add_location(p, file, 130, 4, 3733);
+    			add_location(p, file, 124, 4, 3476);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -786,14 +836,14 @@ var archive = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(130:2) {:else}",
+    		source: "(124:2) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (124:2) {#if matchingDate}
+    // (118:2) {#if queriedMeme}
     function create_if_block(ctx) {
     	let img;
     	let img_src_value;
@@ -802,15 +852,15 @@ var archive = (function () {
     		c: function create() {
     			img = element("img");
     			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
-    			if (!src_url_equal(img.src, img_src_value = getMemeOtd(stringToDate(/*matchingDate*/ ctx[5])))) attr_dev(img, "src", img_src_value);
+    			if (!src_url_equal(img.src, img_src_value = /*queriedMeme*/ ctx[5])) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file, 124, 4, 3592);
+    			add_location(img, file, 118, 4, 3362);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*matchingDate*/ 32 && !src_url_equal(img.src, img_src_value = getMemeOtd(stringToDate(/*matchingDate*/ ctx[5])))) {
+    			if (dirty & /*queriedMeme*/ 32 && !src_url_equal(img.src, img_src_value = /*queriedMeme*/ ctx[5])) {
     				attr_dev(img, "src", img_src_value);
     			}
     		},
@@ -823,7 +873,7 @@ var archive = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(124:2) {#if matchingDate}",
+    		source: "(118:2) {#if queriedMeme}",
     		ctx
     	});
 
@@ -887,7 +937,7 @@ var archive = (function () {
     	let if_block0 = !/*archivedMemes*/ ctx[6].length && create_if_block_1(ctx);
 
     	function select_block_type(ctx, dirty) {
-    		if (/*matchingDate*/ ctx[5]) return create_if_block;
+    		if (/*queriedMeme*/ ctx[5]) return create_if_block;
     		return create_else_block;
     	}
 
@@ -948,43 +998,43 @@ var archive = (function () {
     			p1.textContent = "DVS-style dates accepted";
     			t22 = space();
     			footer = element("footer");
-    			add_location(h20, file, 46, 2, 1560);
+    			add_location(h20, file, 40, 2, 1332);
     			attr_dev(span0, "class", "-mt-1.5");
-    			add_location(span0, file, 54, 8, 1793);
+    			add_location(span0, file, 48, 8, 1565);
     			attr_dev(div0, "class", "flex-1 btn");
     			attr_dev(div0, "disabled", div0_disabled_value = !/*backwardsEnabled*/ ctx[4]);
-    			add_location(div0, file, 49, 6, 1655);
+    			add_location(div0, file, 43, 6, 1427);
     			attr_dev(div1, "class", "w-1/4");
-    			add_location(div1, file, 48, 4, 1629);
+    			add_location(div1, file, 42, 4, 1401);
     			attr_dev(p0, "class", "flex-1 my-2 text-lg text-center");
-    			add_location(p0, file, 57, 4, 1855);
+    			add_location(p0, file, 51, 4, 1627);
     			attr_dev(span1, "class", "-mt-1.5");
-    			add_location(span1, file, 66, 8, 2117);
+    			add_location(span1, file, 60, 8, 1889);
     			attr_dev(div2, "class", "flex-1 btn");
     			attr_dev(div2, "disabled", div2_disabled_value = !/*forwardsEnabled*/ ctx[3]);
-    			add_location(div2, file, 61, 6, 1981);
+    			add_location(div2, file, 55, 6, 1753);
     			attr_dev(div3, "class", "w-1/4");
-    			add_location(div3, file, 60, 4, 1955);
+    			add_location(div3, file, 54, 4, 1727);
     			attr_dev(div4, "class", "flex sm:w-1/4 mx-auto my-4");
-    			add_location(div4, file, 47, 2, 1584);
+    			add_location(div4, file, 41, 2, 1356);
     			attr_dev(th0, "class", "border-2");
-    			add_location(th0, file, 73, 8, 2291);
+    			add_location(th0, file, 67, 8, 2063);
     			attr_dev(th1, "class", "border-2");
-    			add_location(th1, file, 74, 8, 2330);
-    			add_location(tr, file, 72, 6, 2278);
-    			add_location(thead, file, 71, 4, 2264);
-    			add_location(tbody, file, 77, 4, 2390);
+    			add_location(th1, file, 68, 8, 2102);
+    			add_location(tr, file, 66, 6, 2050);
+    			add_location(thead, file, 65, 4, 2036);
+    			add_location(tbody, file, 71, 4, 2162);
     			attr_dev(table, "class", "table-auto w-full max-w-4xl mx-auto border-white border-2");
-    			add_location(table, file, 70, 2, 2186);
-    			add_location(main, file, 45, 0, 1551);
-    			add_location(h21, file, 121, 2, 3495);
+    			add_location(table, file, 64, 2, 1958);
+    			add_location(main, file, 39, 0, 1323);
+    			add_location(h21, file, 115, 2, 3267);
     			attr_dev(input, "type", "text");
-    			add_location(input, file, 122, 2, 3521);
+    			add_location(input, file, 116, 2, 3293);
     			attr_dev(p1, "class", "mt-4");
-    			add_location(p1, file, 134, 2, 3845);
+    			add_location(p1, file, 128, 2, 3588);
     			attr_dev(section, "class", "mt-48");
-    			add_location(section, file, 120, 0, 3469);
-    			add_location(footer, file, 136, 0, 3901);
+    			add_location(section, file, 114, 0, 3241);
+    			add_location(footer, file, 130, 0, 3644);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -1029,7 +1079,7 @@ var archive = (function () {
     			append_dev(section, h21);
     			append_dev(section, t18);
     			append_dev(section, input);
-    			set_input_value(input, /*dateString*/ ctx[2]);
+    			set_input_value(input, /*dateQuery*/ ctx[2]);
     			append_dev(section, t19);
     			if_block1.m(section, null);
     			append_dev(section, t20);
@@ -1095,8 +1145,8 @@ var archive = (function () {
     				if_block0 = null;
     			}
 
-    			if (dirty & /*dateString*/ 4 && input.value !== /*dateString*/ ctx[2]) {
-    				set_input_value(input, /*dateString*/ ctx[2]);
+    			if (dirty & /*dateQuery*/ 4 && input.value !== /*dateQuery*/ ctx[2]) {
+    				set_input_value(input, /*dateQuery*/ ctx[2]);
     			}
 
     			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block1) {
@@ -1150,7 +1200,7 @@ var archive = (function () {
     function instance($$self, $$props, $$invalidate) {
     	let tomorrowMeme;
     	let archivedMemes;
-    	let matchingDate;
+    	let queriedMeme;
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Archive', slots, []);
     	const today = new Date();
@@ -1166,7 +1216,7 @@ var archive = (function () {
 
     	let month = today.getMonth() + 1;
     	let year = today.getFullYear();
-    	let dateString = dateToString(today);
+    	let dateQuery = dateToString(today);
     	let forwardsEnabled = true;
     	let backwardsEnabled = true;
     	const writable_props = [];
@@ -1179,8 +1229,8 @@ var archive = (function () {
     	const click_handler_1 = () => forwardsEnabled && $$invalidate(0, month++, month);
 
     	function input_input_handler() {
-    		dateString = this.value;
-    		$$invalidate(2, dateString);
+    		dateQuery = this.value;
+    		$$invalidate(2, dateQuery);
     	}
 
     	$$self.$capture_state = () => ({
@@ -1188,17 +1238,16 @@ var archive = (function () {
     		stringToDate,
     		getMemeOtd,
     		getMemesOfMonth,
-    		memeExists,
     		Header,
     		today,
     		tomorrow,
     		isTomorrow,
     		month,
     		year,
-    		dateString,
+    		dateQuery,
     		forwardsEnabled,
     		backwardsEnabled,
-    		matchingDate,
+    		queriedMeme,
     		tomorrowMeme,
     		archivedMemes
     	});
@@ -1206,10 +1255,10 @@ var archive = (function () {
     	$$self.$inject_state = $$props => {
     		if ('month' in $$props) $$invalidate(0, month = $$props.month);
     		if ('year' in $$props) $$invalidate(1, year = $$props.year);
-    		if ('dateString' in $$props) $$invalidate(2, dateString = $$props.dateString);
+    		if ('dateQuery' in $$props) $$invalidate(2, dateQuery = $$props.dateQuery);
     		if ('forwardsEnabled' in $$props) $$invalidate(3, forwardsEnabled = $$props.forwardsEnabled);
     		if ('backwardsEnabled' in $$props) $$invalidate(4, backwardsEnabled = $$props.backwardsEnabled);
-    		if ('matchingDate' in $$props) $$invalidate(5, matchingDate = $$props.matchingDate);
+    		if ('queriedMeme' in $$props) $$invalidate(5, queriedMeme = $$props.queriedMeme);
     		if ('tomorrowMeme' in $$props) $$invalidate(8, tomorrowMeme = $$props.tomorrowMeme);
     		if ('archivedMemes' in $$props) $$invalidate(6, archivedMemes = $$props.archivedMemes);
     	};
@@ -1240,23 +1289,11 @@ var archive = (function () {
     		}
 
     		if ($$self.$$.dirty & /*year, month, tomorrowMeme*/ 259) {
-    			$$invalidate(6, archivedMemes = [
-    				...getMemesOfMonth(year, month),
-    				// ...dates.filter(date => isTomorrow(date) && !forwardsEnabled),
-    				...tomorrowMeme
-    				? [{ date: tomorrow, meme: tomorrowMeme }]
-    				: []
-    			]);
+    			$$invalidate(6, archivedMemes = [...getMemesOfMonth(year, month), { date: tomorrow, meme: tomorrowMeme }].filter(meme => !!meme.meme));
     		}
 
-    		if ($$self.$$.dirty & /*dateString*/ 4) {
-    			// $: matchingDates = dates.filter(
-    			//   date =>
-    			//     dateToString(new Date(date)) === dateToString(stringToDate(dateString)),
-    			// );
-    			$$invalidate(5, matchingDate = memeExists(dateString)
-    			? dateToString(stringToDate(dateString))
-    			: null);
+    		if ($$self.$$.dirty & /*dateQuery*/ 4) {
+    			$$invalidate(5, queriedMeme = getMemeOtd(stringToDate(dateQuery)));
     		}
     	};
 
@@ -1265,10 +1302,10 @@ var archive = (function () {
     	return [
     		month,
     		year,
-    		dateString,
+    		dateQuery,
     		forwardsEnabled,
     		backwardsEnabled,
-    		matchingDate,
+    		queriedMeme,
     		archivedMemes,
     		isTomorrow,
     		tomorrowMeme,

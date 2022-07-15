@@ -1,6 +1,8 @@
 <script lang="ts">
+  import { filter } from "cypress/types/bluebird";
+
   import { dateToString, stringToDate } from "./date";
-  import { getMemeOtd, getMemesOfMonth, memeExists } from "./db";
+  import { getMemeOtd, getMemesOfMonth } from "./db";
   import Header from "./Header.svelte";
 
   const today = new Date();
@@ -16,7 +18,7 @@
 
   let month = today.getMonth() + 1;
   let year = today.getFullYear();
-  let dateString = dateToString(today);
+  let dateQuery = dateToString(today);
   let forwardsEnabled = true;
   let backwardsEnabled = true;
 
@@ -40,18 +42,10 @@
 
   $: archivedMemes = [
     ...getMemesOfMonth(year, month),
-    // ...dates.filter(date => isTomorrow(date) && !forwardsEnabled),
-    ...(tomorrowMeme ? [{ date: tomorrow, meme: tomorrowMeme }] : []),
-  ];
+    { date: tomorrow, meme: tomorrowMeme },
+  ].filter(meme => !!meme.meme);
 
-  // $: matchingDates = dates.filter(
-  //   date =>
-  //     dateToString(new Date(date)) === dateToString(stringToDate(dateString)),
-  // );
-
-  $: matchingDate = memeExists(dateString)
-    ? dateToString(stringToDate(dateString))
-    : null;
+  $: queriedMeme = getMemeOtd(stringToDate(dateQuery));
 </script>
 
 <Header />
@@ -132,11 +126,11 @@
 </main>
 <section class="mt-48">
   <h2>Specify a date</h2>
-  <input type="text" bind:value={dateString} />
-  {#if matchingDate}
+  <input type="text" bind:value={dateQuery} />
+  {#if queriedMeme}
     <img
       class="max-w-sm mx-auto w-1/2 sm:w-auto"
-      src={getMemeOtd(stringToDate(matchingDate))}
+      src={queriedMeme}
       alt="Meme"
     />
   {:else}
