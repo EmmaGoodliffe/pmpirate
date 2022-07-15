@@ -18,7 +18,7 @@ describe("home", () => {
             .should("have.attr", "src")
             .should("have.lengthOf.above", 0);
         } else {
-          cy.get("table tfoot").should("contain", "No memes");
+          cy.get("table tfoot").should("contain", ":(");
         }
       });
   });

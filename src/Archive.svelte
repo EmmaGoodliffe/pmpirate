@@ -126,7 +126,7 @@
       {/each}
     </tbody>
     {#if !archivedMemes.length}
-      <tfoot class="p-4 inline-block text-center">No memes that month</tfoot>
+      <tfoot class="p-4 inline-block text-center">No memes that month :(</tfoot>
     {/if}
   </table>
 </main>
