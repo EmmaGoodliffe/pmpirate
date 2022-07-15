@@ -32,7 +32,7 @@ describe("home", () => {
       .then(text => {
         const [month, year] = text.split("/").map(x => parseInt(x));
         const today = new Date();
-        const [, currentMonth, currentYear] = separateDate(today)
+        const [, currentMonth, currentYear] = separateDate(today);
         const correctYear = currentMonth - 1 ? currentYear : currentYear - 1;
         const correctMonth = currentMonth - 1 || 12;
         expect(month).to.equal(correctMonth);

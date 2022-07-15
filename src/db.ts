@@ -19,7 +19,9 @@ const cacheMonth = (monthOfMemes: { meme: string; date: Date }[]) => {
   const keys = monthOfMemes.map(meme => {
     const [date, m, y] = separateDate(meme.date);
     if (m !== month || y !== year) {
-      throw new Error(`Expected month to be ${month}; received ${m}`);
+      throw new Error(
+        `Expected ${m} and ${month} to be equal, as well as ${y} and ${year}`,
+      );
     }
     return date;
   });

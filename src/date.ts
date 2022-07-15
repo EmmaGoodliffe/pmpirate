@@ -46,12 +46,12 @@ export const stringToDate = (d: string) => {
   const splitters = ["/", "-", "."];
   for (const splitter of splitters) {
     const [date, month, year] = d.split(splitter).map(toInt);
-    const result = compoundDate(date, month, fixYear(year))
+    const result = compoundDate(date, month, fixYear(year));
     if (date <= 31 && `${result}` !== "Invalid Date") return result;
   }
   for (const splitter of splitters) {
     const [year, month, date] = d.split(splitter).map(toInt);
-    const result = compoundDate(date, month, fixYear(year))
+    const result = compoundDate(date, month, fixYear(year));
     if (`${result}` !== "Invalid Date") return result;
   }
   const result = new Date(d);
