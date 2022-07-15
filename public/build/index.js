@@ -4579,17 +4579,67 @@ var app = (function () {
         $inject_state() { }
     }
 
+    const toInt = (x) => {
+        const intX = parseInt(x);
+        if (!isNaN(intX))
+            return intX;
+        const numerals = [
+            "I",
+            "II",
+            "III",
+            "IV",
+            "V",
+            "VI",
+            "VII",
+            "VIII",
+            "IX",
+            "X",
+            "XI",
+            "XII",
+        ];
+        return numerals.indexOf(x) + 1;
+    };
     const separateDate = (date) => [
         date.getDate(),
         date.getMonth() + 1,
         date.getFullYear(),
     ];
+    const compoundDate = (date, month, year) => new Date(year, month - 1, date);
     const dateToString = (d, splitter = "/", reverse = false) => {
         const [date, month, year] = separateDate(d).map(x => `${x}`);
         const ogOrder = [date.padStart(2, "0"), month.padStart(2, "0"), year];
         const ordered = reverse ? ogOrder.reverse() : ogOrder;
         return ordered.join(splitter);
     };
+    const fixYear = (y) => {
+        const year = `${y}`;
+        if (year.length <= 2)
+            return fixYear("20" + year.padStart(2, "0"));
+        if (year.length === 3)
+            return null;
+        return parseInt(year);
+    };
+    const stringToDate = (d) => {
+        const today = new Date();
+        const splitters = ["/", "-", "."];
+        for (const splitter of splitters) {
+            const [date, month, year] = d.split(splitter).map(toInt);
+            const result = compoundDate(date, month, fixYear(year));
+            if (date <= 31 && `${result}` !== "Invalid Date")
+                return result;
+        }
+        for (const splitter of splitters) {
+            const [year, month, date] = d.split(splitter).map(toInt);
+            const result = compoundDate(date, month, fixYear(year));
+            if (`${result}` !== "Invalid Date")
+                return result;
+        }
+        const result = new Date(d);
+        if (`${result}` !== "Invalid Date")
+            return result;
+        return today;
+    };
+    const getLengthOfMonth = (year, month) => new Date(year, month, 0).getDate();
 
     var otd = {
     	"2021-10-12": "mugs.png",
@@ -4647,45 +4697,83 @@ var app = (function () {
     	otd: otd
     };
 
-    const cache = {
-        2022: {
-            7: {
-                15: "memes/mugs.png",
-            },
-        },
-    };
+    const dates = Object.keys(memes.otd);
+    const cache = {};
     const getMemeOtdFromCache = (d) => {
         const [date, month, year] = separateDate(d);
-        // TODO: return `null` for no meme and `undefined` for cache miss
         try {
-            return cache[year][month][date];
+            const result = cache[year][month][date];
+            if (result)
+                return result;
+            return null; // No meme
         }
         catch (err) {
-            return undefined;
+            return undefined; // Cache miss
         }
     };
-    const cacheMeme = (d, meme) => {
-        const [date, month, year] = separateDate(d);
+    const cacheMonth = (monthOfMemes) => {
+        const [, month, year] = separateDate(monthOfMemes[0].date);
         if (!cache[year]) {
             cache[year] = {};
         }
-        if (!cache[year][month]) {
-            cache[year][month] = {};
+        const keys = monthOfMemes.map(meme => {
+            const [date, m, y] = separateDate(meme.date);
+            if (m !== month || y !== year) {
+                throw new Error(`Expected month to be ${month}; received ${m}`);
+            }
+            return date;
+        });
+        const values = monthOfMemes.map(meme => meme.meme);
+        const result = {};
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            const value = values[i];
+            result[key] = value;
         }
-        cache[year][month][date] = meme;
-        console.log(cache);
+        cache[year][month] = result;
     };
-    const getMemeOtdFromDb = (date) => {
-        const key = dateToString(date, "-", true);
-        const meme = memes.otd[key] ? `memes/${memes.otd[key]}` : null;
-        cacheMeme(date, meme);
-        return meme;
-    };
+    // const cacheMeme = (d: Date, meme: string) => {
+    //   const [date, month, year] = separateDate(d);
+    //   if (!cache[year]) {
+    //     cache[year] = {};
+    //   }
+    //   if (!cache[year][month]) {
+    //     cache[year][month] = {};
+    //   }
+    //   cache[year][month][date] = meme;
+    //   console.log(cache);
+    // };
     const getMemeOtd = (date) => {
         const fromCache = getMemeOtdFromCache(date);
         if (fromCache !== undefined)
             return fromCache;
-        return getMemeOtdFromDb(date);
+        const [, month, year] = separateDate(date);
+        getMemesOfMonth(year, month);
+        return getMemeOtdFromCache(date);
+    };
+    const isArchivedHere = (d, month, year) => {
+        const date = stringToDate(d);
+        const today = new Date();
+        const goodDate = date <= today;
+        const [, dMonth, dYear] = separateDate(date);
+        const goodMonth = dMonth === month;
+        const goodYear = dYear === year;
+        return goodDate && goodMonth && goodYear;
+    };
+    const getMemesOfMonth = (year, month) => {
+        const archivedDates = dates.filter(date => isArchivedHere(date, month, year));
+        const monthOfMemes = new Array(getLengthOfMonth(year, month))
+            .fill(null)
+            .map((x, i) => {
+            const date = compoundDate(i + 1, month, year);
+            const key = dateToString(date, "-", true);
+            return {
+                date,
+                meme: archivedDates.includes(key) ? `memes/${memes.otd[key]}` : null,
+            };
+        });
+        cacheMonth(monthOfMemes);
+        return monthOfMemes;
     };
 
     /* src/Doc.svelte generated by Svelte v3.43.0 */

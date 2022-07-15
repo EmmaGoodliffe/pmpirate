@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { filter } from "cypress/types/bluebird";
-
   import { dateToString, stringToDate } from "./date";
   import { getMemeOtd, getMemesOfMonth } from "./db";
   import Header from "./Header.svelte";
