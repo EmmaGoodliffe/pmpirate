@@ -5,10 +5,10 @@
 </script>
 
 <h2>Meme of the Day</h2>
-{#if src === undefined}
+{#if src}
+  <img class={className} {src} alt="Meme" />
+{:else}
   <p class={`${className} text-center`}>
     No meme today :( ... Send suggestions
   </p>
-{:else}
-  <img class={className} {src} alt="Meme" />
 {/if}

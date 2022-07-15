@@ -689,7 +689,7 @@ var archive = (function () {
     	return child_ctx;
     }
 
-    // (95:12) {#if isTomorrow(meme.date)}
+    // (77:12) {#if isTomorrow(meme.date)}
     function create_if_block_2(ctx) {
     	let br;
     	let t;
@@ -698,7 +698,7 @@ var archive = (function () {
     		c: function create() {
     			br = element("br");
     			t = text("\n              (Sneak peek)");
-    			add_location(br, file, 95, 14, 2878);
+    			add_location(br, file, 77, 14, 2412);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, br, anchor);
@@ -714,14 +714,14 @@ var archive = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(95:12) {#if isTomorrow(meme.date)}",
+    		source: "(77:12) {#if isTomorrow(meme.date)}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (91:6) {#each archivedMemes as meme}
+    // (73:6) {#each archivedMemes as meme}
     function create_each_block(ctx) {
     	let tr;
     	let td0;
@@ -748,13 +748,13 @@ var archive = (function () {
     			img = element("img");
     			t3 = space();
     			attr_dev(td0, "class", "text-center");
-    			add_location(td0, file, 92, 10, 2756);
+    			add_location(td0, file, 74, 10, 2290);
     			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
     			if (!src_url_equal(img.src, img_src_value = /*meme*/ ctx[14].meme)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file, 100, 12, 2973);
-    			add_location(td1, file, 99, 10, 2956);
-    			add_location(tr, file, 91, 8, 2741);
+    			add_location(img, file, 82, 12, 2507);
+    			add_location(td1, file, 81, 10, 2490);
+    			add_location(tr, file, 73, 8, 2275);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr, anchor);
@@ -796,14 +796,14 @@ var archive = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(91:6) {#each archivedMemes as meme}",
+    		source: "(73:6) {#each archivedMemes as meme}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (110:4) {#if !archivedMemes.length}
+    // (92:4) {#if !archivedMemes.length}
     function create_if_block_1(ctx) {
     	let tfoot;
 
@@ -812,7 +812,7 @@ var archive = (function () {
     			tfoot = element("tfoot");
     			tfoot.textContent = "No memes that month :(";
     			attr_dev(tfoot, "class", "p-4 inline-block text-center");
-    			add_location(tfoot, file, 110, 6, 3198);
+    			add_location(tfoot, file, 92, 6, 2732);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tfoot, anchor);
@@ -826,14 +826,14 @@ var archive = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(110:4) {#if !archivedMemes.length}",
+    		source: "(92:4) {#if !archivedMemes.length}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (124:2) {:else}
+    // (106:2) {:else}
     function create_else_block(ctx) {
     	let p;
 
@@ -842,7 +842,7 @@ var archive = (function () {
     			p = element("p");
     			p.textContent = "No memes that day :(";
     			attr_dev(p, "class", "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto text-center");
-    			add_location(p, file, 124, 4, 3537);
+    			add_location(p, file, 106, 4, 3071);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -857,14 +857,14 @@ var archive = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(124:2) {:else}",
+    		source: "(106:2) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (118:2) {#if queriedMeme}
+    // (100:2) {#if queriedMeme}
     function create_if_block(ctx) {
     	let img;
     	let img_src_value;
@@ -875,7 +875,7 @@ var archive = (function () {
     			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
     			if (!src_url_equal(img.src, img_src_value = /*queriedMeme*/ ctx[5])) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file, 118, 4, 3423);
+    			add_location(img, file, 100, 4, 2957);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
@@ -894,7 +894,7 @@ var archive = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(118:2) {#if queriedMeme}",
+    		source: "(100:2) {#if queriedMeme}",
     		ctx
     	});
 
@@ -1048,14 +1048,14 @@ var archive = (function () {
     			attr_dev(table, "class", "table-auto w-full max-w-4xl mx-auto border-white border-2");
     			add_location(table, file, 64, 2, 2019);
     			add_location(main, file, 39, 0, 1384);
-    			add_location(h21, file, 115, 2, 3328);
+    			add_location(h21, file, 97, 2, 2862);
     			attr_dev(input, "type", "text");
-    			add_location(input, file, 116, 2, 3354);
+    			add_location(input, file, 98, 2, 2888);
     			attr_dev(p1, "class", "mt-4");
-    			add_location(p1, file, 128, 2, 3649);
+    			add_location(p1, file, 110, 2, 3183);
     			attr_dev(section, "class", "mt-48");
-    			add_location(section, file, 114, 0, 3302);
-    			add_location(footer, file, 130, 0, 3705);
+    			add_location(section, file, 96, 0, 2836);
+    			add_location(footer, file, 112, 0, 3239);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");

@@ -5005,8 +5005,41 @@ var app = (function () {
 
     const file$1 = "src/Otd.svelte";
 
-    // (10:0) {:else}
+    // (8:0) {:else}
     function create_else_block(ctx) {
+    	let p;
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			p = element("p");
+    			t = text("No meme today :( ... Send suggestions");
+    			attr_dev(p, "class", `${className} text-center`);
+    			add_location(p, file$1, 8, 2, 198);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, p, anchor);
+    			append_dev(p, t);
+    		},
+    		p: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(p);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block.name,
+    		type: "else",
+    		source: "(8:0) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (6:0) {#if src}
+    function create_if_block(ctx) {
     	let img;
     	let img_src_value;
 
@@ -5016,7 +5049,7 @@ var app = (function () {
     			attr_dev(img, "class", className);
     			if (!src_url_equal(img.src, img_src_value = /*src*/ ctx[0])) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file$1, 10, 2, 257);
+    			add_location(img, file$1, 6, 2, 145);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
@@ -5033,42 +5066,9 @@ var app = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block.name,
-    		type: "else",
-    		source: "(10:0) {:else}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (6:0) {#if src === undefined}
-    function create_if_block(ctx) {
-    	let p;
-    	let t;
-
-    	const block = {
-    		c: function create() {
-    			p = element("p");
-    			t = text("No meme today :( ... Send suggestions");
-    			attr_dev(p, "class", `${className} text-center`);
-    			add_location(p, file$1, 6, 2, 159);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, p, anchor);
-    			append_dev(p, t);
-    		},
-    		p: noop,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(p);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(6:0) {#if src === undefined}",
+    		source: "(6:0) {#if src}",
     		ctx
     	});
 
@@ -5081,7 +5081,7 @@ var app = (function () {
     	let if_block_anchor;
 
     	function select_block_type(ctx, dirty) {
-    		if (/*src*/ ctx[0] === undefined) return create_if_block;
+    		if (/*src*/ ctx[0]) return create_if_block;
     		return create_else_block;
     	}
 

@@ -81,24 +81,6 @@
       </tr>
     </thead>
     <tbody>
-      <!-- {#each archivedDates as date}
-        <tr>
-          <td class="text-center">
-            {date.split("-").reverse().join("/")}
-            <br />
-            {#if isTomorrow(date)}
-              (Sneak peek)
-            {/if}
-          </td>
-          <td>
-            <img
-              class="max-w-sm mx-auto w-1/2 sm:w-auto"
-              src={getMemeOtd(date)}
-              alt="Meme"
-            />
-          </td>
-        </tr>
-      {/each} -->
       {#each archivedMemes as meme}
         <tr>
           <td class="text-center">
