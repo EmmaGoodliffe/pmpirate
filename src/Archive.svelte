@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { dateToString, stringToDate } from "./date";
-  import { getMemeOtd, getMemesOfMonth } from "./db";
+  import { compoundDate, dateToString, stringToDate } from "./date";
+  import { firstMonth, getMemeOtd, getMemesOfMonth } from "./db";
   import Header from "./Header.svelte";
 
   const today = new Date();
@@ -34,7 +34,8 @@
     today.getMonth() + 1 === month && today.getFullYear() === year
   );
 
-  $: backwardsEnabled = new Date(2021, 9 - 1, 1) < new Date(year, month - 1, 1);
+  $: backwardsEnabled = firstMonth < compoundDate(1, month, year);
+  // $: backwardsEnabled = new Date(2021, 9 - 1, 1) < new Date(year, month - 1, 1);
 
   $: tomorrowMeme = getMemeOtd(tomorrow);
 

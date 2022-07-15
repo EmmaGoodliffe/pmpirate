@@ -7,19 +7,9 @@ import {
 } from "./date";
 import memes from "./memes.json";
 
-const dates = Object.keys(memes.otd);
 const cache: Record<number, Record<number, Record<number, string>>> = {};
 
-const getMemeOtdFromCache = (d: Date) => {
-  const [date, month, year] = separateDate(d);
-  try {
-    const result = cache[year][month][date];
-    if (result) return result;
-    return null; // No meme
-  } catch (err) {
-    return undefined; // Cache miss
-  }
-};
+export const firstMonth = compoundDate(1, 9, 2021);
 
 const cacheMonth = (monthOfMemes: { meme: string; date: Date }[]) => {
   const [, month, year] = separateDate(monthOfMemes[0].date);
@@ -43,26 +33,6 @@ const cacheMonth = (monthOfMemes: { meme: string; date: Date }[]) => {
   cache[year][month] = result;
 };
 
-// const cacheMeme = (d: Date, meme: string) => {
-//   const [date, month, year] = separateDate(d);
-//   if (!cache[year]) {
-//     cache[year] = {};
-//   }
-//   if (!cache[year][month]) {
-//     cache[year][month] = {};
-//   }
-//   cache[year][month][date] = meme;
-//   console.log(cache);
-// };
-
-export const getMemeOtd = (date: Date) => {
-  const fromCache = getMemeOtdFromCache(date);
-  if (fromCache !== undefined) return fromCache;
-  const [, month, year] = separateDate(date);
-  getMemesOfMonth(year, month);
-  return getMemeOtdFromCache(date);
-};
-
 const isArchivedHere = (d: string, month: number, year: number) => {
   const date = stringToDate(d);
   const today = new Date();
@@ -73,18 +43,62 @@ const isArchivedHere = (d: string, month: number, year: number) => {
   return goodDate && goodMonth && goodYear;
 };
 
-export const getMemesOfMonth = (year: number, month: number) => {
-  const archivedDates = dates.filter(date => isArchivedHere(date, month, year));
+const isMemeMonthPossible = (year: number, month: number) => {
+  const date = compoundDate(1, month, year);
+  const currentYear = separateDate(new Date())[2];
+  return firstMonth <= date && year <= currentYear;
+};
+
+const getMemesOfMonthFromDb = (year: number, month: number) => {
+  if (!isMemeMonthPossible(year, month)) return null;
+  console.count(`${year}-${month}`);
+  console.count("DB reads");
   const monthOfMemes = new Array(getLengthOfMonth(year, month))
     .fill(null)
     .map((x, i) => {
-      const date = compoundDate(i + 1, month, year)
+      const date = compoundDate(i + 1, month, year);
       const key = dateToString(date, "-", true);
+      const url = memes.otd[key] && `memes/${memes.otd[key]}`;
       return {
         date,
-        meme: archivedDates.includes(key) ? `memes/${memes.otd[key]}` : null,
+        meme: isArchivedHere(key, month, year) && url ? url : null,
       };
     });
   cacheMonth(monthOfMemes);
   return monthOfMemes;
+};
+
+const getMemesOfMonthFromCache = (year: number, month: number) => {
+  try {
+    const fromCache = cache[year][month];
+    if (fromCache) {
+      return Object.keys(fromCache).map(key => {
+        const date = parseInt(key);
+        const meme = fromCache[date];
+        return {
+          date: compoundDate(date, month, year),
+          meme,
+        };
+      });
+    }
+  } catch (err) {
+    console.log("Quelled cache error");
+  }
+  return undefined;
+};
+
+export const getMemesOfMonth = (year: number, month: number) =>
+  getMemesOfMonthFromCache(year, month) ?? getMemesOfMonthFromDb(year, month);
+
+export const getMemeOtd = (d: Date) => {
+  const [date, month, year] = separateDate(d);
+  if (!isMemeMonthPossible(year, month)) return null;
+  try {
+    const fromCache = cache[year][month][date];
+    if (fromCache !== undefined) return fromCache;
+  } catch (err) {
+    console.log("Quelled cache error");
+  }
+  getMemesOfMonth(year, month);
+  return getMemeOtd(d);
 };
