@@ -80,12 +80,14 @@
       </tr>
     </thead>
     {#await archivedMemesPromise}
-    <tfoot> 
-      <Loader />
-    </tfoot>
+      <tfoot>
+        <Loader />
+      </tfoot>
     {:then archivedMemes}
       <tbody>
-        {#each Object.keys(archivedMemes).map(x => parseInt(x)) as date}
+        {#each Object.keys(archivedMemes)
+          .map(x => parseInt(x))
+          .sort((a, b) => a - b) as date}
           {#if compoundDate(date, month, year) <= stringToDate(dateToString(today))}
             <Shelf
               date={compoundDate(date, month, year)}

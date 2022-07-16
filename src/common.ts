@@ -1,6 +1,6 @@
 import { getAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDfGaweLVDXcfxJDZ4ztoMoilhU9fv4uXU",
@@ -14,4 +14,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 getAnalytics(app);
-export const db = getFirestore(app);
+const db = getFirestore(app);
+const isEmulation =
+  location.href.includes("localhost") || location.href.includes("127.0.0.1");
+isEmulation && connectFirestoreEmulator(db, "localhost", 8080);
+export { db };
