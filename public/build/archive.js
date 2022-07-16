@@ -4,6 +4,9 @@ var archive = (function () {
     'use strict';
 
     function noop() { }
+    function is_promise(value) {
+        return value && typeof value === 'object' && typeof value.then === 'function';
+    }
     function add_location(element, file, line, column, char) {
         element.__svelte_meta = {
             loc: { file, line, column, char }
@@ -59,6 +62,9 @@ var archive = (function () {
     function space() {
         return text(' ');
     }
+    function empty() {
+        return text('');
+    }
     function listen(node, event, handler, options) {
         node.addEventListener(event, handler, options);
         return () => node.removeEventListener(event, handler, options);
@@ -76,17 +82,27 @@ var archive = (function () {
         input.value = value == null ? '' : value;
     }
     function set_style(node, key, value, important) {
-        node.style.setProperty(key, value, important ? 'important' : '');
+        if (value === null) {
+            node.style.removeProperty(key);
+        }
+        else {
+            node.style.setProperty(key, value, important ? 'important' : '');
+        }
     }
-    function custom_event(type, detail, bubbles = false) {
+    function custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
         const e = document.createEvent('CustomEvent');
-        e.initCustomEvent(type, bubbles, false, detail);
+        e.initCustomEvent(type, bubbles, cancelable, detail);
         return e;
     }
 
     let current_component;
     function set_current_component(component) {
         current_component = component;
+    }
+    function get_current_component() {
+        if (!current_component)
+            throw new Error('Function called outside component initialization');
+        return current_component;
     }
 
     const dirty_components = [];
@@ -104,22 +120,40 @@ var archive = (function () {
     function add_render_callback(fn) {
         render_callbacks.push(fn);
     }
-    let flushing = false;
+    // flush() calls callbacks in this order:
+    // 1. All beforeUpdate callbacks, in order: parents before children
+    // 2. All bind:this callbacks, in reverse order: children before parents.
+    // 3. All afterUpdate callbacks, in order: parents before children. EXCEPT
+    //    for afterUpdates called during the initial onMount, which are called in
+    //    reverse order: children before parents.
+    // Since callbacks might update component values, which could trigger another
+    // call to flush(), the following steps guard against this:
+    // 1. During beforeUpdate, any updated components will be added to the
+    //    dirty_components array and will cause a reentrant call to flush(). Because
+    //    the flush index is kept outside the function, the reentrant call will pick
+    //    up where the earlier call left off and go through all dirty components. The
+    //    current_component value is saved and restored so that the reentrant call will
+    //    not interfere with the "parent" flush() call.
+    // 2. bind:this callbacks cannot trigger new flush() calls.
+    // 3. During afterUpdate, any updated components will NOT have their afterUpdate
+    //    callback called a second time; the seen_callbacks set, outside the flush()
+    //    function, guarantees this behavior.
     const seen_callbacks = new Set();
+    let flushidx = 0; // Do *not* move this inside the flush() function
     function flush() {
-        if (flushing)
-            return;
-        flushing = true;
+        const saved_component = current_component;
         do {
             // first, call beforeUpdate functions
             // and update components
-            for (let i = 0; i < dirty_components.length; i += 1) {
-                const component = dirty_components[i];
+            while (flushidx < dirty_components.length) {
+                const component = dirty_components[flushidx];
+                flushidx++;
                 set_current_component(component);
                 update$1(component.$$);
             }
             set_current_component(null);
             dirty_components.length = 0;
+            flushidx = 0;
             while (binding_callbacks.length)
                 binding_callbacks.pop()();
             // then, once components are updated, call
@@ -139,8 +173,8 @@ var archive = (function () {
             flush_callbacks.pop()();
         }
         update_scheduled = false;
-        flushing = false;
         seen_callbacks.clear();
+        set_current_component(saved_component);
     }
     function update$1($$) {
         if ($$.fragment !== null) {
@@ -154,6 +188,19 @@ var archive = (function () {
     }
     const outroing = new Set();
     let outros;
+    function group_outros() {
+        outros = {
+            r: 0,
+            c: [],
+            p: outros // parent group
+        };
+    }
+    function check_outros() {
+        if (!outros.r) {
+            run_all(outros.c);
+        }
+        outros = outros.p;
+    }
     function transition_in(block, local) {
         if (block && block.i) {
             outroing.delete(block);
@@ -175,7 +222,98 @@ var archive = (function () {
             });
             block.o(local);
         }
+        else if (callback) {
+            callback();
+        }
     }
+
+    function handle_promise(promise, info) {
+        const token = info.token = {};
+        function update(type, index, key, value) {
+            if (info.token !== token)
+                return;
+            info.resolved = value;
+            let child_ctx = info.ctx;
+            if (key !== undefined) {
+                child_ctx = child_ctx.slice();
+                child_ctx[key] = value;
+            }
+            const block = type && (info.current = type)(child_ctx);
+            let needs_flush = false;
+            if (info.block) {
+                if (info.blocks) {
+                    info.blocks.forEach((block, i) => {
+                        if (i !== index && block) {
+                            group_outros();
+                            transition_out(block, 1, 1, () => {
+                                if (info.blocks[i] === block) {
+                                    info.blocks[i] = null;
+                                }
+                            });
+                            check_outros();
+                        }
+                    });
+                }
+                else {
+                    info.block.d(1);
+                }
+                block.c();
+                transition_in(block, 1);
+                block.m(info.mount(), info.anchor);
+                needs_flush = true;
+            }
+            info.block = block;
+            if (info.blocks)
+                info.blocks[index] = block;
+            if (needs_flush) {
+                flush();
+            }
+        }
+        if (is_promise(promise)) {
+            const current_component = get_current_component();
+            promise.then(value => {
+                set_current_component(current_component);
+                update(info.then, 1, info.value, value);
+                set_current_component(null);
+            }, error => {
+                set_current_component(current_component);
+                update(info.catch, 2, info.error, error);
+                set_current_component(null);
+                if (!info.hasCatch) {
+                    throw error;
+                }
+            });
+            // if we previously had a then/catch block, destroy it
+            if (info.current !== info.pending) {
+                update(info.pending, 0);
+                return true;
+            }
+        }
+        else {
+            if (info.current !== info.then) {
+                update(info.then, 1, info.value, promise);
+                return true;
+            }
+            info.resolved = promise;
+        }
+    }
+    function update_await_block_branch(info, ctx, dirty) {
+        const child_ctx = ctx.slice();
+        const { resolved } = info;
+        if (info.current === info.then) {
+            child_ctx[info.value] = resolved;
+        }
+        if (info.current === info.catch) {
+            child_ctx[info.error] = resolved;
+        }
+        info.block.p(child_ctx, dirty);
+    }
+
+    const globals = (typeof window !== 'undefined'
+        ? window
+        : typeof globalThis !== 'undefined'
+            ? globalThis
+            : global);
     function create_component(block) {
         block && block.c();
     }
@@ -306,7 +444,7 @@ var archive = (function () {
     }
 
     function dispatch_dev(type, detail) {
-        document.dispatchEvent(custom_event(type, Object.assign({ version: '3.43.0' }, detail), true));
+        document.dispatchEvent(custom_event(type, Object.assign({ version: '3.49.0' }, detail), { bubbles: true }));
     }
     function append_dev(target, node) {
         dispatch_dev('SvelteDOMInsert', { target, node });
@@ -401,7 +539,9 @@ var archive = (function () {
             "XI",
             "XII",
         ];
-        return numerals.indexOf(x) + 1;
+        const index = numerals.indexOf(x);
+        if (index === -1)
+            return index + 1;
     };
     const separateDate = (date) => [
         date.getDate(),
@@ -424,910 +564,24 @@ var archive = (function () {
         return parseInt(year);
     };
     const stringToDate = (d) => {
-        const today = new Date();
         const splitters = ["/", "-", "."];
         for (const splitter of splitters) {
             const [date, month, year] = d.split(splitter).map(toInt);
             const result = compoundDate(date, month, fixYear(year));
-            if (date <= 31 && `${result}` !== "Invalid Date")
+            if (![date, month, year].some(x => !x) && `${result}` !== "Invalid Date")
                 return result;
         }
         for (const splitter of splitters) {
             const [year, month, date] = d.split(splitter).map(toInt);
             const result = compoundDate(date, month, fixYear(year));
-            if (`${result}` !== "Invalid Date")
+            if (![date, month, year].some(x => !x) && `${result}` !== "Invalid Date")
                 return result;
         }
         const result = new Date(d);
         if (`${result}` !== "Invalid Date")
             return result;
-        return today;
     };
     const getLengthOfMonth = (year, month) => new Date(year, month, 0).getDate();
-
-    var otd = {
-    	"2021-10-12": "mugs.png",
-    	"2021-10-13": "you three.jpg",
-    	"2021-10-14": "Gebreamlak.png",
-    	"2021-10-15": "integration.png",
-    	"2021-10-16": "slaps.png",
-    	"2021-10-17": "trains.jpg",
-    	"2021-10-18": "engineers.jpg",
-    	"2021-10-19": "uncertainty.jpg",
-    	"2021-10-20": "LHC.jpg",
-    	"2021-10-21": "xi.jpg",
-    	"2021-10-22": "crossover.jpg",
-    	"2021-10-23": "HDMI.jpg",
-    	"2021-11-05": "drink.png",
-    	"2021-11-06": "boxes.png",
-    	"2021-11-09": "F1.png",
-    	"2021-11-10": "dates.png",
-    	"2021-11-11": "interviews.png",
-    	"2021-11-15": "planes.jpg",
-    	"2021-11-16": "1i.jpg",
-    	"2021-11-17": "pure 2.png",
-    	"2021-11-24": "air resistance.jpg",
-    	"2021-11-25": "obvious.jpg",
-    	"2021-12-25": "xmas.jpg",
-    	"2022-01-09": "Coulomb.png",
-    	"2022-01-13": "bon appetit.png",
-    	"2022-01-14": "Friday.png",
-    	"2022-01-17": "speed.png",
-    	"2022-01-25": "stability.png",
-    	"2022-02-01": "ethane.png",
-    	"2022-02-02": "birthday.png",
-    	"2022-02-03": "k.jpg",
-    	"2022-02-04": "Le Chatelier.png",
-    	"2022-02-05": "2nd order ODE.png",
-    	"2022-02-07": "expansion.png",
-    	"2022-02-08": "cuts.png",
-    	"2022-03-03": "spin.png",
-    	"2022-03-08": "physics mark.png",
-    	"2022-03-16": "core prac..png",
-    	"2022-03-23": "copper.png",
-    	"2022-05-04": "A level.png",
-    	"2022-05-05": "studying.png",
-    	"2022-05-06": "Newton's III.png",
-    	"2022-05-26": "physics 1 flashbacks.png",
-    	"2022-05-27": "capacitors.jpg",
-    	"2022-05-28": "diodes.jpg",
-    	"2022-06-07": "cheese.png",
-    	"2022-06-10": "wrapped.png",
-    	"2022-06-11": "USB.png",
-    	"2022-06-14": "Ferris.png",
-    	"2022-06-16": "chicken.png"
-    };
-    var memes = {
-    	otd: otd
-    };
-
-    const dates = Object.keys(memes.otd);
-    const cache = {
-        2022: {
-            7: {
-                15: "memes/mugs.png",
-            },
-        },
-    };
-    const getMemeOtdFromCache = (d) => {
-        const [date, month, year] = separateDate(d);
-        // TODO: return `null` for no meme and `undefined` for cache miss
-        try {
-            return cache[year][month][date];
-        }
-        catch (err) {
-            return undefined;
-        }
-    };
-    const cacheMeme = (d, meme) => {
-        const [date, month, year] = separateDate(d);
-        if (!cache[year]) {
-            cache[year] = {};
-        }
-        if (!cache[year][month]) {
-            cache[year][month] = {};
-        }
-        cache[year][month][date] = meme;
-        console.log(cache);
-    };
-    const getMemeOtdFromDb = (date) => {
-        const key = dateToString(date, "-", true);
-        const meme = memes.otd[key] ? `memes/${memes.otd[key]}` : null;
-        cacheMeme(date, meme);
-        return meme;
-    };
-    const getMemeOtd = (date) => {
-        const fromCache = getMemeOtdFromCache(date);
-        if (fromCache !== undefined)
-            return fromCache;
-        return getMemeOtdFromDb(date);
-    };
-    const isArchivedHere = (d, month, year) => {
-        const date = stringToDate(d);
-        const today = new Date();
-        const goodDate = date <= today;
-        const [, dMonth, dYear] = separateDate(date);
-        const goodMonth = dMonth === month;
-        const goodYear = dYear === year;
-        return goodDate && goodMonth && goodYear;
-    };
-    const getMemesOfMonth = (year, month) => {
-        const archivedDates = dates
-            .filter(date => isArchivedHere(date, month, year))
-            .map(x => dateToString(stringToDate(x)));
-        const memes = new Array(getLengthOfMonth(year, month))
-            .fill(null)
-            .map((x, i) => {
-            const date = compoundDate(i + 1, month, year);
-            return {
-                date,
-                meme: archivedDates.includes(dateToString(date))
-                    ? getMemeOtd(date)
-                    : null,
-            };
-        });
-        for (const meme of memes) {
-            cacheMeme(meme.date, meme.meme);
-        }
-        return memes;
-    };
-
-    /* src/Header.svelte generated by Svelte v3.43.0 */
-
-    const file$1 = "src/Header.svelte";
-
-    function create_fragment$1(ctx) {
-    	let header;
-    	let a;
-    	let img;
-    	let img_src_value;
-    	let t0;
-    	let h1;
-
-    	const block = {
-    		c: function create() {
-    			header = element("header");
-    			a = element("a");
-    			img = element("img");
-    			t0 = space();
-    			h1 = element("h1");
-    			h1.textContent = "Physics & Maths Pirate";
-    			attr_dev(img, "class", "inline-block");
-    			set_style(img, "height", "2.5em");
-    			if (!src_url_equal(img.src, img_src_value = "./favicon.png")) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "alt", "Logo");
-    			add_location(img, file$1, 2, 4, 46);
-    			attr_dev(h1, "class", "inline-block ml-4");
-    			add_location(h1, file$1, 8, 4, 161);
-    			attr_dev(a, "href", "/");
-    			add_location(a, file$1, 1, 2, 29);
-    			attr_dev(header, "class", "my-8 flex");
-    			add_location(header, file$1, 0, 0, 0);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, header, anchor);
-    			append_dev(header, a);
-    			append_dev(a, img);
-    			append_dev(a, t0);
-    			append_dev(a, h1);
-    		},
-    		p: noop,
-    		i: noop,
-    		o: noop,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(header);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$1.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$1($$self, $$props) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Header', slots, []);
-    	const writable_props = [];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Header> was created with unknown prop '${key}'`);
-    	});
-
-    	return [];
-    }
-
-    class Header extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "Header",
-    			options,
-    			id: create_fragment$1.name
-    		});
-    	}
-    }
-
-    /* src/Archive.svelte generated by Svelte v3.43.0 */
-    const file = "src/Archive.svelte";
-
-    function get_each_context(ctx, list, i) {
-    	const child_ctx = ctx.slice();
-    	child_ctx[14] = list[i];
-    	return child_ctx;
-    }
-
-    // (95:12) {#if isTomorrow(meme.date)}
-    function create_if_block_2(ctx) {
-    	let br;
-    	let t;
-
-    	const block = {
-    		c: function create() {
-    			br = element("br");
-    			t = text("\n              (Sneak peek)");
-    			add_location(br, file, 95, 14, 2817);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, br, anchor);
-    			insert_dev(target, t, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(br);
-    			if (detaching) detach_dev(t);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_2.name,
-    		type: "if",
-    		source: "(95:12) {#if isTomorrow(meme.date)}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (91:6) {#each archivedMemes as meme}
-    function create_each_block(ctx) {
-    	let tr;
-    	let td0;
-    	let t0_value = dateToString(/*meme*/ ctx[14].date, "/") + "";
-    	let t0;
-    	let t1;
-    	let show_if = /*isTomorrow*/ ctx[7](/*meme*/ ctx[14].date);
-    	let t2;
-    	let td1;
-    	let img;
-    	let img_src_value;
-    	let t3;
-    	let if_block = show_if && create_if_block_2(ctx);
-
-    	const block = {
-    		c: function create() {
-    			tr = element("tr");
-    			td0 = element("td");
-    			t0 = text(t0_value);
-    			t1 = space();
-    			if (if_block) if_block.c();
-    			t2 = space();
-    			td1 = element("td");
-    			img = element("img");
-    			t3 = space();
-    			attr_dev(td0, "class", "text-center");
-    			add_location(td0, file, 92, 10, 2695);
-    			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
-    			if (!src_url_equal(img.src, img_src_value = /*meme*/ ctx[14].meme)) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "alt", "Meme");
-    			add_location(img, file, 100, 12, 2912);
-    			add_location(td1, file, 99, 10, 2895);
-    			add_location(tr, file, 91, 8, 2680);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, tr, anchor);
-    			append_dev(tr, td0);
-    			append_dev(td0, t0);
-    			append_dev(td0, t1);
-    			if (if_block) if_block.m(td0, null);
-    			append_dev(tr, t2);
-    			append_dev(tr, td1);
-    			append_dev(td1, img);
-    			append_dev(tr, t3);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*archivedMemes*/ 64 && t0_value !== (t0_value = dateToString(/*meme*/ ctx[14].date, "/") + "")) set_data_dev(t0, t0_value);
-    			if (dirty & /*archivedMemes*/ 64) show_if = /*isTomorrow*/ ctx[7](/*meme*/ ctx[14].date);
-
-    			if (show_if) {
-    				if (if_block) ; else {
-    					if_block = create_if_block_2(ctx);
-    					if_block.c();
-    					if_block.m(td0, null);
-    				}
-    			} else if (if_block) {
-    				if_block.d(1);
-    				if_block = null;
-    			}
-
-    			if (dirty & /*archivedMemes*/ 64 && !src_url_equal(img.src, img_src_value = /*meme*/ ctx[14].meme)) {
-    				attr_dev(img, "src", img_src_value);
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(tr);
-    			if (if_block) if_block.d();
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_each_block.name,
-    		type: "each",
-    		source: "(91:6) {#each archivedMemes as meme}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (110:4) {#if !archivedMemes.length}
-    function create_if_block_1(ctx) {
-    	let tfoot;
-
-    	const block = {
-    		c: function create() {
-    			tfoot = element("tfoot");
-    			tfoot.textContent = "No memes that month :(";
-    			attr_dev(tfoot, "class", "p-4 inline-block text-center");
-    			add_location(tfoot, file, 110, 6, 3137);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, tfoot, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(tfoot);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_1.name,
-    		type: "if",
-    		source: "(110:4) {#if !archivedMemes.length}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (124:2) {:else}
-    function create_else_block(ctx) {
-    	let p;
-
-    	const block = {
-    		c: function create() {
-    			p = element("p");
-    			p.textContent = "No memes that day :(";
-    			attr_dev(p, "class", "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto text-center");
-    			add_location(p, file, 124, 4, 3476);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, p, anchor);
-    		},
-    		p: noop,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(p);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_else_block.name,
-    		type: "else",
-    		source: "(124:2) {:else}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (118:2) {#if queriedMeme}
-    function create_if_block(ctx) {
-    	let img;
-    	let img_src_value;
-
-    	const block = {
-    		c: function create() {
-    			img = element("img");
-    			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
-    			if (!src_url_equal(img.src, img_src_value = /*queriedMeme*/ ctx[5])) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "alt", "Meme");
-    			add_location(img, file, 118, 4, 3362);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, img, anchor);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*queriedMeme*/ 32 && !src_url_equal(img.src, img_src_value = /*queriedMeme*/ ctx[5])) {
-    				attr_dev(img, "src", img_src_value);
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(img);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block.name,
-    		type: "if",
-    		source: "(118:2) {#if queriedMeme}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function create_fragment(ctx) {
-    	let header;
-    	let t0;
-    	let main;
-    	let h20;
-    	let t2;
-    	let div4;
-    	let div1;
-    	let div0;
-    	let span0;
-    	let div0_disabled_value;
-    	let t4;
-    	let p0;
-    	let t5_value = `${/*month*/ ctx[0]}`.padStart(2, "0") + "";
-    	let t5;
-    	let t6;
-    	let t7;
-    	let t8;
-    	let div3;
-    	let div2;
-    	let span1;
-    	let div2_disabled_value;
-    	let t10;
-    	let table;
-    	let thead;
-    	let tr;
-    	let th0;
-    	let t12;
-    	let th1;
-    	let t14;
-    	let tbody;
-    	let t15;
-    	let t16;
-    	let section;
-    	let h21;
-    	let t18;
-    	let input;
-    	let t19;
-    	let t20;
-    	let p1;
-    	let t22;
-    	let footer;
-    	let current;
-    	let mounted;
-    	let dispose;
-    	header = new Header({ $$inline: true });
-    	let each_value = /*archivedMemes*/ ctx[6];
-    	validate_each_argument(each_value);
-    	let each_blocks = [];
-
-    	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
-    	}
-
-    	let if_block0 = !/*archivedMemes*/ ctx[6].length && create_if_block_1(ctx);
-
-    	function select_block_type(ctx, dirty) {
-    		if (/*queriedMeme*/ ctx[5]) return create_if_block;
-    		return create_else_block;
-    	}
-
-    	let current_block_type = select_block_type(ctx);
-    	let if_block1 = current_block_type(ctx);
-
-    	const block = {
-    		c: function create() {
-    			create_component(header.$$.fragment);
-    			t0 = space();
-    			main = element("main");
-    			h20 = element("h2");
-    			h20.textContent = "Meme archive";
-    			t2 = space();
-    			div4 = element("div");
-    			div1 = element("div");
-    			div0 = element("div");
-    			span0 = element("span");
-    			span0.textContent = "<";
-    			t4 = space();
-    			p0 = element("p");
-    			t5 = text(t5_value);
-    			t6 = text("/");
-    			t7 = text(/*year*/ ctx[1]);
-    			t8 = space();
-    			div3 = element("div");
-    			div2 = element("div");
-    			span1 = element("span");
-    			span1.textContent = ">";
-    			t10 = space();
-    			table = element("table");
-    			thead = element("thead");
-    			tr = element("tr");
-    			th0 = element("th");
-    			th0.textContent = "Date";
-    			t12 = space();
-    			th1 = element("th");
-    			th1.textContent = "Meme";
-    			t14 = space();
-    			tbody = element("tbody");
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].c();
-    			}
-
-    			t15 = space();
-    			if (if_block0) if_block0.c();
-    			t16 = space();
-    			section = element("section");
-    			h21 = element("h2");
-    			h21.textContent = "Specify a date";
-    			t18 = space();
-    			input = element("input");
-    			t19 = space();
-    			if_block1.c();
-    			t20 = space();
-    			p1 = element("p");
-    			p1.textContent = "DVS-style dates accepted";
-    			t22 = space();
-    			footer = element("footer");
-    			add_location(h20, file, 40, 2, 1332);
-    			attr_dev(span0, "class", "-mt-1.5");
-    			add_location(span0, file, 48, 8, 1565);
-    			attr_dev(div0, "class", "flex-1 btn");
-    			attr_dev(div0, "disabled", div0_disabled_value = !/*backwardsEnabled*/ ctx[4]);
-    			add_location(div0, file, 43, 6, 1427);
-    			attr_dev(div1, "class", "w-1/4");
-    			add_location(div1, file, 42, 4, 1401);
-    			attr_dev(p0, "class", "flex-1 my-2 text-lg text-center");
-    			add_location(p0, file, 51, 4, 1627);
-    			attr_dev(span1, "class", "-mt-1.5");
-    			add_location(span1, file, 60, 8, 1889);
-    			attr_dev(div2, "class", "flex-1 btn");
-    			attr_dev(div2, "disabled", div2_disabled_value = !/*forwardsEnabled*/ ctx[3]);
-    			add_location(div2, file, 55, 6, 1753);
-    			attr_dev(div3, "class", "w-1/4");
-    			add_location(div3, file, 54, 4, 1727);
-    			attr_dev(div4, "class", "flex sm:w-1/4 mx-auto my-4");
-    			add_location(div4, file, 41, 2, 1356);
-    			attr_dev(th0, "class", "border-2");
-    			add_location(th0, file, 67, 8, 2063);
-    			attr_dev(th1, "class", "border-2");
-    			add_location(th1, file, 68, 8, 2102);
-    			add_location(tr, file, 66, 6, 2050);
-    			add_location(thead, file, 65, 4, 2036);
-    			add_location(tbody, file, 71, 4, 2162);
-    			attr_dev(table, "class", "table-auto w-full max-w-4xl mx-auto border-white border-2");
-    			add_location(table, file, 64, 2, 1958);
-    			add_location(main, file, 39, 0, 1323);
-    			add_location(h21, file, 115, 2, 3267);
-    			attr_dev(input, "type", "text");
-    			add_location(input, file, 116, 2, 3293);
-    			attr_dev(p1, "class", "mt-4");
-    			add_location(p1, file, 128, 2, 3588);
-    			attr_dev(section, "class", "mt-48");
-    			add_location(section, file, 114, 0, 3241);
-    			add_location(footer, file, 130, 0, 3644);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(header, target, anchor);
-    			insert_dev(target, t0, anchor);
-    			insert_dev(target, main, anchor);
-    			append_dev(main, h20);
-    			append_dev(main, t2);
-    			append_dev(main, div4);
-    			append_dev(div4, div1);
-    			append_dev(div1, div0);
-    			append_dev(div0, span0);
-    			append_dev(div4, t4);
-    			append_dev(div4, p0);
-    			append_dev(p0, t5);
-    			append_dev(p0, t6);
-    			append_dev(p0, t7);
-    			append_dev(div4, t8);
-    			append_dev(div4, div3);
-    			append_dev(div3, div2);
-    			append_dev(div2, span1);
-    			append_dev(main, t10);
-    			append_dev(main, table);
-    			append_dev(table, thead);
-    			append_dev(thead, tr);
-    			append_dev(tr, th0);
-    			append_dev(tr, t12);
-    			append_dev(tr, th1);
-    			append_dev(table, t14);
-    			append_dev(table, tbody);
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].m(tbody, null);
-    			}
-
-    			append_dev(table, t15);
-    			if (if_block0) if_block0.m(table, null);
-    			insert_dev(target, t16, anchor);
-    			insert_dev(target, section, anchor);
-    			append_dev(section, h21);
-    			append_dev(section, t18);
-    			append_dev(section, input);
-    			set_input_value(input, /*dateQuery*/ ctx[2]);
-    			append_dev(section, t19);
-    			if_block1.m(section, null);
-    			append_dev(section, t20);
-    			append_dev(section, p1);
-    			insert_dev(target, t22, anchor);
-    			insert_dev(target, footer, anchor);
-    			current = true;
-
-    			if (!mounted) {
-    				dispose = [
-    					listen_dev(div0, "click", /*click_handler*/ ctx[9], false, false, false),
-    					listen_dev(div2, "click", /*click_handler_1*/ ctx[10], false, false, false),
-    					listen_dev(input, "input", /*input_input_handler*/ ctx[11])
-    				];
-
-    				mounted = true;
-    			}
-    		},
-    		p: function update(ctx, [dirty]) {
-    			if (!current || dirty & /*backwardsEnabled*/ 16 && div0_disabled_value !== (div0_disabled_value = !/*backwardsEnabled*/ ctx[4])) {
-    				attr_dev(div0, "disabled", div0_disabled_value);
-    			}
-
-    			if ((!current || dirty & /*month*/ 1) && t5_value !== (t5_value = `${/*month*/ ctx[0]}`.padStart(2, "0") + "")) set_data_dev(t5, t5_value);
-    			if (!current || dirty & /*year*/ 2) set_data_dev(t7, /*year*/ ctx[1]);
-
-    			if (!current || dirty & /*forwardsEnabled*/ 8 && div2_disabled_value !== (div2_disabled_value = !/*forwardsEnabled*/ ctx[3])) {
-    				attr_dev(div2, "disabled", div2_disabled_value);
-    			}
-
-    			if (dirty & /*archivedMemes, isTomorrow, dateToString*/ 192) {
-    				each_value = /*archivedMemes*/ ctx[6];
-    				validate_each_argument(each_value);
-    				let i;
-
-    				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context(ctx, each_value, i);
-
-    					if (each_blocks[i]) {
-    						each_blocks[i].p(child_ctx, dirty);
-    					} else {
-    						each_blocks[i] = create_each_block(child_ctx);
-    						each_blocks[i].c();
-    						each_blocks[i].m(tbody, null);
-    					}
-    				}
-
-    				for (; i < each_blocks.length; i += 1) {
-    					each_blocks[i].d(1);
-    				}
-
-    				each_blocks.length = each_value.length;
-    			}
-
-    			if (!/*archivedMemes*/ ctx[6].length) {
-    				if (if_block0) ; else {
-    					if_block0 = create_if_block_1(ctx);
-    					if_block0.c();
-    					if_block0.m(table, null);
-    				}
-    			} else if (if_block0) {
-    				if_block0.d(1);
-    				if_block0 = null;
-    			}
-
-    			if (dirty & /*dateQuery*/ 4 && input.value !== /*dateQuery*/ ctx[2]) {
-    				set_input_value(input, /*dateQuery*/ ctx[2]);
-    			}
-
-    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block1) {
-    				if_block1.p(ctx, dirty);
-    			} else {
-    				if_block1.d(1);
-    				if_block1 = current_block_type(ctx);
-
-    				if (if_block1) {
-    					if_block1.c();
-    					if_block1.m(section, t20);
-    				}
-    			}
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(header.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(header.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(header, detaching);
-    			if (detaching) detach_dev(t0);
-    			if (detaching) detach_dev(main);
-    			destroy_each(each_blocks, detaching);
-    			if (if_block0) if_block0.d();
-    			if (detaching) detach_dev(t16);
-    			if (detaching) detach_dev(section);
-    			if_block1.d();
-    			if (detaching) detach_dev(t22);
-    			if (detaching) detach_dev(footer);
-    			mounted = false;
-    			run_all(dispose);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance($$self, $$props, $$invalidate) {
-    	let tomorrowMeme;
-    	let archivedMemes;
-    	let queriedMeme;
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Archive', slots, []);
-    	const today = new Date();
-    	const tomorrow = new Date(Number(today) + 24 * Math.pow(60, 2) * Math.pow(10, 3));
-
-    	// const dates = Object.keys(memes.otd);
-    	const isTomorrow = date => {
-    		const diffInMilliseconds = Number(date) - Number(today);
-    		const diffInSeconds = diffInMilliseconds / Math.pow(10, 3);
-    		const diffInHours = diffInSeconds / Math.pow(60, 2);
-    		return 0 < diffInHours && diffInHours <= 24;
-    	};
-
-    	let month = today.getMonth() + 1;
-    	let year = today.getFullYear();
-    	let dateQuery = dateToString(today);
-    	let forwardsEnabled = true;
-    	let backwardsEnabled = true;
-    	const writable_props = [];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Archive> was created with unknown prop '${key}'`);
-    	});
-
-    	const click_handler = () => backwardsEnabled && $$invalidate(0, month--, month);
-    	const click_handler_1 = () => forwardsEnabled && $$invalidate(0, month++, month);
-
-    	function input_input_handler() {
-    		dateQuery = this.value;
-    		$$invalidate(2, dateQuery);
-    	}
-
-    	$$self.$capture_state = () => ({
-    		dateToString,
-    		stringToDate,
-    		getMemeOtd,
-    		getMemesOfMonth,
-    		Header,
-    		today,
-    		tomorrow,
-    		isTomorrow,
-    		month,
-    		year,
-    		dateQuery,
-    		forwardsEnabled,
-    		backwardsEnabled,
-    		queriedMeme,
-    		tomorrowMeme,
-    		archivedMemes
-    	});
-
-    	$$self.$inject_state = $$props => {
-    		if ('month' in $$props) $$invalidate(0, month = $$props.month);
-    		if ('year' in $$props) $$invalidate(1, year = $$props.year);
-    		if ('dateQuery' in $$props) $$invalidate(2, dateQuery = $$props.dateQuery);
-    		if ('forwardsEnabled' in $$props) $$invalidate(3, forwardsEnabled = $$props.forwardsEnabled);
-    		if ('backwardsEnabled' in $$props) $$invalidate(4, backwardsEnabled = $$props.backwardsEnabled);
-    		if ('queriedMeme' in $$props) $$invalidate(5, queriedMeme = $$props.queriedMeme);
-    		if ('tomorrowMeme' in $$props) $$invalidate(8, tomorrowMeme = $$props.tomorrowMeme);
-    		if ('archivedMemes' in $$props) $$invalidate(6, archivedMemes = $$props.archivedMemes);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*month, year*/ 3) {
-    			{
-    				if (month < 1) {
-    					$$invalidate(0, month = 12);
-    					$$invalidate(1, year--, year);
-    				} else if (month > 12) {
-    					$$invalidate(0, month = 1);
-    					$$invalidate(1, year++, year);
-    				}
-    			}
-    		}
-
-    		if ($$self.$$.dirty & /*month, year*/ 3) {
-    			$$invalidate(3, forwardsEnabled = !(today.getMonth() + 1 === month && today.getFullYear() === year));
-    		}
-
-    		if ($$self.$$.dirty & /*year, month*/ 3) {
-    			$$invalidate(4, backwardsEnabled = new Date(2021, 9 - 1, 1) < new Date(year, month - 1, 1));
-    		}
-
-    		if ($$self.$$.dirty & /*year, month, tomorrowMeme*/ 259) {
-    			$$invalidate(6, archivedMemes = [...getMemesOfMonth(year, month), { date: tomorrow, meme: tomorrowMeme }].filter(meme => !!meme.meme));
-    		}
-
-    		if ($$self.$$.dirty & /*dateQuery*/ 4) {
-    			$$invalidate(5, queriedMeme = getMemeOtd(stringToDate(dateQuery)));
-    		}
-    	};
-
-    	$$invalidate(8, tomorrowMeme = getMemeOtd(tomorrow));
-
-    	return [
-    		month,
-    		year,
-    		dateQuery,
-    		forwardsEnabled,
-    		backwardsEnabled,
-    		queriedMeme,
-    		archivedMemes,
-    		isTomorrow,
-    		tomorrowMeme,
-    		click_handler,
-    		click_handler_1,
-    		input_input_handler
-    	];
-    }
-
-    class Archive extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance, create_fragment, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "Archive",
-    			options,
-    			id: create_fragment.name
-    		});
-    	}
-    }
 
     /**
      * @license
@@ -2920,6 +2174,7 @@ var archive = (function () {
     const name$1$1 = "@firebase/firestore-compat";
 
     const name$p = "firebase";
+    const version$3 = "9.9.0";
 
     /**
      * @license
@@ -3149,6 +2404,29 @@ var archive = (function () {
             }
         }
     }
+
+    /**
+     * @license
+     * Copyright 2019 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * The current SDK version.
+     *
+     * @public
+     */
+    const SDK_VERSION = version$3;
     function initializeApp(options, rawConfig = {}) {
         if (typeof rawConfig !== 'object') {
             const name = rawConfig;
@@ -3595,6 +2873,3206 @@ var archive = (function () {
      * @packageDocumentation
      */
     registerCoreComponents('');
+
+    var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
+
+    /*
+
+     Copyright The Closure Library Authors.
+     SPDX-License-Identifier: Apache-2.0
+    */
+    var k,goog=goog||{},l=commonjsGlobal||self;function aa(){}function ba(a){var b=typeof a;b="object"!=b?b:a?Array.isArray(a)?"array":b:"null";return "array"==b||"object"==b&&"number"==typeof a.length}function p(a){var b=typeof a;return "object"==b&&null!=a||"function"==b}function da(a){return Object.prototype.hasOwnProperty.call(a,ea)&&a[ea]||(a[ea]=++fa)}var ea="closure_uid_"+(1E9*Math.random()>>>0),fa=0;function ha(a,b,c){return a.call.apply(a.bind,arguments)}
+    function ia(a,b,c){if(!a)throw Error();if(2<arguments.length){var d=Array.prototype.slice.call(arguments,2);return function(){var e=Array.prototype.slice.call(arguments);Array.prototype.unshift.apply(e,d);return a.apply(b,e)}}return function(){return a.apply(b,arguments)}}function q(a,b,c){Function.prototype.bind&&-1!=Function.prototype.bind.toString().indexOf("native code")?q=ha:q=ia;return q.apply(null,arguments)}
+    function ja(a,b){var c=Array.prototype.slice.call(arguments,1);return function(){var d=c.slice();d.push.apply(d,arguments);return a.apply(this,d)}}function t(a,b){function c(){}c.prototype=b.prototype;a.Z=b.prototype;a.prototype=new c;a.prototype.constructor=a;a.Vb=function(d,e,f){for(var h=Array(arguments.length-2),n=2;n<arguments.length;n++)h[n-2]=arguments[n];return b.prototype[e].apply(d,h)};}function v(){this.s=this.s;this.o=this.o;}var ka=0,la={};v.prototype.s=!1;v.prototype.na=function(){if(!this.s&&(this.s=!0,this.M(),0!=ka)){var a=da(this);delete la[a];}};v.prototype.M=function(){if(this.o)for(;this.o.length;)this.o.shift()();};const ma$1=Array.prototype.indexOf?function(a,b){return Array.prototype.indexOf.call(a,b,void 0)}:function(a,b){if("string"===typeof a)return "string"!==typeof b||1!=b.length?-1:a.indexOf(b,0);for(let c=0;c<a.length;c++)if(c in a&&a[c]===b)return c;return -1},na=Array.prototype.forEach?function(a,b,c){Array.prototype.forEach.call(a,b,c);}:function(a,b,c){const d=a.length,e="string"===typeof a?a.split(""):a;for(let f=0;f<d;f++)f in e&&b.call(c,e[f],f,a);};
+    function oa(a){a:{var b=pa;const c=a.length,d="string"===typeof a?a.split(""):a;for(let e=0;e<c;e++)if(e in d&&b.call(void 0,d[e],e,a)){b=e;break a}b=-1;}return 0>b?null:"string"===typeof a?a.charAt(b):a[b]}function qa(a){return Array.prototype.concat.apply([],arguments)}function ra(a){const b=a.length;if(0<b){const c=Array(b);for(let d=0;d<b;d++)c[d]=a[d];return c}return []}function sa(a){return /^[\s\xa0]*$/.test(a)}var ta=String.prototype.trim?function(a){return a.trim()}:function(a){return /^[\s\xa0]*([\s\S]*?)[\s\xa0]*$/.exec(a)[1]};function w(a,b){return -1!=a.indexOf(b)}function ua(a,b){return a<b?-1:a>b?1:0}var x$1;a:{var va=l.navigator;if(va){var wa=va.userAgent;if(wa){x$1=wa;break a}}x$1="";}function xa(a,b,c){for(const d in a)b.call(c,a[d],d,a);}function ya(a){const b={};for(const c in a)b[c]=a[c];return b}var za="constructor hasOwnProperty isPrototypeOf propertyIsEnumerable toLocaleString toString valueOf".split(" ");function Aa$1(a,b){let c,d;for(let e=1;e<arguments.length;e++){d=arguments[e];for(c in d)a[c]=d[c];for(let f=0;f<za.length;f++)c=za[f],Object.prototype.hasOwnProperty.call(d,c)&&(a[c]=d[c]);}}function Ca(a){Ca[" "](a);return a}Ca[" "]=aa;function Fa$1(a){var b=Ga;return Object.prototype.hasOwnProperty.call(b,9)?b[9]:b[9]=a(9)}var Ha=w(x$1,"Opera"),y=w(x$1,"Trident")||w(x$1,"MSIE"),Ia=w(x$1,"Edge"),Ja=Ia||y,Ka=w(x$1,"Gecko")&&!(w(x$1.toLowerCase(),"webkit")&&!w(x$1,"Edge"))&&!(w(x$1,"Trident")||w(x$1,"MSIE"))&&!w(x$1,"Edge"),La=w(x$1.toLowerCase(),"webkit")&&!w(x$1,"Edge");function Ma(){var a=l.document;return a?a.documentMode:void 0}var Na$1;
+    a:{var Oa="",Pa=function(){var a=x$1;if(Ka)return /rv:([^\);]+)(\)|;)/.exec(a);if(Ia)return /Edge\/([\d\.]+)/.exec(a);if(y)return /\b(?:MSIE|rv)[: ]([^\);]+)(\)|;)/.exec(a);if(La)return /WebKit\/(\S+)/.exec(a);if(Ha)return /(?:Version)[ \/]?(\S+)/.exec(a)}();Pa&&(Oa=Pa?Pa[1]:"");if(y){var Qa=Ma();if(null!=Qa&&Qa>parseFloat(Oa)){Na$1=String(Qa);break a}}Na$1=Oa;}var Ga={};
+    function Ra(){return Fa$1(function(){let a=0;const b=ta(String(Na$1)).split("."),c=ta("9").split("."),d=Math.max(b.length,c.length);for(let h=0;0==a&&h<d;h++){var e=b[h]||"",f=c[h]||"";do{e=/(\d*)(\D*)(.*)/.exec(e)||["","","",""];f=/(\d*)(\D*)(.*)/.exec(f)||["","","",""];if(0==e[0].length&&0==f[0].length)break;a=ua(0==e[1].length?0:parseInt(e[1],10),0==f[1].length?0:parseInt(f[1],10))||ua(0==e[2].length,0==f[2].length)||ua(e[2],f[2]);e=e[3];f=f[3];}while(0==a)}return 0<=a})}if(l.document&&y){Ma();}var Va=function(){if(!l.addEventListener||!Object.defineProperty)return !1;var a=!1,b=Object.defineProperty({},"passive",{get:function(){a=!0;}});try{l.addEventListener("test",aa,b),l.removeEventListener("test",aa,b);}catch(c){}return a}();function z$1(a,b){this.type=a;this.g=this.target=b;this.defaultPrevented=!1;}z$1.prototype.h=function(){this.defaultPrevented=!0;};function A(a,b){z$1.call(this,a?a.type:"");this.relatedTarget=this.g=this.target=null;this.button=this.screenY=this.screenX=this.clientY=this.clientX=0;this.key="";this.metaKey=this.shiftKey=this.altKey=this.ctrlKey=!1;this.state=null;this.pointerId=0;this.pointerType="";this.i=null;if(a){var c=this.type=a.type,d=a.changedTouches&&a.changedTouches.length?a.changedTouches[0]:null;this.target=a.target||a.srcElement;this.g=b;if(b=a.relatedTarget){if(Ka){a:{try{Ca(b.nodeName);var e=!0;break a}catch(f){}e=
+    !1;}e||(b=null);}}else "mouseover"==c?b=a.fromElement:"mouseout"==c&&(b=a.toElement);this.relatedTarget=b;d?(this.clientX=void 0!==d.clientX?d.clientX:d.pageX,this.clientY=void 0!==d.clientY?d.clientY:d.pageY,this.screenX=d.screenX||0,this.screenY=d.screenY||0):(this.clientX=void 0!==a.clientX?a.clientX:a.pageX,this.clientY=void 0!==a.clientY?a.clientY:a.pageY,this.screenX=a.screenX||0,this.screenY=a.screenY||0);this.button=a.button;this.key=a.key||"";this.ctrlKey=a.ctrlKey;this.altKey=a.altKey;this.shiftKey=
+    a.shiftKey;this.metaKey=a.metaKey;this.pointerId=a.pointerId||0;this.pointerType="string"===typeof a.pointerType?a.pointerType:Wa[a.pointerType]||"";this.state=a.state;this.i=a;a.defaultPrevented&&A.Z.h.call(this);}}t(A,z$1);var Wa={2:"touch",3:"pen",4:"mouse"};A.prototype.h=function(){A.Z.h.call(this);var a=this.i;a.preventDefault?a.preventDefault():a.returnValue=!1;};var B$1="closure_listenable_"+(1E6*Math.random()|0);var Xa=0;function Ya(a,b,c,d,e){this.listener=a;this.proxy=null;this.src=b;this.type=c;this.capture=!!d;this.ia=e;this.key=++Xa;this.ca=this.fa=!1;}function Za(a){a.ca=!0;a.listener=null;a.proxy=null;a.src=null;a.ia=null;}function $a(a){this.src=a;this.g={};this.h=0;}$a.prototype.add=function(a,b,c,d,e){var f=a.toString();a=this.g[f];a||(a=this.g[f]=[],this.h++);var h=ab(a,b,d,e);-1<h?(b=a[h],c||(b.fa=!1)):(b=new Ya(b,this.src,f,!!d,e),b.fa=c,a.push(b));return b};function bb(a,b){var c=b.type;if(c in a.g){var d=a.g[c],e=ma$1(d,b),f;(f=0<=e)&&Array.prototype.splice.call(d,e,1);f&&(Za(b),0==a.g[c].length&&(delete a.g[c],a.h--));}}
+    function ab(a,b,c,d){for(var e=0;e<a.length;++e){var f=a[e];if(!f.ca&&f.listener==b&&f.capture==!!c&&f.ia==d)return e}return -1}var cb="closure_lm_"+(1E6*Math.random()|0),db$1={};function fb(a,b,c,d,e){if(d&&d.once)return gb(a,b,c,d,e);if(Array.isArray(b)){for(var f=0;f<b.length;f++)fb(a,b[f],c,d,e);return null}c=hb(c);return a&&a[B$1]?a.N(b,c,p(d)?!!d.capture:!!d,e):ib(a,b,c,!1,d,e)}
+    function ib(a,b,c,d,e,f){if(!b)throw Error("Invalid event type");var h=p(e)?!!e.capture:!!e,n=jb(a);n||(a[cb]=n=new $a(a));c=n.add(b,c,d,h,f);if(c.proxy)return c;d=kb();c.proxy=d;d.src=a;d.listener=c;if(a.addEventListener)Va||(e=h),void 0===e&&(e=!1),a.addEventListener(b.toString(),d,e);else if(a.attachEvent)a.attachEvent(lb(b.toString()),d);else if(a.addListener&&a.removeListener)a.addListener(d);else throw Error("addEventListener and attachEvent are unavailable.");return c}
+    function kb(){function a(c){return b.call(a.src,a.listener,c)}var b=mb;return a}function gb(a,b,c,d,e){if(Array.isArray(b)){for(var f=0;f<b.length;f++)gb(a,b[f],c,d,e);return null}c=hb(c);return a&&a[B$1]?a.O(b,c,p(d)?!!d.capture:!!d,e):ib(a,b,c,!0,d,e)}
+    function nb(a,b,c,d,e){if(Array.isArray(b))for(var f=0;f<b.length;f++)nb(a,b[f],c,d,e);else (d=p(d)?!!d.capture:!!d,c=hb(c),a&&a[B$1])?(a=a.i,b=String(b).toString(),b in a.g&&(f=a.g[b],c=ab(f,c,d,e),-1<c&&(Za(f[c]),Array.prototype.splice.call(f,c,1),0==f.length&&(delete a.g[b],a.h--)))):a&&(a=jb(a))&&(b=a.g[b.toString()],a=-1,b&&(a=ab(b,c,d,e)),(c=-1<a?b[a]:null)&&ob(c));}
+    function ob(a){if("number"!==typeof a&&a&&!a.ca){var b=a.src;if(b&&b[B$1])bb(b.i,a);else {var c=a.type,d=a.proxy;b.removeEventListener?b.removeEventListener(c,d,a.capture):b.detachEvent?b.detachEvent(lb(c),d):b.addListener&&b.removeListener&&b.removeListener(d);(c=jb(b))?(bb(c,a),0==c.h&&(c.src=null,b[cb]=null)):Za(a);}}}function lb(a){return a in db$1?db$1[a]:db$1[a]="on"+a}function mb(a,b){if(a.ca)a=!0;else {b=new A(b,this);var c=a.listener,d=a.ia||a.src;a.fa&&ob(a);a=c.call(d,b);}return a}
+    function jb(a){a=a[cb];return a instanceof $a?a:null}var pb="__closure_events_fn_"+(1E9*Math.random()>>>0);function hb(a){if("function"===typeof a)return a;a[pb]||(a[pb]=function(b){return a.handleEvent(b)});return a[pb]}function C$1(){v.call(this);this.i=new $a(this);this.P=this;this.I=null;}t(C$1,v);C$1.prototype[B$1]=!0;C$1.prototype.removeEventListener=function(a,b,c,d){nb(this,a,b,c,d);};
+    function D$1(a,b){var c,d=a.I;if(d)for(c=[];d;d=d.I)c.push(d);a=a.P;d=b.type||b;if("string"===typeof b)b=new z$1(b,a);else if(b instanceof z$1)b.target=b.target||a;else {var e=b;b=new z$1(d,a);Aa$1(b,e);}e=!0;if(c)for(var f=c.length-1;0<=f;f--){var h=b.g=c[f];e=qb(h,d,!0,b)&&e;}h=b.g=a;e=qb(h,d,!0,b)&&e;e=qb(h,d,!1,b)&&e;if(c)for(f=0;f<c.length;f++)h=b.g=c[f],e=qb(h,d,!1,b)&&e;}
+    C$1.prototype.M=function(){C$1.Z.M.call(this);if(this.i){var a=this.i,c;for(c in a.g){for(var d=a.g[c],e=0;e<d.length;e++)Za(d[e]);delete a.g[c];a.h--;}}this.I=null;};C$1.prototype.N=function(a,b,c,d){return this.i.add(String(a),b,!1,c,d)};C$1.prototype.O=function(a,b,c,d){return this.i.add(String(a),b,!0,c,d)};
+    function qb(a,b,c,d){b=a.i.g[String(b)];if(!b)return !0;b=b.concat();for(var e=!0,f=0;f<b.length;++f){var h=b[f];if(h&&!h.ca&&h.capture==c){var n=h.listener,u=h.ia||h.src;h.fa&&bb(a.i,h);e=!1!==n.call(u,d)&&e;}}return e&&!d.defaultPrevented}var rb=l.JSON.stringify;function sb(){var a=tb;let b=null;a.g&&(b=a.g,a.g=a.g.next,a.g||(a.h=null),b.next=null);return b}class ub{constructor(){this.h=this.g=null;}add(a,b){const c=vb.get();c.set(a,b);this.h?this.h.next=c:this.g=c;this.h=c;}}var vb=new class{constructor(a,b){this.i=a;this.j=b;this.h=0;this.g=null;}get(){let a;0<this.h?(this.h--,a=this.g,this.g=a.next,a.next=null):a=this.i();return a}}(()=>new wb,a=>a.reset());
+    class wb{constructor(){this.next=this.g=this.h=null;}set(a,b){this.h=a;this.g=b;this.next=null;}reset(){this.next=this.g=this.h=null;}}function yb(a){l.setTimeout(()=>{throw a;},0);}function zb(a,b){Ab||Bb();Cb||(Ab(),Cb=!0);tb.add(a,b);}var Ab;function Bb(){var a=l.Promise.resolve(void 0);Ab=function(){a.then(Db);};}var Cb=!1,tb=new ub;function Db(){for(var a;a=sb();){try{a.h.call(a.g);}catch(c){yb(c);}var b=vb;b.j(a);100>b.h&&(b.h++,a.next=b.g,b.g=a);}Cb=!1;}function Eb(a,b){C$1.call(this);this.h=a||1;this.g=b||l;this.j=q(this.kb,this);this.l=Date.now();}t(Eb,C$1);k=Eb.prototype;k.da=!1;k.S=null;k.kb=function(){if(this.da){var a=Date.now()-this.l;0<a&&a<.8*this.h?this.S=this.g.setTimeout(this.j,this.h-a):(this.S&&(this.g.clearTimeout(this.S),this.S=null),D$1(this,"tick"),this.da&&(Fb(this),this.start()));}};k.start=function(){this.da=!0;this.S||(this.S=this.g.setTimeout(this.j,this.h),this.l=Date.now());};
+    function Fb(a){a.da=!1;a.S&&(a.g.clearTimeout(a.S),a.S=null);}k.M=function(){Eb.Z.M.call(this);Fb(this);delete this.g;};function Gb(a,b,c){if("function"===typeof a)c&&(a=q(a,c));else if(a&&"function"==typeof a.handleEvent)a=q(a.handleEvent,a);else throw Error("Invalid listener argument");return 2147483647<Number(b)?-1:l.setTimeout(a,b||0)}function Hb(a){a.g=Gb(()=>{a.g=null;a.i&&(a.i=!1,Hb(a));},a.j);const b=a.h;a.h=null;a.m.apply(null,b);}class Ib extends v{constructor(a,b){super();this.m=a;this.j=b;this.h=null;this.i=!1;this.g=null;}l(a){this.h=arguments;this.g?this.i=!0:Hb(this);}M(){super.M();this.g&&(l.clearTimeout(this.g),this.g=null,this.i=!1,this.h=null);}}function E(a){v.call(this);this.h=a;this.g={};}t(E,v);var Jb=[];function Kb(a,b,c,d){Array.isArray(c)||(c&&(Jb[0]=c.toString()),c=Jb);for(var e=0;e<c.length;e++){var f=fb(b,c[e],d||a.handleEvent,!1,a.h||a);if(!f)break;a.g[f.key]=f;}}function Lb(a){xa(a.g,function(b,c){this.g.hasOwnProperty(c)&&ob(b);},a);a.g={};}E.prototype.M=function(){E.Z.M.call(this);Lb(this);};E.prototype.handleEvent=function(){throw Error("EventHandler.handleEvent not implemented");};function Mb(){this.g=!0;}Mb.prototype.Aa=function(){this.g=!1;};function Nb(a,b,c,d,e,f){a.info(function(){if(a.g)if(f){var h="";for(var n=f.split("&"),u=0;u<n.length;u++){var m=n[u].split("=");if(1<m.length){var r=m[0];m=m[1];var G=r.split("_");h=2<=G.length&&"type"==G[1]?h+(r+"="+m+"&"):h+(r+"=redacted&");}}}else h=null;else h=f;return "XMLHTTP REQ ("+d+") [attempt "+e+"]: "+b+"\n"+c+"\n"+h});}
+    function Ob(a,b,c,d,e,f,h){a.info(function(){return "XMLHTTP RESP ("+d+") [ attempt "+e+"]: "+b+"\n"+c+"\n"+f+" "+h});}function F$1(a,b,c,d){a.info(function(){return "XMLHTTP TEXT ("+b+"): "+Pb(a,c)+(d?" "+d:"")});}function Qb(a,b){a.info(function(){return "TIMEOUT: "+b});}Mb.prototype.info=function(){};
+    function Pb(a,b){if(!a.g)return b;if(!b)return null;try{var c=JSON.parse(b);if(c)for(a=0;a<c.length;a++)if(Array.isArray(c[a])){var d=c[a];if(!(2>d.length)){var e=d[1];if(Array.isArray(e)&&!(1>e.length)){var f=e[0];if("noop"!=f&&"stop"!=f&&"close"!=f)for(var h=1;h<e.length;h++)e[h]="";}}}return rb(c)}catch(n){return b}}var H={},Rb=null;function Sb(){return Rb=Rb||new C$1}H.Ma="serverreachability";function Tb(a){z$1.call(this,H.Ma,a);}t(Tb,z$1);function I(a){const b=Sb();D$1(b,new Tb(b,a));}H.STAT_EVENT="statevent";function Ub(a,b){z$1.call(this,H.STAT_EVENT,a);this.stat=b;}t(Ub,z$1);function J$1(a){const b=Sb();D$1(b,new Ub(b,a));}H.Na="timingevent";function Vb(a,b){z$1.call(this,H.Na,a);this.size=b;}t(Vb,z$1);
+    function K(a,b){if("function"!==typeof a)throw Error("Fn must not be null and must be a function");return l.setTimeout(function(){a();},b)}var Wb={NO_ERROR:0,lb:1,yb:2,xb:3,sb:4,wb:5,zb:6,Ja:7,TIMEOUT:8,Cb:9};var Xb={qb:"complete",Mb:"success",Ka:"error",Ja:"abort",Eb:"ready",Fb:"readystatechange",TIMEOUT:"timeout",Ab:"incrementaldata",Db:"progress",tb:"downloadprogress",Ub:"uploadprogress"};function Yb(){}Yb.prototype.h=null;function Zb(a){return a.h||(a.h=a.i())}var L$1={OPEN:"a",pb:"b",Ka:"c",Bb:"d"};function ac(){z$1.call(this,"d");}t(ac,z$1);function bc(){z$1.call(this,"c");}t(bc,z$1);var cc;function dc(){}t(dc,Yb);dc.prototype.g=function(){return new XMLHttpRequest};dc.prototype.i=function(){return {}};cc=new dc;function M$1(a,b,c,d){this.l=a;this.j=b;this.m=c;this.X=d||1;this.V=new E(this);this.P=ec;a=Ja?125:void 0;this.W=new Eb(a);this.H=null;this.i=!1;this.s=this.A=this.v=this.K=this.F=this.Y=this.B=null;this.D=[];this.g=null;this.C=0;this.o=this.u=null;this.N=-1;this.I=!1;this.O=0;this.L=null;this.aa=this.J=this.$=this.U=!1;this.h=new fc;}function fc(){this.i=null;this.g="";this.h=!1;}var ec=45E3,gc={},hc={};k=M$1.prototype;k.setTimeout=function(a){this.P=a;};
+    function ic(a,b,c){a.K=1;a.v=jc(N$1(b));a.s=c;a.U=!0;kc(a,null);}function kc(a,b){a.F=Date.now();lc(a);a.A=N$1(a.v);var c=a.A,d=a.X;Array.isArray(d)||(d=[String(d)]);mc(c.h,"t",d);a.C=0;c=a.l.H;a.h=new fc;a.g=nc(a.l,c?b:null,!a.s);0<a.O&&(a.L=new Ib(q(a.Ia,a,a.g),a.O));Kb(a.V,a.g,"readystatechange",a.gb);b=a.H?ya(a.H):{};a.s?(a.u||(a.u="POST"),b["Content-Type"]="application/x-www-form-urlencoded",a.g.ea(a.A,a.u,a.s,b)):(a.u="GET",a.g.ea(a.A,a.u,null,b));I(1);Nb(a.j,a.u,a.A,a.m,a.X,a.s);}
+    k.gb=function(a){a=a.target;const b=this.L;b&&3==O(a)?b.l():this.Ia(a);};
+    k.Ia=function(a){try{if(a==this.g)a:{const r=O(this.g);var b=this.g.Da();const G=this.g.ba();if(!(3>r)&&(3!=r||Ja||this.g&&(this.h.h||this.g.ga()||oc(this.g)))){this.I||4!=r||7==b||(8==b||0>=G?I(3):I(2));pc(this);var c=this.g.ba();this.N=c;b:if(qc(this)){var d=oc(this.g);a="";var e=d.length,f=4==O(this.g);if(!this.h.i){if("undefined"===typeof TextDecoder){P(this);rc(this);var h="";break b}this.h.i=new l.TextDecoder;}for(b=0;b<e;b++)this.h.h=!0,a+=this.h.i.decode(d[b],{stream:f&&b==e-1});d.splice(0,
+    e);this.h.g+=a;this.C=0;h=this.h.g;}else h=this.g.ga();this.i=200==c;Ob(this.j,this.u,this.A,this.m,this.X,r,c);if(this.i){if(this.$&&!this.J){b:{if(this.g){var n,u=this.g;if((n=u.g?u.g.getResponseHeader("X-HTTP-Initial-Response"):null)&&!sa(n)){var m=n;break b}}m=null;}if(c=m)F$1(this.j,this.m,c,"Initial handshake response via X-HTTP-Initial-Response"),this.J=!0,sc(this,c);else {this.i=!1;this.o=3;J$1(12);P(this);rc(this);break a}}this.U?(tc(this,r,h),Ja&&this.i&&3==r&&(Kb(this.V,this.W,"tick",this.fb),
+    this.W.start())):(F$1(this.j,this.m,h,null),sc(this,h));4==r&&P(this);this.i&&!this.I&&(4==r?uc(this.l,this):(this.i=!1,lc(this)));}else 400==c&&0<h.indexOf("Unknown SID")?(this.o=3,J$1(12)):(this.o=0,J$1(13)),P(this),rc(this);}}}catch(r){}finally{}};function qc(a){return a.g?"GET"==a.u&&2!=a.K&&a.l.Ba:!1}
+    function tc(a,b,c){let d=!0,e;for(;!a.I&&a.C<c.length;)if(e=vc(a,c),e==hc){4==b&&(a.o=4,J$1(14),d=!1);F$1(a.j,a.m,null,"[Incomplete Response]");break}else if(e==gc){a.o=4;J$1(15);F$1(a.j,a.m,c,"[Invalid Chunk]");d=!1;break}else F$1(a.j,a.m,e,null),sc(a,e);qc(a)&&e!=hc&&e!=gc&&(a.h.g="",a.C=0);4!=b||0!=c.length||a.h.h||(a.o=1,J$1(16),d=!1);a.i=a.i&&d;d?0<c.length&&!a.aa&&(a.aa=!0,b=a.l,b.g==a&&b.$&&!b.L&&(b.h.info("Great, no buffering proxy detected. Bytes received: "+c.length),wc(b),b.L=!0,J$1(11))):(F$1(a.j,a.m,
+    c,"[Invalid Chunked Response]"),P(a),rc(a));}k.fb=function(){if(this.g){var a=O(this.g),b=this.g.ga();this.C<b.length&&(pc(this),tc(this,a,b),this.i&&4!=a&&lc(this));}};function vc(a,b){var c=a.C,d=b.indexOf("\n",c);if(-1==d)return hc;c=Number(b.substring(c,d));if(isNaN(c))return gc;d+=1;if(d+c>b.length)return hc;b=b.substr(d,c);a.C=d+c;return b}k.cancel=function(){this.I=!0;P(this);};function lc(a){a.Y=Date.now()+a.P;xc(a,a.P);}
+    function xc(a,b){if(null!=a.B)throw Error("WatchDog timer not null");a.B=K(q(a.eb,a),b);}function pc(a){a.B&&(l.clearTimeout(a.B),a.B=null);}k.eb=function(){this.B=null;const a=Date.now();0<=a-this.Y?(Qb(this.j,this.A),2!=this.K&&(I(3),J$1(17)),P(this),this.o=2,rc(this)):xc(this,this.Y-a);};function rc(a){0==a.l.G||a.I||uc(a.l,a);}function P(a){pc(a);var b=a.L;b&&"function"==typeof b.na&&b.na();a.L=null;Fb(a.W);Lb(a.V);a.g&&(b=a.g,a.g=null,b.abort(),b.na());}
+    function sc(a,b){try{var c=a.l;if(0!=c.G&&(c.g==a||yc(c.i,a)))if(c.I=a.N,!a.J&&yc(c.i,a)&&3==c.G){try{var d=c.Ca.g.parse(b);}catch(m){d=null;}if(Array.isArray(d)&&3==d.length){var e=d;if(0==e[0])a:{if(!c.u){if(c.g)if(c.g.F+3E3<a.F)zc$1(c),Ac(c);else break a;Bc(c);J$1(18);}}else c.ta=e[1],0<c.ta-c.U&&37500>e[2]&&c.N&&0==c.A&&!c.v&&(c.v=K(q(c.ab,c),6E3));if(1>=Cc(c.i)&&c.ka){try{c.ka();}catch(m){}c.ka=void 0;}}else Q$1(c,11);}else if((a.J||c.g==a)&&zc$1(c),!sa(b))for(e=c.Ca.g.parse(b),b=0;b<e.length;b++){let m=e[b];
+    c.U=m[0];m=m[1];if(2==c.G)if("c"==m[0]){c.J=m[1];c.la=m[2];const r=m[3];null!=r&&(c.ma=r,c.h.info("VER="+c.ma));const G=m[4];null!=G&&(c.za=G,c.h.info("SVER="+c.za));const Da=m[5];null!=Da&&"number"===typeof Da&&0<Da&&(d=1.5*Da,c.K=d,c.h.info("backChannelRequestTimeoutMs_="+d));d=c;const ca=a.g;if(ca){const Ea=ca.g?ca.g.getResponseHeader("X-Client-Wire-Protocol"):null;if(Ea){var f=d.i;!f.g&&(w(Ea,"spdy")||w(Ea,"quic")||w(Ea,"h2"))&&(f.j=f.l,f.g=new Set,f.h&&(Dc(f,f.h),f.h=null));}if(d.D){const xb=
+    ca.g?ca.g.getResponseHeader("X-HTTP-Session-Id"):null;xb&&(d.sa=xb,R(d.F,d.D,xb));}}c.G=3;c.j&&c.j.xa();c.$&&(c.O=Date.now()-a.F,c.h.info("Handshake RTT: "+c.O+"ms"));d=c;var h=a;d.oa=Ec(d,d.H?d.la:null,d.W);if(h.J){Fc(d.i,h);var n=h,u=d.K;u&&n.setTimeout(u);n.B&&(pc(n),lc(n));d.g=h;}else Gc(d);0<c.l.length&&Hc(c);}else "stop"!=m[0]&&"close"!=m[0]||Q$1(c,7);else 3==c.G&&("stop"==m[0]||"close"==m[0]?"stop"==m[0]?Q$1(c,7):Ic(c):"noop"!=m[0]&&c.j&&c.j.wa(m),c.A=0);}I(4);}catch(m){}}function Jc(a){if(a.R&&"function"==typeof a.R)return a.R();if("string"===typeof a)return a.split("");if(ba(a)){for(var b=[],c=a.length,d=0;d<c;d++)b.push(a[d]);return b}b=[];c=0;for(d in a)b[c++]=a[d];return b}
+    function Kc(a,b){if(a.forEach&&"function"==typeof a.forEach)a.forEach(b,void 0);else if(ba(a)||"string"===typeof a)na(a,b,void 0);else {if(a.T&&"function"==typeof a.T)var c=a.T();else if(a.R&&"function"==typeof a.R)c=void 0;else if(ba(a)||"string"===typeof a){c=[];for(var d=a.length,e=0;e<d;e++)c.push(e);}else for(e in c=[],d=0,a)c[d++]=e;d=Jc(a);e=d.length;for(var f=0;f<e;f++)b.call(void 0,d[f],c&&c[f],a);}}function S(a,b){this.h={};this.g=[];this.i=0;var c=arguments.length;if(1<c){if(c%2)throw Error("Uneven number of arguments");for(var d=0;d<c;d+=2)this.set(arguments[d],arguments[d+1]);}else if(a)if(a instanceof S)for(c=a.T(),d=0;d<c.length;d++)this.set(c[d],a.get(c[d]));else for(d in a)this.set(d,a[d]);}k=S.prototype;k.R=function(){Lc(this);for(var a=[],b=0;b<this.g.length;b++)a.push(this.h[this.g[b]]);return a};k.T=function(){Lc(this);return this.g.concat()};
+    function Lc(a){if(a.i!=a.g.length){for(var b=0,c=0;b<a.g.length;){var d=a.g[b];T(a.h,d)&&(a.g[c++]=d);b++;}a.g.length=c;}if(a.i!=a.g.length){var e={};for(c=b=0;b<a.g.length;)d=a.g[b],T(e,d)||(a.g[c++]=d,e[d]=1),b++;a.g.length=c;}}k.get=function(a,b){return T(this.h,a)?this.h[a]:b};k.set=function(a,b){T(this.h,a)||(this.i++,this.g.push(a));this.h[a]=b;};k.forEach=function(a,b){for(var c=this.T(),d=0;d<c.length;d++){var e=c[d],f=this.get(e);a.call(b,f,e,this);}};
+    function T(a,b){return Object.prototype.hasOwnProperty.call(a,b)}var Mc=/^(?:([^:/?#.]+):)?(?:\/\/(?:([^\\/?#]*)@)?([^\\/?#]*?)(?::([0-9]+))?(?=[\\/?#]|$))?([^?#]+)?(?:\?([^#]*))?(?:#([\s\S]*))?$/;function Nc(a,b){if(a){a=a.split("&");for(var c=0;c<a.length;c++){var d=a[c].indexOf("="),e=null;if(0<=d){var f=a[c].substring(0,d);e=a[c].substring(d+1);}else f=a[c];b(f,e?decodeURIComponent(e.replace(/\+/g," ")):"");}}}function U$1(a,b){this.i=this.s=this.j="";this.m=null;this.o=this.l="";this.g=!1;if(a instanceof U$1){this.g=void 0!==b?b:a.g;Oc(this,a.j);this.s=a.s;Pc(this,a.i);Qc(this,a.m);this.l=a.l;b=a.h;var c=new Rc;c.i=b.i;b.g&&(c.g=new S(b.g),c.h=b.h);Sc(this,c);this.o=a.o;}else a&&(c=String(a).match(Mc))?(this.g=!!b,Oc(this,c[1]||"",!0),this.s=Tc(c[2]||""),Pc(this,c[3]||"",!0),Qc(this,c[4]),this.l=Tc(c[5]||"",!0),Sc(this,c[6]||"",!0),this.o=Tc(c[7]||"")):(this.g=!!b,this.h=new Rc(null,this.g));}
+    U$1.prototype.toString=function(){var a=[],b=this.j;b&&a.push(Uc(b,Vc,!0),":");var c=this.i;if(c||"file"==b)a.push("//"),(b=this.s)&&a.push(Uc(b,Vc,!0),"@"),a.push(encodeURIComponent(String(c)).replace(/%25([0-9a-fA-F]{2})/g,"%$1")),c=this.m,null!=c&&a.push(":",String(c));if(c=this.l)this.i&&"/"!=c.charAt(0)&&a.push("/"),a.push(Uc(c,"/"==c.charAt(0)?Wc:Xc,!0));(c=this.h.toString())&&a.push("?",c);(c=this.o)&&a.push("#",Uc(c,Yc));return a.join("")};function N$1(a){return new U$1(a)}
+    function Oc(a,b,c){a.j=c?Tc(b,!0):b;a.j&&(a.j=a.j.replace(/:$/,""));}function Pc(a,b,c){a.i=c?Tc(b,!0):b;}function Qc(a,b){if(b){b=Number(b);if(isNaN(b)||0>b)throw Error("Bad port number "+b);a.m=b;}else a.m=null;}function Sc(a,b,c){b instanceof Rc?(a.h=b,Zc(a.h,a.g)):(c||(b=Uc(b,$c)),a.h=new Rc(b,a.g));}function R(a,b,c){a.h.set(b,c);}function jc(a){R(a,"zx",Math.floor(2147483648*Math.random()).toString(36)+Math.abs(Math.floor(2147483648*Math.random())^Date.now()).toString(36));return a}
+    function ad(a){return a instanceof U$1?N$1(a):new U$1(a,void 0)}function bd(a,b,c,d){var e=new U$1(null,void 0);a&&Oc(e,a);b&&Pc(e,b);c&&Qc(e,c);d&&(e.l=d);return e}function Tc(a,b){return a?b?decodeURI(a.replace(/%25/g,"%2525")):decodeURIComponent(a):""}function Uc(a,b,c){return "string"===typeof a?(a=encodeURI(a).replace(b,cd),c&&(a=a.replace(/%25([0-9a-fA-F]{2})/g,"%$1")),a):null}function cd(a){a=a.charCodeAt(0);return "%"+(a>>4&15).toString(16)+(a&15).toString(16)}
+    var Vc=/[#\/\?@]/g,Xc=/[#\?:]/g,Wc=/[#\?]/g,$c=/[#\?@]/g,Yc=/#/g;function Rc(a,b){this.h=this.g=null;this.i=a||null;this.j=!!b;}function V(a){a.g||(a.g=new S,a.h=0,a.i&&Nc(a.i,function(b,c){a.add(decodeURIComponent(b.replace(/\+/g," ")),c);}));}k=Rc.prototype;k.add=function(a,b){V(this);this.i=null;a=W$1(this,a);var c=this.g.get(a);c||this.g.set(a,c=[]);c.push(b);this.h+=1;return this};
+    function dd(a,b){V(a);b=W$1(a,b);T(a.g.h,b)&&(a.i=null,a.h-=a.g.get(b).length,a=a.g,T(a.h,b)&&(delete a.h[b],a.i--,a.g.length>2*a.i&&Lc(a)));}function ed(a,b){V(a);b=W$1(a,b);return T(a.g.h,b)}k.forEach=function(a,b){V(this);this.g.forEach(function(c,d){na(c,function(e){a.call(b,e,d,this);},this);},this);};k.T=function(){V(this);for(var a=this.g.R(),b=this.g.T(),c=[],d=0;d<b.length;d++)for(var e=a[d],f=0;f<e.length;f++)c.push(b[d]);return c};
+    k.R=function(a){V(this);var b=[];if("string"===typeof a)ed(this,a)&&(b=qa(b,this.g.get(W$1(this,a))));else {a=this.g.R();for(var c=0;c<a.length;c++)b=qa(b,a[c]);}return b};k.set=function(a,b){V(this);this.i=null;a=W$1(this,a);ed(this,a)&&(this.h-=this.g.get(a).length);this.g.set(a,[b]);this.h+=1;return this};k.get=function(a,b){if(!a)return b;a=this.R(a);return 0<a.length?String(a[0]):b};function mc(a,b,c){dd(a,b);0<c.length&&(a.i=null,a.g.set(W$1(a,b),ra(c)),a.h+=c.length);}
+    k.toString=function(){if(this.i)return this.i;if(!this.g)return "";for(var a=[],b=this.g.T(),c=0;c<b.length;c++){var d=b[c],e=encodeURIComponent(String(d));d=this.R(d);for(var f=0;f<d.length;f++){var h=e;""!==d[f]&&(h+="="+encodeURIComponent(String(d[f])));a.push(h);}}return this.i=a.join("&")};function W$1(a,b){b=String(b);a.j&&(b=b.toLowerCase());return b}function Zc(a,b){b&&!a.j&&(V(a),a.i=null,a.g.forEach(function(c,d){var e=d.toLowerCase();d!=e&&(dd(this,d),mc(this,e,c));},a));a.j=b;}var fd=class{constructor(a,b){this.h=a;this.g=b;}};function gd(a){this.l=a||hd;l.PerformanceNavigationTiming?(a=l.performance.getEntriesByType("navigation"),a=0<a.length&&("hq"==a[0].nextHopProtocol||"h2"==a[0].nextHopProtocol)):a=!!(l.g&&l.g.Ea&&l.g.Ea()&&l.g.Ea().Zb);this.j=a?this.l:1;this.g=null;1<this.j&&(this.g=new Set);this.h=null;this.i=[];}var hd=10;function id(a){return a.h?!0:a.g?a.g.size>=a.j:!1}function Cc(a){return a.h?1:a.g?a.g.size:0}function yc(a,b){return a.h?a.h==b:a.g?a.g.has(b):!1}function Dc(a,b){a.g?a.g.add(b):a.h=b;}
+    function Fc(a,b){a.h&&a.h==b?a.h=null:a.g&&a.g.has(b)&&a.g.delete(b);}gd.prototype.cancel=function(){this.i=jd(this);if(this.h)this.h.cancel(),this.h=null;else if(this.g&&0!==this.g.size){for(const a of this.g.values())a.cancel();this.g.clear();}};function jd(a){if(null!=a.h)return a.i.concat(a.h.D);if(null!=a.g&&0!==a.g.size){let b=a.i;for(const c of a.g.values())b=b.concat(c.D);return b}return ra(a.i)}function kd(){}kd.prototype.stringify=function(a){return l.JSON.stringify(a,void 0)};kd.prototype.parse=function(a){return l.JSON.parse(a,void 0)};function ld(){this.g=new kd;}function md(a,b,c){const d=c||"";try{Kc(a,function(e,f){let h=e;p(e)&&(h=rb(e));b.push(d+f+"="+encodeURIComponent(h));});}catch(e){throw b.push(d+"type="+encodeURIComponent("_badmap")),e;}}function nd(a,b){const c=new Mb;if(l.Image){const d=new Image;d.onload=ja(od,c,d,"TestLoadImage: loaded",!0,b);d.onerror=ja(od,c,d,"TestLoadImage: error",!1,b);d.onabort=ja(od,c,d,"TestLoadImage: abort",!1,b);d.ontimeout=ja(od,c,d,"TestLoadImage: timeout",!1,b);l.setTimeout(function(){if(d.ontimeout)d.ontimeout();},1E4);d.src=a;}else b(!1);}function od(a,b,c,d,e){try{b.onload=null,b.onerror=null,b.onabort=null,b.ontimeout=null,e(d);}catch(f){}}function pd(a){this.l=a.$b||null;this.j=a.ib||!1;}t(pd,Yb);pd.prototype.g=function(){return new qd(this.l,this.j)};pd.prototype.i=function(a){return function(){return a}}({});function qd(a,b){C$1.call(this);this.D=a;this.u=b;this.m=void 0;this.readyState=rd;this.status=0;this.responseType=this.responseText=this.response=this.statusText="";this.onreadystatechange=null;this.v=new Headers;this.h=null;this.C="GET";this.B="";this.g=!1;this.A=this.j=this.l=null;}t(qd,C$1);var rd=0;k=qd.prototype;
+    k.open=function(a,b){if(this.readyState!=rd)throw this.abort(),Error("Error reopening a connection");this.C=a;this.B=b;this.readyState=1;sd(this);};k.send=function(a){if(1!=this.readyState)throw this.abort(),Error("need to call open() first. ");this.g=!0;const b={headers:this.v,method:this.C,credentials:this.m,cache:void 0};a&&(b.body=a);(this.D||l).fetch(new Request(this.B,b)).then(this.Va.bind(this),this.ha.bind(this));};
+    k.abort=function(){this.response=this.responseText="";this.v=new Headers;this.status=0;this.j&&this.j.cancel("Request was aborted.");1<=this.readyState&&this.g&&4!=this.readyState&&(this.g=!1,td(this));this.readyState=rd;};
+    k.Va=function(a){if(this.g&&(this.l=a,this.h||(this.status=this.l.status,this.statusText=this.l.statusText,this.h=a.headers,this.readyState=2,sd(this)),this.g&&(this.readyState=3,sd(this),this.g)))if("arraybuffer"===this.responseType)a.arrayBuffer().then(this.Ta.bind(this),this.ha.bind(this));else if("undefined"!==typeof l.ReadableStream&&"body"in a){this.j=a.body.getReader();if(this.u){if(this.responseType)throw Error('responseType must be empty for "streamBinaryChunks" mode responses.');this.response=
+    [];}else this.response=this.responseText="",this.A=new TextDecoder;ud(this);}else a.text().then(this.Ua.bind(this),this.ha.bind(this));};function ud(a){a.j.read().then(a.Sa.bind(a)).catch(a.ha.bind(a));}k.Sa=function(a){if(this.g){if(this.u&&a.value)this.response.push(a.value);else if(!this.u){var b=a.value?a.value:new Uint8Array(0);if(b=this.A.decode(b,{stream:!a.done}))this.response=this.responseText+=b;}a.done?td(this):sd(this);3==this.readyState&&ud(this);}};
+    k.Ua=function(a){this.g&&(this.response=this.responseText=a,td(this));};k.Ta=function(a){this.g&&(this.response=a,td(this));};k.ha=function(){this.g&&td(this);};function td(a){a.readyState=4;a.l=null;a.j=null;a.A=null;sd(a);}k.setRequestHeader=function(a,b){this.v.append(a,b);};k.getResponseHeader=function(a){return this.h?this.h.get(a.toLowerCase())||"":""};
+    k.getAllResponseHeaders=function(){if(!this.h)return "";const a=[],b=this.h.entries();for(var c=b.next();!c.done;)c=c.value,a.push(c[0]+": "+c[1]),c=b.next();return a.join("\r\n")};function sd(a){a.onreadystatechange&&a.onreadystatechange.call(a);}Object.defineProperty(qd.prototype,"withCredentials",{get:function(){return "include"===this.m},set:function(a){this.m=a?"include":"same-origin";}});var vd=l.JSON.parse;function X$1(a){C$1.call(this);this.headers=new S;this.u=a||null;this.h=!1;this.C=this.g=null;this.H="";this.m=0;this.j="";this.l=this.F=this.v=this.D=!1;this.B=0;this.A=null;this.J=wd;this.K=this.L=!1;}t(X$1,C$1);var wd="",xd=/^https?$/i,yd=["POST","PUT"];k=X$1.prototype;
+    k.ea=function(a,b,c,d){if(this.g)throw Error("[goog.net.XhrIo] Object is active with another request="+this.H+"; newUri="+a);b=b?b.toUpperCase():"GET";this.H=a;this.j="";this.m=0;this.D=!1;this.h=!0;this.g=this.u?this.u.g():cc.g();this.C=this.u?Zb(this.u):Zb(cc);this.g.onreadystatechange=q(this.Fa,this);try{this.F=!0,this.g.open(b,String(a),!0),this.F=!1;}catch(f){zd(this,f);return}a=c||"";const e=new S(this.headers);d&&Kc(d,function(f,h){e.set(h,f);});d=oa(e.T());c=l.FormData&&a instanceof l.FormData;
+    !(0<=ma$1(yd,b))||d||c||e.set("Content-Type","application/x-www-form-urlencoded;charset=utf-8");e.forEach(function(f,h){this.g.setRequestHeader(h,f);},this);this.J&&(this.g.responseType=this.J);"withCredentials"in this.g&&this.g.withCredentials!==this.L&&(this.g.withCredentials=this.L);try{Ad(this),0<this.B&&((this.K=Bd(this.g))?(this.g.timeout=this.B,this.g.ontimeout=q(this.pa,this)):this.A=Gb(this.pa,this.B,this)),this.v=!0,this.g.send(a),this.v=!1;}catch(f){zd(this,f);}};
+    function Bd(a){return y&&Ra()&&"number"===typeof a.timeout&&void 0!==a.ontimeout}function pa(a){return "content-type"==a.toLowerCase()}k.pa=function(){"undefined"!=typeof goog&&this.g&&(this.j="Timed out after "+this.B+"ms, aborting",this.m=8,D$1(this,"timeout"),this.abort(8));};function zd(a,b){a.h=!1;a.g&&(a.l=!0,a.g.abort(),a.l=!1);a.j=b;a.m=5;Cd(a);Dd(a);}function Cd(a){a.D||(a.D=!0,D$1(a,"complete"),D$1(a,"error"));}
+    k.abort=function(a){this.g&&this.h&&(this.h=!1,this.l=!0,this.g.abort(),this.l=!1,this.m=a||7,D$1(this,"complete"),D$1(this,"abort"),Dd(this));};k.M=function(){this.g&&(this.h&&(this.h=!1,this.l=!0,this.g.abort(),this.l=!1),Dd(this,!0));X$1.Z.M.call(this);};k.Fa=function(){this.s||(this.F||this.v||this.l?Ed(this):this.cb());};k.cb=function(){Ed(this);};
+    function Ed(a){if(a.h&&"undefined"!=typeof goog&&(!a.C[1]||4!=O(a)||2!=a.ba()))if(a.v&&4==O(a))Gb(a.Fa,0,a);else if(D$1(a,"readystatechange"),4==O(a)){a.h=!1;try{const n=a.ba();a:switch(n){case 200:case 201:case 202:case 204:case 206:case 304:case 1223:var b=!0;break a;default:b=!1;}var c;if(!(c=b)){var d;if(d=0===n){var e=String(a.H).match(Mc)[1]||null;if(!e&&l.self&&l.self.location){var f=l.self.location.protocol;e=f.substr(0,f.length-1);}d=!xd.test(e?e.toLowerCase():"");}c=d;}if(c)D$1(a,"complete"),D$1(a,
+    "success");else {a.m=6;try{var h=2<O(a)?a.g.statusText:"";}catch(u){h="";}a.j=h+" ["+a.ba()+"]";Cd(a);}}finally{Dd(a);}}}function Dd(a,b){if(a.g){Ad(a);const c=a.g,d=a.C[0]?aa:null;a.g=null;a.C=null;b||D$1(a,"ready");try{c.onreadystatechange=d;}catch(e){}}}function Ad(a){a.g&&a.K&&(a.g.ontimeout=null);a.A&&(l.clearTimeout(a.A),a.A=null);}function O(a){return a.g?a.g.readyState:0}k.ba=function(){try{return 2<O(this)?this.g.status:-1}catch(a){return -1}};
+    k.ga=function(){try{return this.g?this.g.responseText:""}catch(a){return ""}};k.Qa=function(a){if(this.g){var b=this.g.responseText;a&&0==b.indexOf(a)&&(b=b.substring(a.length));return vd(b)}};function oc(a){try{if(!a.g)return null;if("response"in a.g)return a.g.response;switch(a.J){case wd:case "text":return a.g.responseText;case "arraybuffer":if("mozResponseArrayBuffer"in a.g)return a.g.mozResponseArrayBuffer}return null}catch(b){return null}}k.Da=function(){return this.m};
+    k.La=function(){return "string"===typeof this.j?this.j:String(this.j)};function Fd(a){let b="";xa(a,function(c,d){b+=d;b+=":";b+=c;b+="\r\n";});return b}function Gd(a,b,c){a:{for(d in c){var d=!1;break a}d=!0;}d||(c=Fd(c),"string"===typeof a?(null!=c&&encodeURIComponent(String(c))):R(a,b,c));}function Hd(a,b,c){return c&&c.internalChannelParams?c.internalChannelParams[a]||b:b}
+    function Id(a){this.za=0;this.l=[];this.h=new Mb;this.la=this.oa=this.F=this.W=this.g=this.sa=this.D=this.aa=this.o=this.P=this.s=null;this.Za=this.V=0;this.Xa=Hd("failFast",!1,a);this.N=this.v=this.u=this.m=this.j=null;this.X=!0;this.I=this.ta=this.U=-1;this.Y=this.A=this.C=0;this.Pa=Hd("baseRetryDelayMs",5E3,a);this.$a=Hd("retryDelaySeedMs",1E4,a);this.Ya=Hd("forwardChannelMaxRetries",2,a);this.ra=Hd("forwardChannelRequestTimeoutMs",2E4,a);this.qa=a&&a.xmlHttpFactory||void 0;this.Ba=a&&a.Yb||!1;
+    this.K=void 0;this.H=a&&a.supportsCrossDomainXhr||!1;this.J="";this.i=new gd(a&&a.concurrentRequestLimit);this.Ca=new ld;this.ja=a&&a.fastHandshake||!1;this.Ra=a&&a.Wb||!1;a&&a.Aa&&this.h.Aa();a&&a.forceLongPolling&&(this.X=!1);this.$=!this.ja&&this.X&&a&&a.detectBufferingProxy||!1;this.ka=void 0;this.O=0;this.L=!1;this.B=null;this.Wa=!a||!1!==a.Xb;}k=Id.prototype;k.ma=8;k.G=1;
+    function Ic(a){Jd(a);if(3==a.G){var b=a.V++,c=N$1(a.F);R(c,"SID",a.J);R(c,"RID",b);R(c,"TYPE","terminate");Kd(a,c);b=new M$1(a,a.h,b,void 0);b.K=2;b.v=jc(N$1(c));c=!1;l.navigator&&l.navigator.sendBeacon&&(c=l.navigator.sendBeacon(b.v.toString(),""));!c&&l.Image&&((new Image).src=b.v,c=!0);c||(b.g=nc(b.l,null),b.g.ea(b.v));b.F=Date.now();lc(b);}Ld(a);}k.hb=function(a){try{this.h.info("Origin Trials invoked: "+a);}catch(b){}};function Ac(a){a.g&&(wc(a),a.g.cancel(),a.g=null);}
+    function Jd(a){Ac(a);a.u&&(l.clearTimeout(a.u),a.u=null);zc$1(a);a.i.cancel();a.m&&("number"===typeof a.m&&l.clearTimeout(a.m),a.m=null);}function Md(a,b){a.l.push(new fd(a.Za++,b));3==a.G&&Hc(a);}function Hc(a){id(a.i)||a.m||(a.m=!0,zb(a.Ha,a),a.C=0);}function Nd(a,b){if(Cc(a.i)>=a.i.j-(a.m?1:0))return !1;if(a.m)return a.l=b.D.concat(a.l),!0;if(1==a.G||2==a.G||a.C>=(a.Xa?0:a.Ya))return !1;a.m=K(q(a.Ha,a,b),Od(a,a.C));a.C++;return !0}
+    k.Ha=function(a){if(this.m)if(this.m=null,1==this.G){if(!a){this.V=Math.floor(1E5*Math.random());a=this.V++;const e=new M$1(this,this.h,a,void 0);let f=this.s;this.P&&(f?(f=ya(f),Aa$1(f,this.P)):f=this.P);null===this.o&&(e.H=f);if(this.ja)a:{var b=0;for(var c=0;c<this.l.length;c++){b:{var d=this.l[c];if("__data__"in d.g&&(d=d.g.__data__,"string"===typeof d)){d=d.length;break b}d=void 0;}if(void 0===d)break;b+=d;if(4096<b){b=c;break a}if(4096===b||c===this.l.length-1){b=c+1;break a}}b=1E3;}else b=1E3;b=
+    Pd(this,e,b);c=N$1(this.F);R(c,"RID",a);R(c,"CVER",22);this.D&&R(c,"X-HTTP-Session-Id",this.D);Kd(this,c);this.o&&f&&Gd(c,this.o,f);Dc(this.i,e);this.Ra&&R(c,"TYPE","init");this.ja?(R(c,"$req",b),R(c,"SID","null"),e.$=!0,ic(e,c,null)):ic(e,c,b);this.G=2;}}else 3==this.G&&(a?Qd(this,a):0==this.l.length||id(this.i)||Qd(this));};
+    function Qd(a,b){var c;b?c=b.m:c=a.V++;const d=N$1(a.F);R(d,"SID",a.J);R(d,"RID",c);R(d,"AID",a.U);Kd(a,d);a.o&&a.s&&Gd(d,a.o,a.s);c=new M$1(a,a.h,c,a.C+1);null===a.o&&(c.H=a.s);b&&(a.l=b.D.concat(a.l));b=Pd(a,c,1E3);c.setTimeout(Math.round(.5*a.ra)+Math.round(.5*a.ra*Math.random()));Dc(a.i,c);ic(c,d,b);}function Kd(a,b){a.j&&Kc({},function(c,d){R(b,d,c);});}
+    function Pd(a,b,c){c=Math.min(a.l.length,c);var d=a.j?q(a.j.Oa,a.j,a):null;a:{var e=a.l;let f=-1;for(;;){const h=["count="+c];-1==f?0<c?(f=e[0].h,h.push("ofs="+f)):f=0:h.push("ofs="+f);let n=!0;for(let u=0;u<c;u++){let m=e[u].h;const r=e[u].g;m-=f;if(0>m)f=Math.max(0,e[u].h-100),n=!1;else try{md(r,h,"req"+m+"_");}catch(G){d&&d(r);}}if(n){d=h.join("&");break a}}}a=a.l.splice(0,c);b.D=a;return d}function Gc(a){a.g||a.u||(a.Y=1,zb(a.Ga,a),a.A=0);}
+    function Bc(a){if(a.g||a.u||3<=a.A)return !1;a.Y++;a.u=K(q(a.Ga,a),Od(a,a.A));a.A++;return !0}k.Ga=function(){this.u=null;Rd(this);if(this.$&&!(this.L||null==this.g||0>=this.O)){var a=2*this.O;this.h.info("BP detection timer enabled: "+a);this.B=K(q(this.bb,this),a);}};k.bb=function(){this.B&&(this.B=null,this.h.info("BP detection timeout reached."),this.h.info("Buffering proxy detected and switch to long-polling!"),this.N=!1,this.L=!0,J$1(10),Ac(this),Rd(this));};
+    function wc(a){null!=a.B&&(l.clearTimeout(a.B),a.B=null);}function Rd(a){a.g=new M$1(a,a.h,"rpc",a.Y);null===a.o&&(a.g.H=a.s);a.g.O=0;var b=N$1(a.oa);R(b,"RID","rpc");R(b,"SID",a.J);R(b,"CI",a.N?"0":"1");R(b,"AID",a.U);Kd(a,b);R(b,"TYPE","xmlhttp");a.o&&a.s&&Gd(b,a.o,a.s);a.K&&a.g.setTimeout(a.K);var c=a.g;a=a.la;c.K=1;c.v=jc(N$1(b));c.s=null;c.U=!0;kc(c,a);}k.ab=function(){null!=this.v&&(this.v=null,Ac(this),Bc(this),J$1(19));};function zc$1(a){null!=a.v&&(l.clearTimeout(a.v),a.v=null);}
+    function uc(a,b){var c=null;if(a.g==b){zc$1(a);wc(a);a.g=null;var d=2;}else if(yc(a.i,b))c=b.D,Fc(a.i,b),d=1;else return;a.I=b.N;if(0!=a.G)if(b.i)if(1==d){c=b.s?b.s.length:0;b=Date.now()-b.F;var e=a.C;d=Sb();D$1(d,new Vb(d,c,b,e));Hc(a);}else Gc(a);else if(e=b.o,3==e||0==e&&0<a.I||!(1==d&&Nd(a,b)||2==d&&Bc(a)))switch(c&&0<c.length&&(b=a.i,b.i=b.i.concat(c)),e){case 1:Q$1(a,5);break;case 4:Q$1(a,10);break;case 3:Q$1(a,6);break;default:Q$1(a,2);}}
+    function Od(a,b){let c=a.Pa+Math.floor(Math.random()*a.$a);a.j||(c*=2);return c*b}function Q$1(a,b){a.h.info("Error code "+b);if(2==b){var c=null;a.j&&(c=null);var d=q(a.jb,a);c||(c=new U$1("//www.google.com/images/cleardot.gif"),l.location&&"http"==l.location.protocol||Oc(c,"https"),jc(c));nd(c.toString(),d);}else J$1(2);a.G=0;a.j&&a.j.va(b);Ld(a);Jd(a);}k.jb=function(a){a?(this.h.info("Successfully pinged google.com"),J$1(2)):(this.h.info("Failed to ping google.com"),J$1(1));};
+    function Ld(a){a.G=0;a.I=-1;if(a.j){if(0!=jd(a.i).length||0!=a.l.length)a.i.i.length=0,ra(a.l),a.l.length=0;a.j.ua();}}function Ec(a,b,c){let d=ad(c);if(""!=d.i)b&&Pc(d,b+"."+d.i),Qc(d,d.m);else {const e=l.location;d=bd(e.protocol,b?b+"."+e.hostname:e.hostname,+e.port,c);}a.aa&&xa(a.aa,function(e,f){R(d,f,e);});b=a.D;c=a.sa;b&&c&&R(d,b,c);R(d,"VER",a.ma);Kd(a,d);return d}
+    function nc(a,b,c){if(b&&!a.H)throw Error("Can't create secondary domain capable XhrIo object.");b=c&&a.Ba&&!a.qa?new X$1(new pd({ib:!0})):new X$1(a.qa);b.L=a.H;return b}function Sd(){}k=Sd.prototype;k.xa=function(){};k.wa=function(){};k.va=function(){};k.ua=function(){};k.Oa=function(){};function Y$1(a,b){C$1.call(this);this.g=new Id(b);this.l=a;this.h=b&&b.messageUrlParams||null;a=b&&b.messageHeaders||null;b&&b.clientProtocolHeaderRequired&&(a?a["X-Client-Protocol"]="webchannel":a={"X-Client-Protocol":"webchannel"});this.g.s=a;a=b&&b.initMessageHeaders||null;b&&b.messageContentType&&(a?a["X-WebChannel-Content-Type"]=b.messageContentType:a={"X-WebChannel-Content-Type":b.messageContentType});b&&b.ya&&(a?a["X-WebChannel-Client-Profile"]=b.ya:a={"X-WebChannel-Client-Profile":b.ya});this.g.P=
+    a;(a=b&&b.httpHeadersOverwriteParam)&&!sa(a)&&(this.g.o=a);this.A=b&&b.supportsCrossDomainXhr||!1;this.v=b&&b.sendRawJson||!1;(b=b&&b.httpSessionIdParam)&&!sa(b)&&(this.g.D=b,a=this.h,null!==a&&b in a&&(a=this.h,b in a&&delete a[b]));this.j=new Z$1(this);}t(Y$1,C$1);Y$1.prototype.m=function(){this.g.j=this.j;this.A&&(this.g.H=!0);var a=this.g,b=this.l,c=this.h||void 0;a.Wa&&(a.h.info("Origin Trials enabled."),zb(q(a.hb,a,b)));J$1(0);a.W=b;a.aa=c||{};a.N=a.X;a.F=Ec(a,null,a.W);Hc(a);};Y$1.prototype.close=function(){Ic(this.g);};
+    Y$1.prototype.u=function(a){if("string"===typeof a){var b={};b.__data__=a;Md(this.g,b);}else this.v?(b={},b.__data__=rb(a),Md(this.g,b)):Md(this.g,a);};Y$1.prototype.M=function(){this.g.j=null;delete this.j;Ic(this.g);delete this.g;Y$1.Z.M.call(this);};function Ud(a){ac.call(this);var b=a.__sm__;if(b){a:{for(const c in b){a=c;break a}a=void 0;}if(this.i=a)a=this.i,b=null!==b&&a in b?b[a]:void 0;this.data=b;}else this.data=a;}t(Ud,ac);function Vd(){bc.call(this);this.status=1;}t(Vd,bc);function Z$1(a){this.g=a;}
+    t(Z$1,Sd);Z$1.prototype.xa=function(){D$1(this.g,"a");};Z$1.prototype.wa=function(a){D$1(this.g,new Ud(a));};Z$1.prototype.va=function(a){D$1(this.g,new Vd(a));};Z$1.prototype.ua=function(){D$1(this.g,"b");};/*
+
+     Copyright 2017 Google LLC
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+    */
+    Y$1.prototype.send=Y$1.prototype.u;Y$1.prototype.open=Y$1.prototype.m;Y$1.prototype.close=Y$1.prototype.close;Wb.NO_ERROR=0;Wb.TIMEOUT=8;Wb.HTTP_ERROR=6;Xb.COMPLETE="complete";L$1.OPEN="a";L$1.CLOSE="b";L$1.ERROR="c";L$1.MESSAGE="d";C$1.prototype.listen=C$1.prototype.N;X$1.prototype.listenOnce=X$1.prototype.O;X$1.prototype.getLastError=X$1.prototype.La;X$1.prototype.getLastErrorCode=X$1.prototype.Da;X$1.prototype.getStatus=X$1.prototype.ba;X$1.prototype.getResponseJson=X$1.prototype.Qa;
+    X$1.prototype.getResponseText=X$1.prototype.ga;X$1.prototype.send=X$1.prototype.ea;
+
+    const D = "@firebase/firestore";
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * Simple wrapper around a nullable UID. Mostly exists to make code more
+     * readable.
+     */
+    class C {
+        constructor(t) {
+            this.uid = t;
+        }
+        isAuthenticated() {
+            return null != this.uid;
+        }
+        /**
+         * Returns a key representing this user, suitable for inclusion in a
+         * dictionary.
+         */    toKey() {
+            return this.isAuthenticated() ? "uid:" + this.uid : "anonymous-user";
+        }
+        isEqual(t) {
+            return t.uid === this.uid;
+        }
+    }
+
+    /** A user with a null UID. */ C.UNAUTHENTICATED = new C(null), 
+    // TODO(mikelehen): Look into getting a proper uid-equivalent for
+    // non-FirebaseAuth providers.
+    C.GOOGLE_CREDENTIALS = new C("google-credentials-uid"), C.FIRST_PARTY = new C("first-party-uid"), 
+    C.MOCK_USER = new C("mock-user");
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    let x = "9.9.0";
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    const N = new Logger("@firebase/firestore");
+
+    function M(t, ...e) {
+        if (N.logLevel <= LogLevel.DEBUG) {
+            const n = e.map(B);
+            N.debug(`Firestore (${x}): ${t}`, ...n);
+        }
+    }
+
+    function F(t, ...e) {
+        if (N.logLevel <= LogLevel.ERROR) {
+            const n = e.map(B);
+            N.error(`Firestore (${x}): ${t}`, ...n);
+        }
+    }
+
+    /**
+     * Converts an additional log parameter to a string representation.
+     */ function B(t) {
+        if ("string" == typeof t) return t;
+        try {
+            return e = t, JSON.stringify(e);
+        } catch (e) {
+            // Converting to JSON failed, just log the object directly
+            return t;
+        }
+        /**
+     * @license
+     * Copyright 2020 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+        /** Formats an object as a JSON string, suitable for logging. */
+        var e;
+    }
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * Unconditionally fails, throwing an Error with the given message.
+     * Messages are stripped in production builds.
+     *
+     * Returns `never` and can be used in expressions:
+     * @example
+     * let futureVar = fail('not implemented yet');
+     */ function L(t = "Unexpected state") {
+        // Log the failure in addition to throw an exception, just in case the
+        // exception is swallowed.
+        const e = `FIRESTORE (${x}) INTERNAL ASSERTION FAILED: ` + t;
+        // NOTE: We don't use FirestoreError here because these are internal failures
+        // that cannot be handled by the user. (Also it would create a circular
+        // dependency between the error and assert modules which doesn't work.)
+        throw F(e), new Error(e);
+    }
+
+    /**
+     * Fails if the given assertion condition is false, throwing an Error with the
+     * given message if it did.
+     *
+     * Messages are stripped in production builds.
+     */ function U(t, e) {
+        t || L();
+    }
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */ const G = {
+        // Causes are copied from:
+        // https://github.com/grpc/grpc/blob/bceec94ea4fc5f0085d81235d8e1c06798dc341a/include/grpc%2B%2B/impl/codegen/status_code_enum.h
+        /** Not an error; returned on success. */
+        OK: "ok",
+        /** The operation was cancelled (typically by the caller). */
+        CANCELLED: "cancelled",
+        /** Unknown error or an error from a different error domain. */
+        UNKNOWN: "unknown",
+        /**
+         * Client specified an invalid argument. Note that this differs from
+         * FAILED_PRECONDITION. INVALID_ARGUMENT indicates arguments that are
+         * problematic regardless of the state of the system (e.g., a malformed file
+         * name).
+         */
+        INVALID_ARGUMENT: "invalid-argument",
+        /**
+         * Deadline expired before operation could complete. For operations that
+         * change the state of the system, this error may be returned even if the
+         * operation has completed successfully. For example, a successful response
+         * from a server could have been delayed long enough for the deadline to
+         * expire.
+         */
+        DEADLINE_EXCEEDED: "deadline-exceeded",
+        /** Some requested entity (e.g., file or directory) was not found. */
+        NOT_FOUND: "not-found",
+        /**
+         * Some entity that we attempted to create (e.g., file or directory) already
+         * exists.
+         */
+        ALREADY_EXISTS: "already-exists",
+        /**
+         * The caller does not have permission to execute the specified operation.
+         * PERMISSION_DENIED must not be used for rejections caused by exhausting
+         * some resource (use RESOURCE_EXHAUSTED instead for those errors).
+         * PERMISSION_DENIED must not be used if the caller can not be identified
+         * (use UNAUTHENTICATED instead for those errors).
+         */
+        PERMISSION_DENIED: "permission-denied",
+        /**
+         * The request does not have valid authentication credentials for the
+         * operation.
+         */
+        UNAUTHENTICATED: "unauthenticated",
+        /**
+         * Some resource has been exhausted, perhaps a per-user quota, or perhaps the
+         * entire file system is out of space.
+         */
+        RESOURCE_EXHAUSTED: "resource-exhausted",
+        /**
+         * Operation was rejected because the system is not in a state required for
+         * the operation's execution. For example, directory to be deleted may be
+         * non-empty, an rmdir operation is applied to a non-directory, etc.
+         *
+         * A litmus test that may help a service implementor in deciding
+         * between FAILED_PRECONDITION, ABORTED, and UNAVAILABLE:
+         *  (a) Use UNAVAILABLE if the client can retry just the failing call.
+         *  (b) Use ABORTED if the client should retry at a higher-level
+         *      (e.g., restarting a read-modify-write sequence).
+         *  (c) Use FAILED_PRECONDITION if the client should not retry until
+         *      the system state has been explicitly fixed. E.g., if an "rmdir"
+         *      fails because the directory is non-empty, FAILED_PRECONDITION
+         *      should be returned since the client should not retry unless
+         *      they have first fixed up the directory by deleting files from it.
+         *  (d) Use FAILED_PRECONDITION if the client performs conditional
+         *      REST Get/Update/Delete on a resource and the resource on the
+         *      server does not match the condition. E.g., conflicting
+         *      read-modify-write on the same resource.
+         */
+        FAILED_PRECONDITION: "failed-precondition",
+        /**
+         * The operation was aborted, typically due to a concurrency issue like
+         * sequencer check failures, transaction aborts, etc.
+         *
+         * See litmus test above for deciding between FAILED_PRECONDITION, ABORTED,
+         * and UNAVAILABLE.
+         */
+        ABORTED: "aborted",
+        /**
+         * Operation was attempted past the valid range. E.g., seeking or reading
+         * past end of file.
+         *
+         * Unlike INVALID_ARGUMENT, this error indicates a problem that may be fixed
+         * if the system state changes. For example, a 32-bit file system will
+         * generate INVALID_ARGUMENT if asked to read at an offset that is not in the
+         * range [0,2^32-1], but it will generate OUT_OF_RANGE if asked to read from
+         * an offset past the current file size.
+         *
+         * There is a fair bit of overlap between FAILED_PRECONDITION and
+         * OUT_OF_RANGE. We recommend using OUT_OF_RANGE (the more specific error)
+         * when it applies so that callers who are iterating through a space can
+         * easily look for an OUT_OF_RANGE error to detect when they are done.
+         */
+        OUT_OF_RANGE: "out-of-range",
+        /** Operation is not implemented or not supported/enabled in this service. */
+        UNIMPLEMENTED: "unimplemented",
+        /**
+         * Internal errors. Means some invariants expected by underlying System has
+         * been broken. If you see one of these errors, Something is very broken.
+         */
+        INTERNAL: "internal",
+        /**
+         * The service is currently unavailable. This is a most likely a transient
+         * condition and may be corrected by retrying with a backoff.
+         *
+         * See litmus test above for deciding between FAILED_PRECONDITION, ABORTED,
+         * and UNAVAILABLE.
+         */
+        UNAVAILABLE: "unavailable",
+        /** Unrecoverable data loss or corruption. */
+        DATA_LOSS: "data-loss"
+    };
+
+    /** An error returned by a Firestore operation. */ class Q extends FirebaseError {
+        /** @hideconstructor */
+        constructor(
+        /**
+         * The backend error code associated with this error.
+         */
+        t, 
+        /**
+         * A custom error description.
+         */
+        e) {
+            super(t, e), this.code = t, this.message = e, 
+            // HACK: We write a toString property directly because Error is not a real
+            // class and so inheritance does not work correctly. We could alternatively
+            // do the same "back-door inheritance" trick that FirebaseError does.
+            this.toString = () => `${this.name}: [code=${this.code}]: ${this.message}`;
+        }
+    }
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */ class j {
+        constructor() {
+            this.promise = new Promise(((t, e) => {
+                this.resolve = t, this.reject = e;
+            }));
+        }
+    }
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */ class W {
+        constructor(t, e) {
+            this.user = e, this.type = "OAuth", this.headers = new Map, this.headers.set("Authorization", `Bearer ${t}`);
+        }
+    }
+
+    /**
+     * A CredentialsProvider that always yields an empty token.
+     * @internal
+     */ class z {
+        getToken() {
+            return Promise.resolve(null);
+        }
+        invalidateToken() {}
+        start(t, e) {
+            // Fire with initial user.
+            t.enqueueRetryable((() => e(C.UNAUTHENTICATED)));
+        }
+        shutdown() {}
+    }
+
+    class J {
+        constructor(t) {
+            this.t = t, 
+            /** Tracks the current User. */
+            this.currentUser = C.UNAUTHENTICATED, 
+            /**
+             * Counter used to detect if the token changed while a getToken request was
+             * outstanding.
+             */
+            this.i = 0, this.forceRefresh = !1, this.auth = null;
+        }
+        start(t, e) {
+            let n = this.i;
+            // A change listener that prevents double-firing for the same token change.
+                    const s = t => this.i !== n ? (n = this.i, e(t)) : Promise.resolve();
+            // A promise that can be waited on to block on the next token change.
+            // This promise is re-created after each change.
+                    let i = new j;
+            this.o = () => {
+                this.i++, this.currentUser = this.u(), i.resolve(), i = new j, t.enqueueRetryable((() => s(this.currentUser)));
+            };
+            const r = () => {
+                const e = i;
+                t.enqueueRetryable((async () => {
+                    await e.promise, await s(this.currentUser);
+                }));
+            }, o = t => {
+                M("FirebaseAuthCredentialsProvider", "Auth detected"), this.auth = t, this.auth.addAuthTokenListener(this.o), 
+                r();
+            };
+            this.t.onInit((t => o(t))), 
+            // Our users can initialize Auth right after Firestore, so we give it
+            // a chance to register itself with the component framework before we
+            // determine whether to start up in unauthenticated mode.
+            setTimeout((() => {
+                if (!this.auth) {
+                    const t = this.t.getImmediate({
+                        optional: !0
+                    });
+                    t ? o(t) : (
+                    // If auth is still not available, proceed with `null` user
+                    M("FirebaseAuthCredentialsProvider", "Auth not yet detected"), i.resolve(), i = new j);
+                }
+            }), 0), r();
+        }
+        getToken() {
+            // Take note of the current value of the tokenCounter so that this method
+            // can fail (with an ABORTED error) if there is a token change while the
+            // request is outstanding.
+            const t = this.i, e = this.forceRefresh;
+            return this.forceRefresh = !1, this.auth ? this.auth.getToken(e).then((e => 
+            // Cancel the request since the token changed while the request was
+            // outstanding so the response is potentially for a previous user (which
+            // user, we can't be sure).
+            this.i !== t ? (M("FirebaseAuthCredentialsProvider", "getToken aborted due to token change."), 
+            this.getToken()) : e ? (U("string" == typeof e.accessToken), new W(e.accessToken, this.currentUser)) : null)) : Promise.resolve(null);
+        }
+        invalidateToken() {
+            this.forceRefresh = !0;
+        }
+        shutdown() {
+            this.auth && this.auth.removeAuthTokenListener(this.o);
+        }
+        // Auth.getUid() can return null even with a user logged in. It is because
+        // getUid() is synchronous, but the auth code populating Uid is asynchronous.
+        // This method should only be called in the AuthTokenListener callback
+        // to guarantee to get the actual user.
+        u() {
+            const t = this.auth && this.auth.getUid();
+            return U(null === t || "string" == typeof t), new C(t);
+        }
+    }
+
+    /*
+     * FirstPartyToken provides a fresh token each time its value
+     * is requested, because if the token is too old, requests will be rejected.
+     * Technically this may no longer be necessary since the SDK should gracefully
+     * recover from unauthenticated errors (see b/33147818 for context), but it's
+     * safer to keep the implementation as-is.
+     */ class Y {
+        constructor(t, e, n) {
+            this.type = "FirstParty", this.user = C.FIRST_PARTY, this.headers = new Map, this.headers.set("X-Goog-AuthUser", e);
+            const s = t.auth.getAuthHeaderValueForFirstParty([]);
+            s && this.headers.set("Authorization", s), n && this.headers.set("X-Goog-Iam-Authorization-Token", n);
+        }
+    }
+
+    /*
+     * Provides user credentials required for the Firestore JavaScript SDK
+     * to authenticate the user, using technique that is only available
+     * to applications hosted by Google.
+     */ class X {
+        constructor(t, e, n) {
+            this.h = t, this.l = e, this.m = n;
+        }
+        getToken() {
+            return Promise.resolve(new Y(this.h, this.l, this.m));
+        }
+        start(t, e) {
+            // Fire with initial uid.
+            t.enqueueRetryable((() => e(C.FIRST_PARTY)));
+        }
+        shutdown() {}
+        invalidateToken() {}
+    }
+
+    class Z {
+        constructor(t) {
+            this.value = t, this.type = "AppCheck", this.headers = new Map, t && t.length > 0 && this.headers.set("x-firebase-appcheck", this.value);
+        }
+    }
+
+    class tt {
+        constructor(t) {
+            this.g = t, this.forceRefresh = !1, this.appCheck = null, this.p = null;
+        }
+        start(t, e) {
+            const n = t => {
+                null != t.error && M("FirebaseAppCheckTokenProvider", `Error getting App Check token; using placeholder token instead. Error: ${t.error.message}`);
+                const n = t.token !== this.p;
+                return this.p = t.token, M("FirebaseAppCheckTokenProvider", `Received ${n ? "new" : "existing"} token.`), 
+                n ? e(t.token) : Promise.resolve();
+            };
+            this.o = e => {
+                t.enqueueRetryable((() => n(e)));
+            };
+            const s = t => {
+                M("FirebaseAppCheckTokenProvider", "AppCheck detected"), this.appCheck = t, this.appCheck.addTokenListener(this.o);
+            };
+            this.g.onInit((t => s(t))), 
+            // Our users can initialize AppCheck after Firestore, so we give it
+            // a chance to register itself with the component framework.
+            setTimeout((() => {
+                if (!this.appCheck) {
+                    const t = this.g.getImmediate({
+                        optional: !0
+                    });
+                    t ? s(t) : 
+                    // If AppCheck is still not available, proceed without it.
+                    M("FirebaseAppCheckTokenProvider", "AppCheck not yet detected");
+                }
+            }), 0);
+        }
+        getToken() {
+            const t = this.forceRefresh;
+            return this.forceRefresh = !1, this.appCheck ? this.appCheck.getToken(t).then((t => t ? (U("string" == typeof t.token), 
+            this.p = t.token, new Z(t.token)) : null)) : Promise.resolve(null);
+        }
+        invalidateToken() {
+            this.forceRefresh = !0;
+        }
+        shutdown() {
+            this.appCheck && this.appCheck.removeTokenListener(this.o);
+        }
+    }
+
+    /**
+     * Builds a CredentialsProvider depending on the type of
+     * the credentials passed in.
+     */
+    /**
+     * @license
+     * Copyright 2020 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * Generates `nBytes` of random bytes.
+     *
+     * If `nBytes < 0` , an error will be thrown.
+     */
+    function nt(t) {
+        // Polyfills for IE and WebWorker by using `self` and `msCrypto` when `crypto` is not available.
+        const e = 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        "undefined" != typeof self && (self.crypto || self.msCrypto), n = new Uint8Array(t);
+        if (e && "function" == typeof e.getRandomValues) e.getRandomValues(n); else 
+        // Falls back to Math.random
+        for (let e = 0; e < t; e++) n[e] = Math.floor(256 * Math.random());
+        return n;
+    }
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */ class st {
+        static I() {
+            // Alphanumeric characters
+            const t = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", e = Math.floor(256 / t.length) * t.length;
+            // The largest byte value that is a multiple of `char.length`.
+                    let n = "";
+            for (;n.length < 20; ) {
+                const s = nt(40);
+                for (let i = 0; i < s.length; ++i) 
+                // Only accept values that are [0, maxMultiple), this ensures they can
+                // be evenly mapped to indices of `chars` via a modulo operation.
+                n.length < 20 && s[i] < e && (n += t.charAt(s[i] % t.length));
+            }
+            return n;
+        }
+    }
+
+    /** Verifies whether `e` is an IndexedDbTransactionError. */ function Ct(t) {
+        // Use name equality, as instanceof checks on errors don't work with errors
+        // that wrap other errors.
+        return "IndexedDbTransactionError" === t.name;
+    }
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */ class ie {
+        /**
+         * Constructs a DatabaseInfo using the provided host, databaseId and
+         * persistenceKey.
+         *
+         * @param databaseId - The database to use.
+         * @param appId - The Firebase App Id.
+         * @param persistenceKey - A unique identifier for this Firestore's local
+         * storage (used in conjunction with the databaseId).
+         * @param host - The Firestore backend host to connect to.
+         * @param ssl - Whether to use SSL when connecting.
+         * @param forceLongPolling - Whether to use the forceLongPolling option
+         * when using WebChannel as the network transport.
+         * @param autoDetectLongPolling - Whether to use the detectBufferingProxy
+         * option when using WebChannel as the network transport.
+         * @param useFetchStreams Whether to use the Fetch API instead of
+         * XMLHTTPRequest
+         */
+        constructor(t, e, n, s, i, r, o, u) {
+            this.databaseId = t, this.appId = e, this.persistenceKey = n, this.host = s, this.ssl = i, 
+            this.forceLongPolling = r, this.autoDetectLongPolling = o, this.useFetchStreams = u;
+        }
+    }
+
+    /** The default database name for a project. */
+    /**
+     * Represents the database ID a Firestore client is associated with.
+     * @internal
+     */
+    class re {
+        constructor(t, e) {
+            this.projectId = t, this.database = e || "(default)";
+        }
+        static empty() {
+            return new re("", "");
+        }
+        get isDefaultDatabase() {
+            return "(default)" === this.database;
+        }
+        isEqual(t) {
+            return t instanceof re && t.projectId === this.projectId && t.database === this.database;
+        }
+    }
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * Error Codes describing the different ways GRPC can fail. These are copied
+     * directly from GRPC's sources here:
+     *
+     * https://github.com/grpc/grpc/blob/bceec94ea4fc5f0085d81235d8e1c06798dc341a/include/grpc%2B%2B/impl/codegen/status_code_enum.h
+     *
+     * Important! The names of these identifiers matter because the string forms
+     * are used for reverse lookups from the webchannel stream. Do NOT change the
+     * names of these identifiers or change this into a const enum.
+     */ var ts, es;
+
+    /**
+     * Converts an HTTP response's error status to the equivalent error code.
+     *
+     * @param status - An HTTP error response status ("FAILED_PRECONDITION",
+     * "UNKNOWN", etc.)
+     * @returns The equivalent Code. Non-matching responses are mapped to
+     *     Code.UNKNOWN.
+     */ (es = ts || (ts = {}))[es.OK = 0] = "OK", es[es.CANCELLED = 1] = "CANCELLED", 
+    es[es.UNKNOWN = 2] = "UNKNOWN", es[es.INVALID_ARGUMENT = 3] = "INVALID_ARGUMENT", 
+    es[es.DEADLINE_EXCEEDED = 4] = "DEADLINE_EXCEEDED", es[es.NOT_FOUND = 5] = "NOT_FOUND", 
+    es[es.ALREADY_EXISTS = 6] = "ALREADY_EXISTS", es[es.PERMISSION_DENIED = 7] = "PERMISSION_DENIED", 
+    es[es.UNAUTHENTICATED = 16] = "UNAUTHENTICATED", es[es.RESOURCE_EXHAUSTED = 8] = "RESOURCE_EXHAUSTED", 
+    es[es.FAILED_PRECONDITION = 9] = "FAILED_PRECONDITION", es[es.ABORTED = 10] = "ABORTED", 
+    es[es.OUT_OF_RANGE = 11] = "OUT_OF_RANGE", es[es.UNIMPLEMENTED = 12] = "UNIMPLEMENTED", 
+    es[es.INTERNAL = 13] = "INTERNAL", es[es.UNAVAILABLE = 14] = "UNAVAILABLE", es[es.DATA_LOSS = 15] = "DATA_LOSS";
+
+    /** The Platform's 'document' implementation or null if not available. */ function eu() {
+        // `document` is not always available, e.g. in ReactNative and WebWorkers.
+        // eslint-disable-next-line no-restricted-globals
+        return "undefined" != typeof document ? document : null;
+    }
+
+    /**
+     * An instance of the Platform's 'TextEncoder' implementation.
+     */
+    /**
+     * A helper for running delayed tasks following an exponential backoff curve
+     * between attempts.
+     *
+     * Each delay is made up of a "base" delay which follows the exponential
+     * backoff curve, and a +/- 50% "jitter" that is calculated and added to the
+     * base delay. This prevents clients from accidentally synchronizing their
+     * delays causing spikes of load to the backend.
+     */
+    class su {
+        constructor(
+        /**
+         * The AsyncQueue to run backoff operations on.
+         */
+        t, 
+        /**
+         * The ID to use when scheduling backoff operations on the AsyncQueue.
+         */
+        e, 
+        /**
+         * The initial delay (used as the base delay on the first retry attempt).
+         * Note that jitter will still be applied, so the actual delay could be as
+         * little as 0.5*initialDelayMs.
+         */
+        n = 1e3
+        /**
+         * The multiplier to use to determine the extended base delay after each
+         * attempt.
+         */ , s = 1.5
+        /**
+         * The maximum base delay after which no further backoff is performed.
+         * Note that jitter will still be applied, so the actual delay could be as
+         * much as 1.5*maxDelayMs.
+         */ , i = 6e4) {
+            this.js = t, this.timerId = e, this.lo = n, this.fo = s, this._o = i, this.wo = 0, 
+            this.mo = null, 
+            /** The last backoff attempt, as epoch milliseconds. */
+            this.yo = Date.now(), this.reset();
+        }
+        /**
+         * Resets the backoff delay.
+         *
+         * The very next backoffAndWait() will have no delay. If it is called again
+         * (i.e. due to an error), initialDelayMs (plus jitter) will be used, and
+         * subsequent ones will increase according to the backoffFactor.
+         */    reset() {
+            this.wo = 0;
+        }
+        /**
+         * Resets the backoff delay to the maximum delay (e.g. for use after a
+         * RESOURCE_EXHAUSTED error).
+         */    po() {
+            this.wo = this._o;
+        }
+        /**
+         * Returns a promise that resolves after currentDelayMs, and increases the
+         * delay for any subsequent attempts. If there was a pending backoff operation
+         * already, it will be canceled.
+         */    Io(t) {
+            // Cancel any pending backoff operation.
+            this.cancel();
+            // First schedule using the current base (which may be 0 and should be
+            // honored as such).
+            const e = Math.floor(this.wo + this.To()), n = Math.max(0, Date.now() - this.yo), s = Math.max(0, e - n);
+            // Guard against lastAttemptTime being in the future due to a clock change.
+                    s > 0 && M("ExponentialBackoff", `Backing off for ${s} ms (base delay: ${this.wo} ms, delay with jitter: ${e} ms, last attempt: ${n} ms ago)`), 
+            this.mo = this.js.enqueueAfterDelay(this.timerId, s, (() => (this.yo = Date.now(), 
+            t()))), 
+            // Apply backoff factor to determine next delay and ensure it is within
+            // bounds.
+            this.wo *= this.fo, this.wo < this.lo && (this.wo = this.lo), this.wo > this._o && (this.wo = this._o);
+        }
+        Eo() {
+            null !== this.mo && (this.mo.skipDelay(), this.mo = null);
+        }
+        cancel() {
+            null !== this.mo && (this.mo.cancel(), this.mo = null);
+        }
+        /** Returns a random value in the range [-currentBaseMs/2, currentBaseMs/2] */    To() {
+            return (Math.random() - .5) * this.wo;
+        }
+    }
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * Represents an operation scheduled to be run in the future on an AsyncQueue.
+     *
+     * It is created via DelayedOperation.createAndSchedule().
+     *
+     * Supports cancellation (via cancel()) and early execution (via skipDelay()).
+     *
+     * Note: We implement `PromiseLike` instead of `Promise`, as the `Promise` type
+     * in newer versions of TypeScript defines `finally`, which is not available in
+     * IE.
+     */
+    class $u {
+        constructor(t, e, n, s, i) {
+            this.asyncQueue = t, this.timerId = e, this.targetTimeMs = n, this.op = s, this.removalCallback = i, 
+            this.deferred = new j, this.then = this.deferred.promise.then.bind(this.deferred.promise), 
+            // It's normal for the deferred promise to be canceled (due to cancellation)
+            // and so we attach a dummy catch callback to avoid
+            // 'UnhandledPromiseRejectionWarning' log spam.
+            this.deferred.promise.catch((t => {}));
+        }
+        /**
+         * Creates and returns a DelayedOperation that has been scheduled to be
+         * executed on the provided asyncQueue after the provided delayMs.
+         *
+         * @param asyncQueue - The queue to schedule the operation on.
+         * @param id - A Timer ID identifying the type of operation this is.
+         * @param delayMs - The delay (ms) before the operation should be scheduled.
+         * @param op - The operation to run.
+         * @param removalCallback - A callback to be called synchronously once the
+         *   operation is executed or canceled, notifying the AsyncQueue to remove it
+         *   from its delayedOperations list.
+         *   PORTING NOTE: This exists to prevent making removeDelayedOperation() and
+         *   the DelayedOperation class public.
+         */    static createAndSchedule(t, e, n, s, i) {
+            const r = Date.now() + n, o = new $u(t, e, r, s, i);
+            return o.start(n), o;
+        }
+        /**
+         * Starts the timer. This is called immediately after construction by
+         * createAndSchedule().
+         */    start(t) {
+            this.timerHandle = setTimeout((() => this.handleDelayElapsed()), t);
+        }
+        /**
+         * Queues the operation to run immediately (if it hasn't already been run or
+         * canceled).
+         */    skipDelay() {
+            return this.handleDelayElapsed();
+        }
+        /**
+         * Cancels the operation if it hasn't already been executed or canceled. The
+         * promise will be rejected.
+         *
+         * As long as the operation has not yet been run, calling cancel() provides a
+         * guarantee that the operation will not be run.
+         */    cancel(t) {
+            null !== this.timerHandle && (this.clearTimeout(), this.deferred.reject(new Q(G.CANCELLED, "Operation cancelled" + (t ? ": " + t : ""))));
+        }
+        handleDelayElapsed() {
+            this.asyncQueue.enqueueAndForget((() => null !== this.timerHandle ? (this.clearTimeout(), 
+            this.op().then((t => this.deferred.resolve(t)))) : Promise.resolve()));
+        }
+        clearTimeout() {
+            null !== this.timerHandle && (this.removalCallback(this), clearTimeout(this.timerHandle), 
+            this.timerHandle = null);
+        }
+    }
+
+    /**
+     * Returns a FirestoreError that can be surfaced to the user if the provided
+     * error is an IndexedDbTransactionError. Re-throws the error otherwise.
+     */ function Bu(t, e) {
+        if (F("AsyncQueue", `${e}: ${t}`), Ct(t)) return new Q(G.UNAVAILABLE, `${e}: ${t}`);
+        throw t;
+    }
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * FirestoreClient is a top-level class that constructs and owns all of the
+     * pieces of the client SDK architecture. It is responsible for creating the
+     * async queue that is shared by all of the other components in the system.
+     */
+    class zc {
+        constructor(t, e, 
+        /**
+         * Asynchronous queue responsible for all of our internal processing. When
+         * we get incoming work from the user (via public API) or the network
+         * (incoming GRPC messages), we should always schedule onto this queue.
+         * This ensures all of our work is properly serialized (e.g. we don't
+         * start processing a new operation while the previous one is waiting for
+         * an async I/O to complete).
+         */
+        n, s) {
+            this.authCredentials = t, this.appCheckCredentials = e, this.asyncQueue = n, this.databaseInfo = s, 
+            this.user = C.UNAUTHENTICATED, this.clientId = st.I(), this.authCredentialListener = () => Promise.resolve(), 
+            this.appCheckCredentialListener = () => Promise.resolve(), this.authCredentials.start(n, (async t => {
+                M("FirestoreClient", "Received user=", t.uid), await this.authCredentialListener(t), 
+                this.user = t;
+            })), this.appCheckCredentials.start(n, (t => (M("FirestoreClient", "Received new app check token=", t), 
+            this.appCheckCredentialListener(t, this.user))));
+        }
+        async getConfiguration() {
+            return {
+                asyncQueue: this.asyncQueue,
+                databaseInfo: this.databaseInfo,
+                clientId: this.clientId,
+                authCredentials: this.authCredentials,
+                appCheckCredentials: this.appCheckCredentials,
+                initialUser: this.user,
+                maxConcurrentLimboResolutions: 100
+            };
+        }
+        setCredentialChangeListener(t) {
+            this.authCredentialListener = t;
+        }
+        setAppCheckTokenChangeListener(t) {
+            this.appCheckCredentialListener = t;
+        }
+        /**
+         * Checks that the client has not been terminated. Ensures that other methods on
+         * this class cannot be called after the client is terminated.
+         */    verifyNotTerminated() {
+            if (this.asyncQueue.isShuttingDown) throw new Q(G.FAILED_PRECONDITION, "The client has already been terminated.");
+        }
+        terminate() {
+            this.asyncQueue.enterRestrictedMode();
+            const t = new j;
+            return this.asyncQueue.enqueueAndForgetEvenWhileRestricted((async () => {
+                try {
+                    this.onlineComponents && await this.onlineComponents.terminate(), this.offlineComponents && await this.offlineComponents.terminate(), 
+                    // The credentials provider must be terminated after shutting down the
+                    // RemoteStore as it will prevent the RemoteStore from retrieving auth
+                    // tokens.
+                    this.authCredentials.shutdown(), this.appCheckCredentials.shutdown(), t.resolve();
+                } catch (e) {
+                    const n = Bu(e, "Failed to shutdown persistence");
+                    t.reject(n);
+                }
+            })), t.promise;
+        }
+    }
+
+    const _a = new Map;
+
+    /**
+     * Validates that two boolean options are not set at the same time.
+     * @internal
+     */ function ma(t, e, n, s) {
+        if (!0 === e && !0 === s) throw new Q(G.INVALID_ARGUMENT, `${t} and ${n} cannot be used together.`);
+    }
+
+    /**
+     * @license
+     * Copyright 2020 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    // settings() defaults:
+    /**
+     * A concrete type describing all the values that can be applied via a
+     * user-supplied `FirestoreSettings` object. This is a separate type so that
+     * defaults can be supplied and the value can be checked for equality.
+     */
+    class Ea {
+        constructor(t) {
+            var e;
+            if (void 0 === t.host) {
+                if (void 0 !== t.ssl) throw new Q(G.INVALID_ARGUMENT, "Can't provide ssl option if host option is not set");
+                this.host = "firestore.googleapis.com", this.ssl = true;
+            } else this.host = t.host, this.ssl = null === (e = t.ssl) || void 0 === e || e;
+            if (this.credentials = t.credentials, this.ignoreUndefinedProperties = !!t.ignoreUndefinedProperties, 
+            void 0 === t.cacheSizeBytes) this.cacheSizeBytes = 41943040; else {
+                if (-1 !== t.cacheSizeBytes && t.cacheSizeBytes < 1048576) throw new Q(G.INVALID_ARGUMENT, "cacheSizeBytes must be at least 1048576");
+                this.cacheSizeBytes = t.cacheSizeBytes;
+            }
+            this.experimentalForceLongPolling = !!t.experimentalForceLongPolling, this.experimentalAutoDetectLongPolling = !!t.experimentalAutoDetectLongPolling, 
+            this.useFetchStreams = !!t.useFetchStreams, ma("experimentalForceLongPolling", t.experimentalForceLongPolling, "experimentalAutoDetectLongPolling", t.experimentalAutoDetectLongPolling);
+        }
+        isEqual(t) {
+            return this.host === t.host && this.ssl === t.ssl && this.credentials === t.credentials && this.cacheSizeBytes === t.cacheSizeBytes && this.experimentalForceLongPolling === t.experimentalForceLongPolling && this.experimentalAutoDetectLongPolling === t.experimentalAutoDetectLongPolling && this.ignoreUndefinedProperties === t.ignoreUndefinedProperties && this.useFetchStreams === t.useFetchStreams;
+        }
+    }
+
+    /**
+     * @license
+     * Copyright 2020 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * The Cloud Firestore service interface.
+     *
+     * Do not call this constructor directly. Instead, use {@link getFirestore}.
+     */ class Aa {
+        /** @hideconstructor */
+        constructor(t, e, n) {
+            this._authCredentials = e, this._appCheckCredentials = n, 
+            /**
+             * Whether it's a Firestore or Firestore Lite instance.
+             */
+            this.type = "firestore-lite", this._persistenceKey = "(lite)", this._settings = new Ea({}), 
+            this._settingsFrozen = !1, t instanceof re ? this._databaseId = t : (this._app = t, 
+            this._databaseId = function(t) {
+                if (!Object.prototype.hasOwnProperty.apply(t.options, [ "projectId" ])) throw new Q(G.INVALID_ARGUMENT, '"projectId" not provided in firebase.initializeApp.');
+                return new re(t.options.projectId);
+            }
+            /**
+     * Modify this instance to communicate with the Cloud Firestore emulator.
+     *
+     * Note: This must be called before this instance has been used to do any
+     * operations.
+     *
+     * @param firestore - The `Firestore` instance to configure to connect to the
+     * emulator.
+     * @param host - the emulator host (ex: localhost).
+     * @param port - the emulator port (ex: 9000).
+     * @param options.mockUserToken - the mock auth token to use for unit testing
+     * Security Rules.
+     */ (t));
+        }
+        /**
+         * The {@link @firebase/app#FirebaseApp} associated with this `Firestore` service
+         * instance.
+         */    get app() {
+            if (!this._app) throw new Q(G.FAILED_PRECONDITION, "Firestore was not initialized using the Firebase SDK. 'app' is not available");
+            return this._app;
+        }
+        get _initialized() {
+            return this._settingsFrozen;
+        }
+        get _terminated() {
+            return void 0 !== this._terminateTask;
+        }
+        _setSettings(t) {
+            if (this._settingsFrozen) throw new Q(G.FAILED_PRECONDITION, "Firestore has already been started and its settings can no longer be changed. You can only modify settings before calling any other methods on a Firestore object.");
+            this._settings = new Ea(t), void 0 !== t.credentials && (this._authCredentials = function(t) {
+                if (!t) return new z;
+                switch (t.type) {
+                  case "gapi":
+                    const e = t.client;
+                    // Make sure this really is a Gapi client.
+                                    return U(!("object" != typeof e || null === e || !e.auth || !e.auth.getAuthHeaderValueForFirstParty)), 
+                    new X(e, t.sessionIndex || "0", t.iamToken || null);
+
+                  case "provider":
+                    return t.client;
+
+                  default:
+                    throw new Q(G.INVALID_ARGUMENT, "makeAuthCredentialsProvider failed due to invalid credential type");
+                }
+            }(t.credentials));
+        }
+        _getSettings() {
+            return this._settings;
+        }
+        _freezeSettings() {
+            return this._settingsFrozen = !0, this._settings;
+        }
+        _delete() {
+            return this._terminateTask || (this._terminateTask = this._terminate()), this._terminateTask;
+        }
+        /** Returns a JSON-serializable representation of this `Firestore` instance. */    toJSON() {
+            return {
+                app: this._app,
+                databaseId: this._databaseId,
+                settings: this._settings
+            };
+        }
+        /**
+         * Terminates all components used by this client. Subclasses can override
+         * this method to clean up their own dependencies, but must also call this
+         * method.
+         *
+         * Only ever called once.
+         */    _terminate() {
+            /**
+     * Removes all components associated with the provided instance. Must be called
+     * when the `Firestore` instance is terminated.
+     */
+            return function(t) {
+                const e = _a.get(t);
+                e && (M("ComponentProvider", "Removing Datastore"), _a.delete(t), e.terminate());
+            }(this), Promise.resolve();
+        }
+    }
+
+    /**
+     * @license
+     * Copyright 2020 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */ class Na {
+        constructor() {
+            // The last promise in the queue.
+            this.Oc = Promise.resolve(), 
+            // A list of retryable operations. Retryable operations are run in order and
+            // retried with backoff.
+            this.Mc = [], 
+            // Is this AsyncQueue being shut down? Once it is set to true, it will not
+            // be changed again.
+            this.Fc = !1, 
+            // Operations scheduled to be queued in the future. Operations are
+            // automatically removed after they are run or canceled.
+            this.$c = [], 
+            // visible for testing
+            this.Bc = null, 
+            // Flag set while there's an outstanding AsyncQueue operation, used for
+            // assertion sanity-checks.
+            this.Lc = !1, 
+            // Enabled during shutdown on Safari to prevent future access to IndexedDB.
+            this.Uc = !1, 
+            // List of TimerIds to fast-forward delays for.
+            this.qc = [], 
+            // Backoff timer used to schedule retries for retryable operations
+            this.So = new su(this, "async_queue_retry" /* AsyncQueueRetry */), 
+            // Visibility handler that triggers an immediate retry of all retryable
+            // operations. Meant to speed up recovery when we regain file system access
+            // after page comes into foreground.
+            this.Kc = () => {
+                const t = eu();
+                t && M("AsyncQueue", "Visibility state changed to " + t.visibilityState), this.So.Eo();
+            };
+            const t = eu();
+            t && "function" == typeof t.addEventListener && t.addEventListener("visibilitychange", this.Kc);
+        }
+        get isShuttingDown() {
+            return this.Fc;
+        }
+        /**
+         * Adds a new operation to the queue without waiting for it to complete (i.e.
+         * we ignore the Promise result).
+         */    enqueueAndForget(t) {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            this.enqueue(t);
+        }
+        enqueueAndForgetEvenWhileRestricted(t) {
+            this.Gc(), 
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            this.Qc(t);
+        }
+        enterRestrictedMode(t) {
+            if (!this.Fc) {
+                this.Fc = !0, this.Uc = t || !1;
+                const e = eu();
+                e && "function" == typeof e.removeEventListener && e.removeEventListener("visibilitychange", this.Kc);
+            }
+        }
+        enqueue(t) {
+            if (this.Gc(), this.Fc) 
+            // Return a Promise which never resolves.
+            return new Promise((() => {}));
+            // Create a deferred Promise that we can return to the callee. This
+            // allows us to return a "hanging Promise" only to the callee and still
+            // advance the queue even when the operation is not run.
+                    const e = new j;
+            return this.Qc((() => this.Fc && this.Uc ? Promise.resolve() : (t().then(e.resolve, e.reject), 
+            e.promise))).then((() => e.promise));
+        }
+        enqueueRetryable(t) {
+            this.enqueueAndForget((() => (this.Mc.push(t), this.jc())));
+        }
+        /**
+         * Runs the next operation from the retryable queue. If the operation fails,
+         * reschedules with backoff.
+         */    async jc() {
+            if (0 !== this.Mc.length) {
+                try {
+                    await this.Mc[0](), this.Mc.shift(), this.So.reset();
+                } catch (t) {
+                    if (!Ct(t)) throw t;
+     // Failure will be handled by AsyncQueue
+                                    M("AsyncQueue", "Operation failed with retryable error: " + t);
+                }
+                this.Mc.length > 0 && 
+                // If there are additional operations, we re-schedule `retryNextOp()`.
+                // This is necessary to run retryable operations that failed during
+                // their initial attempt since we don't know whether they are already
+                // enqueued. If, for example, `op1`, `op2`, `op3` are enqueued and `op1`
+                // needs to  be re-run, we will run `op1`, `op1`, `op2` using the
+                // already enqueued calls to `retryNextOp()`. `op3()` will then run in the
+                // call scheduled here.
+                // Since `backoffAndRun()` cancels an existing backoff and schedules a
+                // new backoff on every call, there is only ever a single additional
+                // operation in the queue.
+                this.So.Io((() => this.jc()));
+            }
+        }
+        Qc(t) {
+            const e = this.Oc.then((() => (this.Lc = !0, t().catch((t => {
+                this.Bc = t, this.Lc = !1;
+                const e = 
+                /**
+     * Chrome includes Error.message in Error.stack. Other browsers do not.
+     * This returns expected output of message + stack when available.
+     * @param error - Error or FirestoreError
+     */
+                function(t) {
+                    let e = t.message || "";
+                    t.stack && (e = t.stack.includes(t.message) ? t.stack : t.message + "\n" + t.stack);
+                    return e;
+                }
+                /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */ (t);
+                // Re-throw the error so that this.tail becomes a rejected Promise and
+                // all further attempts to chain (via .then) will just short-circuit
+                // and return the rejected Promise.
+                throw F("INTERNAL UNHANDLED ERROR: ", e), t;
+            })).then((t => (this.Lc = !1, t))))));
+            return this.Oc = e, e;
+        }
+        enqueueAfterDelay(t, e, n) {
+            this.Gc(), 
+            // Fast-forward delays for timerIds that have been overriden.
+            this.qc.indexOf(t) > -1 && (e = 0);
+            const s = $u.createAndSchedule(this, t, e, n, (t => this.Wc(t)));
+            return this.$c.push(s), s;
+        }
+        Gc() {
+            this.Bc && L();
+        }
+        verifyOperationInProgress() {}
+        /**
+         * Waits until all currently queued tasks are finished executing. Delayed
+         * operations are not run.
+         */    async zc() {
+            // Operations in the queue prior to draining may have enqueued additional
+            // operations. Keep draining the queue until the tail is no longer advanced,
+            // which indicates that no more new operations were enqueued and that all
+            // operations were executed.
+            let t;
+            do {
+                t = this.Oc, await t;
+            } while (t !== this.Oc);
+        }
+        /**
+         * For Tests: Determine if a delayed operation with a particular TimerId
+         * exists.
+         */    Hc(t) {
+            for (const e of this.$c) if (e.timerId === t) return !0;
+            return !1;
+        }
+        /**
+         * For Tests: Runs some or all delayed operations early.
+         *
+         * @param lastTimerId - Delayed operations up to and including this TimerId
+         * will be drained. Pass TimerId.All to run all delayed operations.
+         * @returns a Promise that resolves once all operations have been run.
+         */    Jc(t) {
+            // Note that draining may generate more delayed ops, so we do that first.
+            return this.zc().then((() => {
+                // Run ops in the same order they'd run if they ran naturally.
+                this.$c.sort(((t, e) => t.targetTimeMs - e.targetTimeMs));
+                for (const e of this.$c) if (e.skipDelay(), "all" /* All */ !== t && e.timerId === t) break;
+                return this.zc();
+            }));
+        }
+        /**
+         * For Tests: Skip all subsequent delays for a timer id.
+         */    Yc(t) {
+            this.qc.push(t);
+        }
+        /** Called once a DelayedOperation is run or canceled. */    Wc(t) {
+            // NOTE: indexOf / slice are O(n), but delayedOperations is expected to be small.
+            const e = this.$c.indexOf(t);
+            this.$c.splice(e, 1);
+        }
+    }
+
+    /**
+     * The Cloud Firestore service interface.
+     *
+     * Do not call this constructor directly. Instead, use {@link getFirestore}.
+     */
+    class Fa extends Aa {
+        /** @hideconstructor */
+        constructor(t, e, n) {
+            super(t, e, n), 
+            /**
+             * Whether it's a {@link Firestore} or Firestore Lite instance.
+             */
+            this.type = "firestore", this._queue = new Na, this._persistenceKey = "name" in t ? t.name : "[DEFAULT]";
+        }
+        _terminate() {
+            return this._firestoreClient || 
+            // The client must be initialized to ensure that all subsequent API
+            // usage throws an exception.
+            Ua(this), this._firestoreClient.terminate();
+        }
+    }
+
+    /**
+     * Returns the existing {@link Firestore} instance that is associated with the
+     * provided {@link @firebase/app#FirebaseApp}. If no instance exists, initializes a new
+     * instance with default settings.
+     *
+     * @param app - The {@link @firebase/app#FirebaseApp} instance that the returned {@link Firestore}
+     * instance is associated with.
+     * @returns The {@link Firestore} instance of the provided app.
+     */ function Ba(e = getApp()) {
+        return _getProvider(e, "firestore").getImmediate();
+    }
+
+    function Ua(t) {
+        var e;
+        const n = t._freezeSettings(), s = function(t, e, n, s) {
+            return new ie(t, e, n, s.host, s.ssl, s.experimentalForceLongPolling, s.experimentalAutoDetectLongPolling, s.useFetchStreams);
+        }(t._databaseId, (null === (e = t._app) || void 0 === e ? void 0 : e.options.appId) || "", t._persistenceKey, n);
+        t._firestoreClient = new zc(t._authCredentials, t._appCheckCredentials, t._queue, s);
+    }
+
+    /**
+     * Cloud Firestore
+     *
+     * @packageDocumentation
+     */ !function(t, e = !0) {
+        !function(t) {
+            x = t;
+        }(SDK_VERSION), _registerComponent(new Component("firestore", ((t, {options: n}) => {
+            const s = t.getProvider("app").getImmediate(), i = new Fa(s, new J(t.getProvider("auth-internal")), new tt(t.getProvider("app-check-internal")));
+            return n = Object.assign({
+                useFetchStreams: e
+            }, n), i._setSettings(n), i;
+        }), "PUBLIC")), registerVersion(D, "3.4.12", t), 
+        // BUILD_TARGET will be replaced by values like esm5, esm2017, cjs5, etc during the compilation
+        registerVersion(D, "3.4.12", "esm2017");
+    }();
+
+    var otd = {
+    	"2021-10-12": "mugs.png",
+    	"2021-10-13": "you three.jpg",
+    	"2021-10-14": "Gebreamlak.png",
+    	"2021-10-15": "integration.png",
+    	"2021-10-16": "slaps.png",
+    	"2021-10-17": "trains.jpg",
+    	"2021-10-18": "engineers.jpg",
+    	"2021-10-19": "uncertainty.jpg",
+    	"2021-10-20": "LHC.jpg",
+    	"2021-10-21": "xi.jpg",
+    	"2021-10-22": "crossover.jpg",
+    	"2021-10-23": "HDMI.jpg",
+    	"2021-11-05": "drink.png",
+    	"2021-11-06": "boxes.png",
+    	"2021-11-09": "F1.png",
+    	"2021-11-10": "dates.png",
+    	"2021-11-11": "interviews.png",
+    	"2021-11-15": "planes.jpg",
+    	"2021-11-16": "1i.jpg",
+    	"2021-11-17": "pure 2.png",
+    	"2021-11-24": "air resistance.jpg",
+    	"2021-11-25": "obvious.jpg",
+    	"2021-12-25": "xmas.jpg",
+    	"2022-01-09": "Coulomb.png",
+    	"2022-01-13": "bon appetit.png",
+    	"2022-01-14": "Friday.png",
+    	"2022-01-17": "speed.png",
+    	"2022-01-25": "stability.png",
+    	"2022-02-01": "ethane.png",
+    	"2022-02-02": "birthday.png",
+    	"2022-02-03": "k.jpg",
+    	"2022-02-04": "Le Chatelier.png",
+    	"2022-02-05": "2nd order ODE.png",
+    	"2022-02-07": "expansion.png",
+    	"2022-02-08": "cuts.png",
+    	"2022-03-03": "spin.png",
+    	"2022-03-08": "physics mark.png",
+    	"2022-03-16": "core prac..png",
+    	"2022-03-23": "copper.png",
+    	"2022-05-04": "A level.png",
+    	"2022-05-05": "studying.png",
+    	"2022-05-06": "Newton's III.png",
+    	"2022-05-26": "physics 1 flashbacks.png",
+    	"2022-05-27": "capacitors.jpg",
+    	"2022-05-28": "diodes.jpg",
+    	"2022-06-07": "cheese.png",
+    	"2022-06-10": "wrapped.png",
+    	"2022-06-11": "USB.png",
+    	"2022-06-14": "Ferris.png",
+    	"2022-06-16": "chicken.png"
+    };
+    var memes = {
+    	otd: otd
+    };
+
+    const cache = {};
+    const queue = new Set();
+    const firstMonth = compoundDate(1, 9, 2021);
+    const delay = (time) => new Promise(resolve => setTimeout(resolve, time * 10 ** 3));
+    const cacheMonth = (year, month, monthOfMemes) => {
+        if (!cache[year]) {
+            cache[year] = {};
+        }
+        cache[year][month] = monthOfMemes;
+    };
+    const isArchivedHere = (date, theMonth, theYear) => {
+        const [, month, year] = separateDate(date);
+        const goodMonth = month === theMonth;
+        const goodYear = year === theYear;
+        return goodMonth && goodYear;
+    };
+    const isMemeMonthPossible = (year, month) => {
+        const date = compoundDate(1, month, year);
+        const today = new Date();
+        const currentYear = separateDate(today)[2];
+        return firstMonth <= date && year <= currentYear;
+    };
+    const getMemesOfMonthFromJson = async (year, month) => {
+        const dates = new Array(getLengthOfMonth(year, month))
+            .fill(null)
+            .map((x, i) => i + 1);
+        const result = {};
+        for (const date of dates) {
+            const d = compoundDate(date, month, year);
+            const key = dateToString(d, "-", true);
+            const url = memes.otd[key];
+            if (isArchivedHere(d, month, year) && url) {
+                result[date] = url;
+            }
+        }
+        await delay(2);
+        return result;
+    };
+    const getMemesOfMonthFromDb = async (year, month, db) => {
+        if (!isMemeMonthPossible(year, month))
+            return null;
+        const mm = `${month}`.padStart(2, "0");
+        const ref = `${year}-${mm}`;
+        if (queue.has(ref)) {
+            await delay(1);
+            return getMemesOfMonthFromCache(year, month);
+        }
+        console.count(ref);
+        console.count("DB reads");
+        queue.add(ref);
+        console.log(queue, cache);
+        // const memesOfMonth = (await getDoc(doc(db, "memes", ref))).data() ?? {};
+        const memesOfMonth = await getMemesOfMonthFromJson(year, month);
+        cacheMonth(year, month, memesOfMonth);
+        queue.delete(ref);
+        console.log(queue, cache);
+        return memesOfMonth;
+    };
+    const getMemesOfMonthFromCache = (year, month) => {
+        try {
+            return cache[year][month];
+        }
+        catch (err) {
+            console.count("Cache errors");
+        }
+        return undefined;
+    };
+    const getMemesOfMonth = (year, month, db) => { var _a; return (_a = getMemesOfMonthFromCache(year, month)) !== null && _a !== void 0 ? _a : getMemesOfMonthFromDb(year, month); };
+    const getMemeOtd = async (d, db, n = 0) => {
+        if (!d)
+            return null;
+        if (n >= 12)
+            throw new Error("DB recursion");
+        const [date, month, year] = separateDate(d);
+        if (!isMemeMonthPossible(year, month))
+            return null;
+        try {
+            return cache[year][month][date];
+        }
+        catch (err) {
+            console.count("Cache errors");
+        }
+        await getMemesOfMonth(year, month);
+        return getMemeOtd(d, db, n + 1);
+    };
+
+    /* src/Header.svelte generated by Svelte v3.49.0 */
+
+    const file$3 = "src/Header.svelte";
+
+    function create_fragment$3(ctx) {
+    	let header;
+    	let a;
+    	let img;
+    	let img_src_value;
+    	let t0;
+    	let h1;
+
+    	const block = {
+    		c: function create() {
+    			header = element("header");
+    			a = element("a");
+    			img = element("img");
+    			t0 = space();
+    			h1 = element("h1");
+    			h1.textContent = "Physics & Maths Pirate";
+    			attr_dev(img, "class", "inline-block");
+    			set_style(img, "height", "2.5em");
+    			if (!src_url_equal(img.src, img_src_value = "./favicon.png")) attr_dev(img, "src", img_src_value);
+    			attr_dev(img, "alt", "Logo");
+    			add_location(img, file$3, 2, 4, 46);
+    			attr_dev(h1, "class", "inline-block ml-4");
+    			add_location(h1, file$3, 8, 4, 161);
+    			attr_dev(a, "href", "/");
+    			add_location(a, file$3, 1, 2, 29);
+    			attr_dev(header, "class", "my-8 flex");
+    			add_location(header, file$3, 0, 0, 0);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, header, anchor);
+    			append_dev(header, a);
+    			append_dev(a, img);
+    			append_dev(a, t0);
+    			append_dev(a, h1);
+    		},
+    		p: noop,
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(header);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$3.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$3($$self, $$props) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('Header', slots, []);
+    	const writable_props = [];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Header> was created with unknown prop '${key}'`);
+    	});
+
+    	return [];
+    }
+
+    class Header extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$3, create_fragment$3, safe_not_equal, {});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Header",
+    			options,
+    			id: create_fragment$3.name
+    		});
+    	}
+    }
+
+    /* src/Loader.svelte generated by Svelte v3.49.0 */
+
+    const file$2 = "src/Loader.svelte";
+
+    function create_fragment$2(ctx) {
+    	let p;
+
+    	const block = {
+    		c: function create() {
+    			p = element("p");
+    			p.textContent = "It's loading, bro...";
+    			add_location(p, file$2, 0, 0, 0);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, p, anchor);
+    		},
+    		p: noop,
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(p);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$2.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$2($$self, $$props) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('Loader', slots, []);
+    	const writable_props = [];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Loader> was created with unknown prop '${key}'`);
+    	});
+
+    	return [];
+    }
+
+    class Loader extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$2, create_fragment$2, safe_not_equal, {});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Loader",
+    			options,
+    			id: create_fragment$2.name
+    		});
+    	}
+    }
+
+    /* src/Shelf.svelte generated by Svelte v3.49.0 */
+    const file$1 = "src/Shelf.svelte";
+
+    // (10:4) {#if isTomorrow}
+    function create_if_block$1(ctx) {
+    	let br;
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			br = element("br");
+    			t = text("\n      (Sneak peek)");
+    			add_location(br, file$1, 10, 6, 221);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, br, anchor);
+    			insert_dev(target, t, anchor);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(br);
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$1.name,
+    		type: "if",
+    		source: "(10:4) {#if isTomorrow}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$1(ctx) {
+    	let tr;
+    	let td0;
+    	let t0_value = dateToString(/*date*/ ctx[0], "/") + "";
+    	let t0;
+    	let t1;
+    	let t2;
+    	let td1;
+    	let img;
+    	let img_src_value;
+    	let if_block = /*isTomorrow*/ ctx[2] && create_if_block$1(ctx);
+
+    	const block = {
+    		c: function create() {
+    			tr = element("tr");
+    			td0 = element("td");
+    			t0 = text(t0_value);
+    			t1 = space();
+    			if (if_block) if_block.c();
+    			t2 = space();
+    			td1 = element("td");
+    			img = element("img");
+    			attr_dev(td0, "class", "text-center");
+    			add_location(td0, file$1, 7, 2, 139);
+    			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
+    			if (!src_url_equal(img.src, img_src_value = `memes/${/*src*/ ctx[1]}`)) attr_dev(img, "src", img_src_value);
+    			attr_dev(img, "alt", "Meme");
+    			add_location(img, file$1, 15, 4, 276);
+    			add_location(td1, file$1, 14, 2, 267);
+    			add_location(tr, file$1, 6, 0, 132);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, tr, anchor);
+    			append_dev(tr, td0);
+    			append_dev(td0, t0);
+    			append_dev(td0, t1);
+    			if (if_block) if_block.m(td0, null);
+    			append_dev(tr, t2);
+    			append_dev(tr, td1);
+    			append_dev(td1, img);
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*date*/ 1 && t0_value !== (t0_value = dateToString(/*date*/ ctx[0], "/") + "")) set_data_dev(t0, t0_value);
+
+    			if (/*isTomorrow*/ ctx[2]) {
+    				if (if_block) ; else {
+    					if_block = create_if_block$1(ctx);
+    					if_block.c();
+    					if_block.m(td0, null);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
+    			}
+
+    			if (dirty & /*src*/ 2 && !src_url_equal(img.src, img_src_value = `memes/${/*src*/ ctx[1]}`)) {
+    				attr_dev(img, "src", img_src_value);
+    			}
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(tr);
+    			if (if_block) if_block.d();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$1.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$1($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('Shelf', slots, []);
+    	let { date } = $$props;
+    	let { src } = $$props;
+    	let { isTomorrow = false } = $$props;
+    	const writable_props = ['date', 'src', 'isTomorrow'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Shelf> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$$set = $$props => {
+    		if ('date' in $$props) $$invalidate(0, date = $$props.date);
+    		if ('src' in $$props) $$invalidate(1, src = $$props.src);
+    		if ('isTomorrow' in $$props) $$invalidate(2, isTomorrow = $$props.isTomorrow);
+    	};
+
+    	$$self.$capture_state = () => ({ dateToString, date, src, isTomorrow });
+
+    	$$self.$inject_state = $$props => {
+    		if ('date' in $$props) $$invalidate(0, date = $$props.date);
+    		if ('src' in $$props) $$invalidate(1, src = $$props.src);
+    		if ('isTomorrow' in $$props) $$invalidate(2, isTomorrow = $$props.isTomorrow);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [date, src, isTomorrow];
+    }
+
+    class Shelf extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { date: 0, src: 1, isTomorrow: 2 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Shelf",
+    			options,
+    			id: create_fragment$1.name
+    		});
+
+    		const { ctx } = this.$$;
+    		const props = options.props || {};
+
+    		if (/*date*/ ctx[0] === undefined && !('date' in props)) {
+    			console.warn("<Shelf> was created without expected prop 'date'");
+    		}
+
+    		if (/*src*/ ctx[1] === undefined && !('src' in props)) {
+    			console.warn("<Shelf> was created without expected prop 'src'");
+    		}
+    	}
+
+    	get date() {
+    		throw new Error("<Shelf>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set date(value) {
+    		throw new Error("<Shelf>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get src() {
+    		throw new Error("<Shelf>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set src(value) {
+    		throw new Error("<Shelf>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get isTomorrow() {
+    		throw new Error("<Shelf>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set isTomorrow(value) {
+    		throw new Error("<Shelf>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* src/Archive.svelte generated by Svelte v3.49.0 */
+
+    const { Object: Object_1 } = globals;
+    const file = "src/Archive.svelte";
+
+    function get_each_context(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[18] = list[i];
+    	return child_ctx;
+    }
+
+    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate, }
+    function create_catch_block_2(ctx) {
+    	const block = {
+    		c: noop,
+    		m: noop,
+    		p: noop,
+    		i: noop,
+    		o: noop,
+    		d: noop
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_catch_block_2.name,
+    		type: "catch",
+    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate, }",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (68:4) {:then archivedMemes}
+    function create_then_block_1(ctx) {
+    	let tbody;
+    	let t0;
+    	let promise;
+    	let t1;
+    	let show_if = !Object.keys(/*archivedMemes*/ ctx[16]).length;
+    	let if_block_anchor;
+    	let current;
+    	let each_value = Object.keys(/*archivedMemes*/ ctx[16]).map(/*func*/ ctx[13]);
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+    	}
+
+    	const out = i => transition_out(each_blocks[i], 1, 1, () => {
+    		each_blocks[i] = null;
+    	});
+
+    	let info = {
+    		ctx,
+    		current: null,
+    		token: null,
+    		hasCatch: false,
+    		pending: create_pending_block_2,
+    		then: create_then_block_2,
+    		catch: create_catch_block_1,
+    		value: 17,
+    		blocks: [,,,]
+    	};
+
+    	handle_promise(promise = /*tomorrowMemePromise*/ ctx[6], info);
+    	let if_block = show_if && create_if_block_1(ctx);
+
+    	const block = {
+    		c: function create() {
+    			tbody = element("tbody");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t0 = space();
+    			info.block.c();
+    			t1 = space();
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
+    			add_location(tbody, file, 68, 6, 1979);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, tbody, anchor);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(tbody, null);
+    			}
+
+    			append_dev(tbody, t0);
+    			info.block.m(tbody, info.anchor = null);
+    			info.mount = () => tbody;
+    			info.anchor = null;
+    			insert_dev(target, t1, anchor);
+    			if (if_block) if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+
+    			if (dirty & /*compoundDate, Object, archivedMemesPromise, parseInt, month, year, stringToDate, dateToString, today*/ 387) {
+    				each_value = Object.keys(/*archivedMemes*/ ctx[16]).map(/*func*/ ctx[13]);
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    						transition_in(each_blocks[i], 1);
+    					} else {
+    						each_blocks[i] = create_each_block(child_ctx);
+    						each_blocks[i].c();
+    						transition_in(each_blocks[i], 1);
+    						each_blocks[i].m(tbody, t0);
+    					}
+    				}
+
+    				group_outros();
+
+    				for (i = each_value.length; i < each_blocks.length; i += 1) {
+    					out(i);
+    				}
+
+    				check_outros();
+    			}
+
+    			info.ctx = ctx;
+
+    			if (dirty & /*tomorrowMemePromise*/ 64 && promise !== (promise = /*tomorrowMemePromise*/ ctx[6]) && handle_promise(promise, info)) ; else {
+    				update_await_block_branch(info, ctx, dirty);
+    			}
+
+    			if (dirty & /*archivedMemesPromise*/ 128) show_if = !Object.keys(/*archivedMemes*/ ctx[16]).length;
+
+    			if (show_if) {
+    				if (if_block) ; else {
+    					if_block = create_if_block_1(ctx);
+    					if_block.c();
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+
+    			for (let i = 0; i < each_value.length; i += 1) {
+    				transition_in(each_blocks[i]);
+    			}
+
+    			transition_in(info.block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			each_blocks = each_blocks.filter(Boolean);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				transition_out(each_blocks[i]);
+    			}
+
+    			for (let i = 0; i < 3; i += 1) {
+    				const block = info.blocks[i];
+    				transition_out(block);
+    			}
+
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(tbody);
+    			destroy_each(each_blocks, detaching);
+    			info.block.d();
+    			info.token = null;
+    			info = null;
+    			if (detaching) detach_dev(t1);
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_then_block_1.name,
+    		type: "then",
+    		source: "(68:4) {:then archivedMemes}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (71:10) {#if compoundDate(date, month, year) <= stringToDate(dateToString(today))}
+    function create_if_block_3(ctx) {
+    	let shelf;
+    	let current;
+
+    	shelf = new Shelf({
+    			props: {
+    				date: compoundDate(/*date*/ ctx[18], /*month*/ ctx[0], /*year*/ ctx[1]),
+    				src: /*archivedMemes*/ ctx[16][/*date*/ ctx[18]]
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			create_component(shelf.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(shelf, target, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const shelf_changes = {};
+    			if (dirty & /*archivedMemesPromise, month, year*/ 131) shelf_changes.date = compoundDate(/*date*/ ctx[18], /*month*/ ctx[0], /*year*/ ctx[1]);
+    			if (dirty & /*archivedMemesPromise*/ 128) shelf_changes.src = /*archivedMemes*/ ctx[16][/*date*/ ctx[18]];
+    			shelf.$set(shelf_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(shelf.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(shelf.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(shelf, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_3.name,
+    		type: "if",
+    		source: "(71:10) {#if compoundDate(date, month, year) <= stringToDate(dateToString(today))}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (70:8) {#each Object.keys(archivedMemes).map(x => parseInt(x)) as date}
+    function create_each_block(ctx) {
+    	let show_if = compoundDate(/*date*/ ctx[18], /*month*/ ctx[0], /*year*/ ctx[1]) <= stringToDate(dateToString(/*today*/ ctx[8]));
+    	let if_block_anchor;
+    	let current;
+    	let if_block = show_if && create_if_block_3(ctx);
+
+    	const block = {
+    		c: function create() {
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			if (if_block) if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*archivedMemesPromise, month, year*/ 131) show_if = compoundDate(/*date*/ ctx[18], /*month*/ ctx[0], /*year*/ ctx[1]) <= stringToDate(dateToString(/*today*/ ctx[8]));
+
+    			if (show_if) {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+
+    					if (dirty & /*archivedMemesPromise, month, year*/ 131) {
+    						transition_in(if_block, 1);
+    					}
+    				} else {
+    					if_block = create_if_block_3(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			} else if (if_block) {
+    				group_outros();
+
+    				transition_out(if_block, 1, 1, () => {
+    					if_block = null;
+    				});
+
+    				check_outros();
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block.name,
+    		type: "each",
+    		source: "(70:8) {#each Object.keys(archivedMemes).map(x => parseInt(x)) as date}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate, }
+    function create_catch_block_1(ctx) {
+    	const block = {
+    		c: noop,
+    		m: noop,
+    		p: noop,
+    		i: noop,
+    		o: noop,
+    		d: noop
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_catch_block_1.name,
+    		type: "catch",
+    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate, }",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (80:8) {:then tomorrowMeme}
+    function create_then_block_2(ctx) {
+    	let if_block_anchor;
+    	let current;
+    	let if_block = /*tomorrowMeme*/ ctx[17] && create_if_block_2(ctx);
+
+    	const block = {
+    		c: function create() {
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			if (if_block) if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			if (/*tomorrowMeme*/ ctx[17]) {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+
+    					if (dirty & /*tomorrowMemePromise*/ 64) {
+    						transition_in(if_block, 1);
+    					}
+    				} else {
+    					if_block = create_if_block_2(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			} else if (if_block) {
+    				group_outros();
+
+    				transition_out(if_block, 1, 1, () => {
+    					if_block = null;
+    				});
+
+    				check_outros();
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_then_block_2.name,
+    		type: "then",
+    		source: "(80:8) {:then tomorrowMeme}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (81:10) {#if tomorrowMeme}
+    function create_if_block_2(ctx) {
+    	let shelf;
+    	let current;
+
+    	shelf = new Shelf({
+    			props: {
+    				date: /*tomorrow*/ ctx[9],
+    				src: /*tomorrowMeme*/ ctx[17],
+    				isTomorrow: true
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			create_component(shelf.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(shelf, target, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const shelf_changes = {};
+    			if (dirty & /*tomorrowMemePromise*/ 64) shelf_changes.src = /*tomorrowMeme*/ ctx[17];
+    			shelf.$set(shelf_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(shelf.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(shelf.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(shelf, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2.name,
+    		type: "if",
+    		source: "(81:10) {#if tomorrowMeme}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (78:36)            <Loader />         {:then tomorrowMeme}
+    function create_pending_block_2(ctx) {
+    	let loader;
+    	let current;
+    	loader = new Loader({ $$inline: true });
+
+    	const block = {
+    		c: function create() {
+    			create_component(loader.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(loader, target, anchor);
+    			current = true;
+    		},
+    		p: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(loader.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(loader.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(loader, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_pending_block_2.name,
+    		type: "pending",
+    		source: "(78:36)            <Loader />         {:then tomorrowMeme}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (86:6) {#if !Object.keys(archivedMemes).length}
+    function create_if_block_1(ctx) {
+    	let tfoot;
+
+    	const block = {
+    		c: function create() {
+    			tfoot = element("tfoot");
+    			tfoot.textContent = "No memes that month :(";
+    			add_location(tfoot, file, 86, 8, 2598);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, tfoot, anchor);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(tfoot);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1.name,
+    		type: "if",
+    		source: "(86:6) {#if !Object.keys(archivedMemes).length}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (64:33)      <tfoot>        <Loader />     </tfoot>     {:then archivedMemes}
+    function create_pending_block_1(ctx) {
+    	let tfoot;
+    	let loader;
+    	let current;
+    	loader = new Loader({ $$inline: true });
+
+    	const block = {
+    		c: function create() {
+    			tfoot = element("tfoot");
+    			create_component(loader.$$.fragment);
+    			add_location(tfoot, file, 64, 4, 1908);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, tfoot, anchor);
+    			mount_component(loader, tfoot, null);
+    			current = true;
+    		},
+    		p: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(loader.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(loader.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(tfoot);
+    			destroy_component(loader);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_pending_block_1.name,
+    		type: "pending",
+    		source: "(64:33)      <tfoot>        <Loader />     </tfoot>     {:then archivedMemes}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate, }
+    function create_catch_block(ctx) {
+    	const block = {
+    		c: noop,
+    		m: noop,
+    		p: noop,
+    		i: noop,
+    		o: noop,
+    		d: noop
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_catch_block.name,
+    		type: "catch",
+    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate, }",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (97:2) {:then queriedMeme}
+    function create_then_block(ctx) {
+    	let if_block_anchor;
+
+    	function select_block_type(ctx, dirty) {
+    		if (/*queriedMeme*/ ctx[15]) return create_if_block;
+    		return create_else_block;
+    	}
+
+    	let current_block_type = select_block_type(ctx);
+    	let if_block = current_block_type(ctx);
+
+    	const block = {
+    		c: function create() {
+    			if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			if_block.m(target, anchor);
+    			insert_dev(target, if_block_anchor, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
+    				if_block.p(ctx, dirty);
+    			} else {
+    				if_block.d(1);
+    				if_block = current_block_type(ctx);
+
+    				if (if_block) {
+    					if_block.c();
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			}
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if_block.d(detaching);
+    			if (detaching) detach_dev(if_block_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_then_block.name,
+    		type: "then",
+    		source: "(97:2) {:then queriedMeme}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (104:4) {:else}
+    function create_else_block(ctx) {
+    	let p;
+
+    	const block = {
+    		c: function create() {
+    			p = element("p");
+    			p.textContent = "No memes that day :(";
+    			attr_dev(p, "class", "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto text-center");
+    			add_location(p, file, 104, 6, 3009);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, p, anchor);
+    		},
+    		p: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(p);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block.name,
+    		type: "else",
+    		source: "(104:4) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (98:4) {#if queriedMeme}
+    function create_if_block(ctx) {
+    	let img;
+    	let img_src_value;
+
+    	const block = {
+    		c: function create() {
+    			img = element("img");
+    			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
+    			if (!src_url_equal(img.src, img_src_value = `memes/${/*queriedMeme*/ ctx[15]}`)) attr_dev(img, "src", img_src_value);
+    			attr_dev(img, "alt", "Meme");
+    			add_location(img, file, 98, 6, 2872);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, img, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*queriedMemePromise*/ 32 && !src_url_equal(img.src, img_src_value = `memes/${/*queriedMeme*/ ctx[15]}`)) {
+    				attr_dev(img, "src", img_src_value);
+    			}
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(img);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block.name,
+    		type: "if",
+    		source: "(98:4) {#if queriedMeme}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (95:29)      <Loader />   {:then queriedMeme}
+    function create_pending_block(ctx) {
+    	let loader;
+    	let current;
+    	loader = new Loader({ $$inline: true });
+
+    	const block = {
+    		c: function create() {
+    			create_component(loader.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(loader, target, anchor);
+    			current = true;
+    		},
+    		p: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(loader.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(loader.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(loader, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_pending_block.name,
+    		type: "pending",
+    		source: "(95:29)      <Loader />   {:then queriedMeme}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment(ctx) {
+    	let header;
+    	let t0;
+    	let main;
+    	let h20;
+    	let t2;
+    	let div4;
+    	let div1;
+    	let div0;
+    	let span0;
+    	let div0_disabled_value;
+    	let t4;
+    	let p0;
+    	let t5_value = `${/*month*/ ctx[0]}`.padStart(2, "0") + "";
+    	let t5;
+    	let t6;
+    	let t7;
+    	let t8;
+    	let div3;
+    	let div2;
+    	let span1;
+    	let div2_disabled_value;
+    	let t10;
+    	let table;
+    	let thead;
+    	let tr;
+    	let th0;
+    	let t12;
+    	let th1;
+    	let t14;
+    	let promise;
+    	let t15;
+    	let section;
+    	let h21;
+    	let t17;
+    	let input;
+    	let t18;
+    	let promise_1;
+    	let t19;
+    	let p1;
+    	let t21;
+    	let footer;
+    	let current;
+    	let mounted;
+    	let dispose;
+    	header = new Header({ $$inline: true });
+
+    	let info = {
+    		ctx,
+    		current: null,
+    		token: null,
+    		hasCatch: false,
+    		pending: create_pending_block_1,
+    		then: create_then_block_1,
+    		catch: create_catch_block_2,
+    		value: 16,
+    		blocks: [,,,]
+    	};
+
+    	handle_promise(promise = /*archivedMemesPromise*/ ctx[7], info);
+
+    	let info_1 = {
+    		ctx,
+    		current: null,
+    		token: null,
+    		hasCatch: false,
+    		pending: create_pending_block,
+    		then: create_then_block,
+    		catch: create_catch_block,
+    		value: 15,
+    		blocks: [,,,]
+    	};
+
+    	handle_promise(promise_1 = /*queriedMemePromise*/ ctx[5], info_1);
+
+    	const block = {
+    		c: function create() {
+    			create_component(header.$$.fragment);
+    			t0 = space();
+    			main = element("main");
+    			h20 = element("h2");
+    			h20.textContent = "Meme archive";
+    			t2 = space();
+    			div4 = element("div");
+    			div1 = element("div");
+    			div0 = element("div");
+    			span0 = element("span");
+    			span0.textContent = "<";
+    			t4 = space();
+    			p0 = element("p");
+    			t5 = text(t5_value);
+    			t6 = text("/");
+    			t7 = text(/*year*/ ctx[1]);
+    			t8 = space();
+    			div3 = element("div");
+    			div2 = element("div");
+    			span1 = element("span");
+    			span1.textContent = ">";
+    			t10 = space();
+    			table = element("table");
+    			thead = element("thead");
+    			tr = element("tr");
+    			th0 = element("th");
+    			th0.textContent = "Date";
+    			t12 = space();
+    			th1 = element("th");
+    			th1.textContent = "Meme";
+    			t14 = space();
+    			info.block.c();
+    			t15 = space();
+    			section = element("section");
+    			h21 = element("h2");
+    			h21.textContent = "Specify a date";
+    			t17 = space();
+    			input = element("input");
+    			t18 = space();
+    			info_1.block.c();
+    			t19 = space();
+    			p1 = element("p");
+    			p1.textContent = "DVS-style dates accepted";
+    			t21 = space();
+    			footer = element("footer");
+    			add_location(h20, file, 32, 2, 1044);
+    			attr_dev(span0, "class", "-mt-1.5");
+    			add_location(span0, file, 40, 8, 1277);
+    			attr_dev(div0, "class", "flex-1 btn");
+    			attr_dev(div0, "disabled", div0_disabled_value = !/*backwardsEnabled*/ ctx[4]);
+    			add_location(div0, file, 35, 6, 1139);
+    			attr_dev(div1, "class", "w-1/4");
+    			add_location(div1, file, 34, 4, 1113);
+    			attr_dev(p0, "class", "flex-1 my-2 text-lg text-center");
+    			add_location(p0, file, 43, 4, 1339);
+    			attr_dev(span1, "class", "-mt-1.5");
+    			add_location(span1, file, 52, 8, 1601);
+    			attr_dev(div2, "class", "flex-1 btn");
+    			attr_dev(div2, "disabled", div2_disabled_value = !/*forwardsEnabled*/ ctx[3]);
+    			add_location(div2, file, 47, 6, 1465);
+    			attr_dev(div3, "class", "w-1/4");
+    			add_location(div3, file, 46, 4, 1439);
+    			attr_dev(div4, "class", "flex sm:w-1/4 mx-auto my-4");
+    			add_location(div4, file, 33, 2, 1068);
+    			attr_dev(th0, "class", "border-2");
+    			add_location(th0, file, 59, 8, 1775);
+    			attr_dev(th1, "class", "border-2");
+    			add_location(th1, file, 60, 8, 1814);
+    			add_location(tr, file, 58, 6, 1762);
+    			add_location(thead, file, 57, 4, 1748);
+    			attr_dev(table, "class", "table-auto w-full max-w-4xl mx-auto border-white border-2");
+    			add_location(table, file, 56, 2, 1670);
+    			add_location(main, file, 31, 0, 1035);
+    			add_location(h21, file, 92, 2, 2706);
+    			attr_dev(input, "type", "text");
+    			add_location(input, file, 93, 2, 2732);
+    			attr_dev(p1, "class", "mt-4");
+    			add_location(p1, file, 109, 2, 3138);
+    			attr_dev(section, "class", "mt-48");
+    			add_location(section, file, 91, 0, 2680);
+    			add_location(footer, file, 111, 0, 3194);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(header, target, anchor);
+    			insert_dev(target, t0, anchor);
+    			insert_dev(target, main, anchor);
+    			append_dev(main, h20);
+    			append_dev(main, t2);
+    			append_dev(main, div4);
+    			append_dev(div4, div1);
+    			append_dev(div1, div0);
+    			append_dev(div0, span0);
+    			append_dev(div4, t4);
+    			append_dev(div4, p0);
+    			append_dev(p0, t5);
+    			append_dev(p0, t6);
+    			append_dev(p0, t7);
+    			append_dev(div4, t8);
+    			append_dev(div4, div3);
+    			append_dev(div3, div2);
+    			append_dev(div2, span1);
+    			append_dev(main, t10);
+    			append_dev(main, table);
+    			append_dev(table, thead);
+    			append_dev(thead, tr);
+    			append_dev(tr, th0);
+    			append_dev(tr, t12);
+    			append_dev(tr, th1);
+    			append_dev(table, t14);
+    			info.block.m(table, info.anchor = null);
+    			info.mount = () => table;
+    			info.anchor = null;
+    			insert_dev(target, t15, anchor);
+    			insert_dev(target, section, anchor);
+    			append_dev(section, h21);
+    			append_dev(section, t17);
+    			append_dev(section, input);
+    			set_input_value(input, /*dateQuery*/ ctx[2]);
+    			append_dev(section, t18);
+    			info_1.block.m(section, info_1.anchor = null);
+    			info_1.mount = () => section;
+    			info_1.anchor = t19;
+    			append_dev(section, t19);
+    			append_dev(section, p1);
+    			insert_dev(target, t21, anchor);
+    			insert_dev(target, footer, anchor);
+    			current = true;
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(div0, "click", /*click_handler*/ ctx[11], false, false, false),
+    					listen_dev(div2, "click", /*click_handler_1*/ ctx[12], false, false, false),
+    					listen_dev(input, "input", /*input_input_handler*/ ctx[14])
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(new_ctx, [dirty]) {
+    			ctx = new_ctx;
+
+    			if (!current || dirty & /*backwardsEnabled*/ 16 && div0_disabled_value !== (div0_disabled_value = !/*backwardsEnabled*/ ctx[4])) {
+    				attr_dev(div0, "disabled", div0_disabled_value);
+    			}
+
+    			if ((!current || dirty & /*month*/ 1) && t5_value !== (t5_value = `${/*month*/ ctx[0]}`.padStart(2, "0") + "")) set_data_dev(t5, t5_value);
+    			if (!current || dirty & /*year*/ 2) set_data_dev(t7, /*year*/ ctx[1]);
+
+    			if (!current || dirty & /*forwardsEnabled*/ 8 && div2_disabled_value !== (div2_disabled_value = !/*forwardsEnabled*/ ctx[3])) {
+    				attr_dev(div2, "disabled", div2_disabled_value);
+    			}
+
+    			info.ctx = ctx;
+
+    			if (dirty & /*archivedMemesPromise*/ 128 && promise !== (promise = /*archivedMemesPromise*/ ctx[7]) && handle_promise(promise, info)) ; else {
+    				update_await_block_branch(info, ctx, dirty);
+    			}
+
+    			if (dirty & /*dateQuery*/ 4 && input.value !== /*dateQuery*/ ctx[2]) {
+    				set_input_value(input, /*dateQuery*/ ctx[2]);
+    			}
+
+    			info_1.ctx = ctx;
+
+    			if (dirty & /*queriedMemePromise*/ 32 && promise_1 !== (promise_1 = /*queriedMemePromise*/ ctx[5]) && handle_promise(promise_1, info_1)) ; else {
+    				update_await_block_branch(info_1, ctx, dirty);
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(header.$$.fragment, local);
+    			transition_in(info.block);
+    			transition_in(info_1.block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(header.$$.fragment, local);
+
+    			for (let i = 0; i < 3; i += 1) {
+    				const block = info.blocks[i];
+    				transition_out(block);
+    			}
+
+    			for (let i = 0; i < 3; i += 1) {
+    				const block = info_1.blocks[i];
+    				transition_out(block);
+    			}
+
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(header, detaching);
+    			if (detaching) detach_dev(t0);
+    			if (detaching) detach_dev(main);
+    			info.block.d();
+    			info.token = null;
+    			info = null;
+    			if (detaching) detach_dev(t15);
+    			if (detaching) detach_dev(section);
+    			info_1.block.d();
+    			info_1.token = null;
+    			info_1 = null;
+    			if (detaching) detach_dev(t21);
+    			if (detaching) detach_dev(footer);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance($$self, $$props, $$invalidate) {
+    	let archivedMemesPromise;
+    	let tomorrowMemePromise;
+    	let queriedMemePromise;
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('Archive', slots, []);
+    	let { db } = $$props;
+    	const today = new Date();
+    	const tomorrow = new Date(Number(today) + 24 * Math.pow(60, 2) * Math.pow(10, 3));
+    	let month = today.getMonth() + 1;
+    	let year = today.getFullYear();
+    	let dateQuery = dateToString(today);
+    	let forwardsEnabled = true;
+    	let backwardsEnabled = true;
+    	const writable_props = ['db'];
+
+    	Object_1.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Archive> was created with unknown prop '${key}'`);
+    	});
+
+    	const click_handler = () => backwardsEnabled && $$invalidate(0, month--, month);
+    	const click_handler_1 = () => forwardsEnabled && $$invalidate(0, month++, month);
+    	const func = x => parseInt(x);
+
+    	function input_input_handler() {
+    		dateQuery = this.value;
+    		$$invalidate(2, dateQuery);
+    	}
+
+    	$$self.$$set = $$props => {
+    		if ('db' in $$props) $$invalidate(10, db = $$props.db);
+    	};
+
+    	$$self.$capture_state = () => ({
+    		compoundDate,
+    		dateToString,
+    		stringToDate,
+    		firstMonth,
+    		getMemeOtd,
+    		getMemesOfMonth,
+    		Header,
+    		Loader,
+    		Shelf,
+    		db,
+    		today,
+    		tomorrow,
+    		month,
+    		year,
+    		dateQuery,
+    		forwardsEnabled,
+    		backwardsEnabled,
+    		queriedMemePromise,
+    		tomorrowMemePromise,
+    		archivedMemesPromise
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ('db' in $$props) $$invalidate(10, db = $$props.db);
+    		if ('month' in $$props) $$invalidate(0, month = $$props.month);
+    		if ('year' in $$props) $$invalidate(1, year = $$props.year);
+    		if ('dateQuery' in $$props) $$invalidate(2, dateQuery = $$props.dateQuery);
+    		if ('forwardsEnabled' in $$props) $$invalidate(3, forwardsEnabled = $$props.forwardsEnabled);
+    		if ('backwardsEnabled' in $$props) $$invalidate(4, backwardsEnabled = $$props.backwardsEnabled);
+    		if ('queriedMemePromise' in $$props) $$invalidate(5, queriedMemePromise = $$props.queriedMemePromise);
+    		if ('tomorrowMemePromise' in $$props) $$invalidate(6, tomorrowMemePromise = $$props.tomorrowMemePromise);
+    		if ('archivedMemesPromise' in $$props) $$invalidate(7, archivedMemesPromise = $$props.archivedMemesPromise);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*month, year*/ 3) {
+    			{
+    				if (month < 1) {
+    					$$invalidate(0, month = 12);
+    					$$invalidate(1, year--, year);
+    				} else if (month > 12) {
+    					$$invalidate(0, month = 1);
+    					$$invalidate(1, year++, year);
+    				}
+    			}
+    		}
+
+    		if ($$self.$$.dirty & /*month, year*/ 3) {
+    			$$invalidate(3, forwardsEnabled = !(today.getMonth() + 1 === month && today.getFullYear() === year));
+    		}
+
+    		if ($$self.$$.dirty & /*month, year*/ 3) {
+    			$$invalidate(4, backwardsEnabled = firstMonth < compoundDate(1, month, year));
+    		}
+
+    		if ($$self.$$.dirty & /*year, month, db*/ 1027) {
+    			$$invalidate(7, archivedMemesPromise = getMemesOfMonth(year, month));
+    		}
+
+    		if ($$self.$$.dirty & /*db*/ 1024) {
+    			$$invalidate(6, tomorrowMemePromise = getMemeOtd(tomorrow, db));
+    		}
+
+    		if ($$self.$$.dirty & /*dateQuery, db*/ 1028) {
+    			$$invalidate(5, queriedMemePromise = getMemeOtd(stringToDate(dateQuery), db));
+    		}
+    	};
+
+    	return [
+    		month,
+    		year,
+    		dateQuery,
+    		forwardsEnabled,
+    		backwardsEnabled,
+    		queriedMemePromise,
+    		tomorrowMemePromise,
+    		archivedMemesPromise,
+    		today,
+    		tomorrow,
+    		db,
+    		click_handler,
+    		click_handler_1,
+    		func,
+    		input_input_handler
+    	];
+    }
+
+    class Archive extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance, create_fragment, safe_not_equal, { db: 10 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Archive",
+    			options,
+    			id: create_fragment.name
+    		});
+
+    		const { ctx } = this.$$;
+    		const props = options.props || {};
+
+    		if (/*db*/ ctx[10] === undefined && !('db' in props)) {
+    			console.warn("<Archive> was created without expected prop 'db'");
+    		}
+    	}
+
+    	get db() {
+    		throw new Error("<Archive>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set db(value) {
+    		throw new Error("<Archive>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
 
     const name$2 = "@firebase/installations";
     const version$2 = "0.5.12";
@@ -5528,10 +8006,13 @@ var archive = (function () {
     };
     const app = initializeApp(firebaseConfig);
     getAnalytics(app);
+    const db = Ba(app);
 
     const archive = new Archive({
         target: document.body,
-        props: {},
+        props: {
+            db,
+        },
     });
 
     return archive;

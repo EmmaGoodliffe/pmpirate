@@ -1,11 +1,15 @@
 <script lang="ts">
+  import type { Firestore } from "@firebase/firestore";
   import { getMemeOtd } from "./db";
   import Doc from "./Doc.svelte";
   import Header from "./Header.svelte";
+  import Loader from "./Loader.svelte";
   import Otd from "./Otd.svelte";
 
+  export let db: Firestore;
+
   const today = new Date();
-  const otdSrc = getMemeOtd(today);
+  const otdSrcPromise = getMemeOtd(today, db);
 
   const mathsBooks = [
     "Pure Year 1",
@@ -70,7 +74,12 @@
 </main>
 <hr />
 <section id="otd">
-  <Otd src={otdSrc} />
+  <h2>Meme of the Day</h2>
+  {#await otdSrcPromise}
+    <Loader />
+  {:then otdSrc}
+    <Otd src={otdSrc} />
+  {/await}
   <p class="epilogue">
     <a class="hover:underline" href="archive.html">Meme Archive</a>
   </p>
