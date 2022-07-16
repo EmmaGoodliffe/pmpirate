@@ -48,3 +48,7 @@ input[type="text"] {
 table tbody tr td {
   @apply border-2 p-4;
 }
+
+table tfoot {
+  @apply p-4 inline-block text-center;
+}

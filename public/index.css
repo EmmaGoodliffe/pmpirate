@@ -522,10 +522,6 @@ Ensure the default browser behavior of the `hidden` attribute.
   border-color: rgb(255 255 255 / var(--tw-border-opacity));
 }
 
-.p-4 {
-  padding: 1rem;
-}
-
 .pt-2 {
   padding-top: 0.5rem;
 }
@@ -639,6 +635,12 @@ input[type="text"] {
 table tbody tr td {
   border-width: 2px;
   padding: 1rem;
+}
+
+table tfoot {
+  display: inline-block;
+  padding: 1rem;
+  text-align: center;
 }
 
 .hover\:underline:hover {

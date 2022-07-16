@@ -4,7 +4,6 @@
   const className = "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto";
 </script>
 
-<h2>Meme of the Day</h2>
 {#if src}
   <img class={className} src={`memes/${src}`} alt="Meme" />
 {:else}

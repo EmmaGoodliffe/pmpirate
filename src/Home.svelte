@@ -1,8 +1,9 @@
 <script lang="ts">
-  import type { Firestore } from "firebase/firestore";
+  import type { Firestore } from "@firebase/firestore";
   import { getMemeOtd } from "./db";
   import Doc from "./Doc.svelte";
   import Header from "./Header.svelte";
+  import Loader from "./Loader.svelte";
   import Otd from "./Otd.svelte";
 
   export let db: Firestore;
@@ -73,7 +74,10 @@
 </main>
 <hr />
 <section id="otd">
-  {#await otdSrcPromise then otdSrc}
+  <h2>Meme of the Day</h2>
+  {#await otdSrcPromise}
+    <Loader />
+  {:then otdSrc}
     <Otd src={otdSrc} />
   {/await}
   <p class="epilogue">
