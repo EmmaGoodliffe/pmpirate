@@ -4424,7 +4424,8 @@ var archive = (function () {
     	"2022-06-10": "wrapped.png",
     	"2022-06-11": "USB.png",
     	"2022-06-14": "Ferris.png",
-    	"2022-06-16": "chicken.png"
+    	"2022-06-16": "chicken.png",
+    	"2022-07-17": "mugs.png"
     };
     var memes = {
     	otd: otd
@@ -4439,9 +4440,16 @@ var archive = (function () {
         cache[year][month] = monthOfMemes;
         console.log({ cache });
     };
+    const isTomorrow = (date) => {
+        const today = new Date();
+        const diffInMilliseconds = Number(date) - Number(today);
+        const diffInSeconds = diffInMilliseconds / 10 ** 3;
+        const diffInHours = diffInSeconds / 60 ** 2;
+        return 0 < diffInHours && diffInHours <= 24;
+    };
     const isArchivedHere = (date, theMonth, theYear) => {
         const today = new Date();
-        const goodDate = date <= today;
+        const goodDate = date <= today || isTomorrow(date);
         const [, month, year] = separateDate(date);
         const goodMonth = month === theMonth;
         const goodYear = year === theYear;
@@ -4603,7 +4611,7 @@ var archive = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[17] = list[i];
+    	child_ctx[16] = list[i];
     	return child_ctx;
     }
 
@@ -4622,13 +4630,13 @@ var archive = (function () {
     	return block;
     }
 
-    // (68:52)        <tbody>         {#each Object.keys(archivedMemes).map(x => parseInt(x)) as date}
+    // (62:52)        <tbody>         {#each Object.keys(archivedMemes).map(x => parseInt(x)) as date}
     function create_then_block_1(ctx) {
     	let tbody;
     	let t;
-    	let show_if = !Object.keys(/*archivedMemes*/ ctx[16]).length;
+    	let show_if = !Object.keys(/*archivedMemes*/ ctx[15]).length;
     	let if_block_anchor;
-    	let each_value = Object.keys(/*archivedMemes*/ ctx[16]).map(/*func*/ ctx[11]);
+    	let each_value = Object.keys(/*archivedMemes*/ ctx[15]).map(/*func*/ ctx[10]);
     	validate_each_argument(each_value);
     	let each_blocks = [];
 
@@ -4649,7 +4657,7 @@ var archive = (function () {
     			t = space();
     			if (if_block) if_block.c();
     			if_block_anchor = empty();
-    			add_location(tbody, file, 68, 6, 2094);
+    			add_location(tbody, file, 62, 6, 1841);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tbody, anchor);
@@ -4663,8 +4671,8 @@ var archive = (function () {
     			insert_dev(target, if_block_anchor, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*archivedMemesPromise, Object, parseInt, isTomorrow, compoundDate, month, year, dateToString*/ 195) {
-    				each_value = Object.keys(/*archivedMemes*/ ctx[16]).map(/*func*/ ctx[11]);
+    			if (dirty & /*archivedMemesPromise, Object, parseInt, isTomorrow, compoundDate, month, year, dateToString*/ 67) {
+    				each_value = Object.keys(/*archivedMemes*/ ctx[15]).map(/*func*/ ctx[10]);
     				validate_each_argument(each_value);
     				let i;
 
@@ -4687,7 +4695,7 @@ var archive = (function () {
     				each_blocks.length = each_value.length;
     			}
 
-    			if (dirty & /*archivedMemesPromise*/ 64) show_if = !Object.keys(/*archivedMemes*/ ctx[16]).length;
+    			if (dirty & /*archivedMemesPromise*/ 64) show_if = !Object.keys(/*archivedMemes*/ ctx[15]).length;
 
     			if (show_if) {
     				if (if_block) ; else {
@@ -4713,14 +4721,14 @@ var archive = (function () {
     		block,
     		id: create_then_block_1.name,
     		type: "then",
-    		source: "(68:52)        <tbody>         {#each Object.keys(archivedMemes).map(x => parseInt(x)) as date}",
+    		source: "(62:52)        <tbody>         {#each Object.keys(archivedMemes).map(x => parseInt(x)) as date}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (74:14) {#if isTomorrow(compoundDate(date, month, year))}
+    // (68:14) {#if isTomorrow(compoundDate(date, month, year))}
     function create_if_block_2(ctx) {
     	let br;
     	let t;
@@ -4729,7 +4737,7 @@ var archive = (function () {
     		c: function create() {
     			br = element("br");
     			t = text("\n                (Sneak peek)");
-    			add_location(br, file, 74, 16, 2374);
+    			add_location(br, file, 68, 16, 2121);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, br, anchor);
@@ -4745,21 +4753,21 @@ var archive = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(74:14) {#if isTomorrow(compoundDate(date, month, year))}",
+    		source: "(68:14) {#if isTomorrow(compoundDate(date, month, year))}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (70:8) {#each Object.keys(archivedMemes).map(x => parseInt(x)) as date}
+    // (64:8) {#each Object.keys(archivedMemes).map(x => parseInt(x)) as date}
     function create_each_block(ctx) {
     	let tr;
     	let td0;
-    	let t0_value = dateToString(compoundDate(/*date*/ ctx[17], /*month*/ ctx[0], /*year*/ ctx[1]), "/") + "";
+    	let t0_value = dateToString(compoundDate(/*date*/ ctx[16], /*month*/ ctx[0], /*year*/ ctx[1]), "/") + "";
     	let t0;
     	let t1;
-    	let show_if = /*isTomorrow*/ ctx[7](compoundDate(/*date*/ ctx[17], /*month*/ ctx[0], /*year*/ ctx[1]));
+    	let show_if = isTomorrow(compoundDate(/*date*/ ctx[16], /*month*/ ctx[0], /*year*/ ctx[1]));
     	let t2;
     	let td1;
     	let img;
@@ -4779,13 +4787,13 @@ var archive = (function () {
     			img = element("img");
     			t3 = space();
     			attr_dev(td0, "class", "text-center");
-    			add_location(td0, file, 71, 12, 2202);
+    			add_location(td0, file, 65, 12, 1949);
     			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
-    			if (!src_url_equal(img.src, img_src_value = `memes/${/*archivedMemes*/ ctx[16][/*date*/ ctx[17]]}`)) attr_dev(img, "src", img_src_value);
+    			if (!src_url_equal(img.src, img_src_value = `memes/${/*archivedMemes*/ ctx[15][/*date*/ ctx[16]]}`)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file, 79, 14, 2479);
-    			add_location(td1, file, 78, 12, 2460);
-    			add_location(tr, file, 70, 10, 2185);
+    			add_location(img, file, 73, 14, 2226);
+    			add_location(td1, file, 72, 12, 2207);
+    			add_location(tr, file, 64, 10, 1932);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tr, anchor);
@@ -4799,8 +4807,8 @@ var archive = (function () {
     			append_dev(tr, t3);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*archivedMemesPromise, month, year*/ 67 && t0_value !== (t0_value = dateToString(compoundDate(/*date*/ ctx[17], /*month*/ ctx[0], /*year*/ ctx[1]), "/") + "")) set_data_dev(t0, t0_value);
-    			if (dirty & /*archivedMemesPromise, month, year*/ 67) show_if = /*isTomorrow*/ ctx[7](compoundDate(/*date*/ ctx[17], /*month*/ ctx[0], /*year*/ ctx[1]));
+    			if (dirty & /*archivedMemesPromise, month, year*/ 67 && t0_value !== (t0_value = dateToString(compoundDate(/*date*/ ctx[16], /*month*/ ctx[0], /*year*/ ctx[1]), "/") + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*archivedMemesPromise, month, year*/ 67) show_if = isTomorrow(compoundDate(/*date*/ ctx[16], /*month*/ ctx[0], /*year*/ ctx[1]));
 
     			if (show_if) {
     				if (if_block) ; else {
@@ -4813,7 +4821,7 @@ var archive = (function () {
     				if_block = null;
     			}
 
-    			if (dirty & /*archivedMemesPromise*/ 64 && !src_url_equal(img.src, img_src_value = `memes/${/*archivedMemes*/ ctx[16][/*date*/ ctx[17]]}`)) {
+    			if (dirty & /*archivedMemesPromise*/ 64 && !src_url_equal(img.src, img_src_value = `memes/${/*archivedMemes*/ ctx[15][/*date*/ ctx[16]]}`)) {
     				attr_dev(img, "src", img_src_value);
     			}
     		},
@@ -4827,14 +4835,14 @@ var archive = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(70:8) {#each Object.keys(archivedMemes).map(x => parseInt(x)) as date}",
+    		source: "(64:8) {#each Object.keys(archivedMemes).map(x => parseInt(x)) as date}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (89:6) {#if !Object.keys(archivedMemes).length}
+    // (83:6) {#if !Object.keys(archivedMemes).length}
     function create_if_block_1(ctx) {
     	let tfoot;
 
@@ -4843,7 +4851,7 @@ var archive = (function () {
     			tfoot = element("tfoot");
     			tfoot.textContent = "No memes that month :(";
     			attr_dev(tfoot, "class", "p-4 inline-block text-center");
-    			add_location(tfoot, file, 89, 8, 2758);
+    			add_location(tfoot, file, 83, 8, 2505);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tfoot, anchor);
@@ -4857,7 +4865,7 @@ var archive = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(89:6) {#if !Object.keys(archivedMemes).length}",
+    		source: "(83:6) {#if !Object.keys(archivedMemes).length}",
     		ctx
     	});
 
@@ -4894,12 +4902,12 @@ var archive = (function () {
     	return block;
     }
 
-    // (100:46)      {#if queriedMeme}
+    // (94:46)      {#if queriedMeme}
     function create_then_block(ctx) {
     	let if_block_anchor;
 
     	function select_block_type(ctx, dirty) {
-    		if (/*queriedMeme*/ ctx[15]) return create_if_block;
+    		if (/*queriedMeme*/ ctx[14]) return create_if_block;
     		return create_else_block;
     	}
 
@@ -4938,14 +4946,14 @@ var archive = (function () {
     		block,
     		id: create_then_block.name,
     		type: "then",
-    		source: "(100:46)      {#if queriedMeme}",
+    		source: "(94:46)      {#if queriedMeme}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (107:4) {:else}
+    // (101:4) {:else}
     function create_else_block(ctx) {
     	let p;
 
@@ -4954,7 +4962,7 @@ var archive = (function () {
     			p = element("p");
     			p.textContent = "No memes that day :(";
     			attr_dev(p, "class", "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto text-center");
-    			add_location(p, file, 107, 6, 3206);
+    			add_location(p, file, 101, 6, 2953);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -4969,14 +4977,14 @@ var archive = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(107:4) {:else}",
+    		source: "(101:4) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (101:4) {#if queriedMeme}
+    // (95:4) {#if queriedMeme}
     function create_if_block(ctx) {
     	let img;
     	let img_src_value;
@@ -4985,15 +4993,15 @@ var archive = (function () {
     		c: function create() {
     			img = element("img");
     			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
-    			if (!src_url_equal(img.src, img_src_value = `memes/${/*queriedMeme*/ ctx[15]}`)) attr_dev(img, "src", img_src_value);
+    			if (!src_url_equal(img.src, img_src_value = `memes/${/*queriedMeme*/ ctx[14]}`)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file, 101, 6, 3069);
+    			add_location(img, file, 95, 6, 2816);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*queriedMemePromise*/ 32 && !src_url_equal(img.src, img_src_value = `memes/${/*queriedMeme*/ ctx[15]}`)) {
+    			if (dirty & /*queriedMemePromise*/ 32 && !src_url_equal(img.src, img_src_value = `memes/${/*queriedMeme*/ ctx[14]}`)) {
     				attr_dev(img, "src", img_src_value);
     			}
     		},
@@ -5006,7 +5014,7 @@ var archive = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(101:4) {#if queriedMeme}",
+    		source: "(95:4) {#if queriedMeme}",
     		ctx
     	});
 
@@ -5083,7 +5091,7 @@ var archive = (function () {
     		pending: create_pending_block_1,
     		then: create_then_block_1,
     		catch: create_catch_block_1,
-    		value: 16
+    		value: 15
     	};
 
     	handle_promise(promise = /*archivedMemesPromise*/ ctx[6], info);
@@ -5096,7 +5104,7 @@ var archive = (function () {
     		pending: create_pending_block,
     		then: create_then_block,
     		catch: create_catch_block,
-    		value: 15
+    		value: 14
     	};
 
     	handle_promise(promise_1 = /*queriedMemePromise*/ ctx[5], info_1);
@@ -5148,42 +5156,42 @@ var archive = (function () {
     			p1.textContent = "DVS-style dates accepted";
     			t21 = space();
     			footer = element("footer");
-    			add_location(h20, file, 36, 2, 1209);
+    			add_location(h20, file, 30, 2, 956);
     			attr_dev(span0, "class", "-mt-1.5");
-    			add_location(span0, file, 44, 8, 1442);
+    			add_location(span0, file, 38, 8, 1189);
     			attr_dev(div0, "class", "flex-1 btn");
     			attr_dev(div0, "disabled", div0_disabled_value = !/*backwardsEnabled*/ ctx[4]);
-    			add_location(div0, file, 39, 6, 1304);
+    			add_location(div0, file, 33, 6, 1051);
     			attr_dev(div1, "class", "w-1/4");
-    			add_location(div1, file, 38, 4, 1278);
+    			add_location(div1, file, 32, 4, 1025);
     			attr_dev(p0, "class", "flex-1 my-2 text-lg text-center");
-    			add_location(p0, file, 47, 4, 1504);
+    			add_location(p0, file, 41, 4, 1251);
     			attr_dev(span1, "class", "-mt-1.5");
-    			add_location(span1, file, 56, 8, 1766);
+    			add_location(span1, file, 50, 8, 1513);
     			attr_dev(div2, "class", "flex-1 btn");
     			attr_dev(div2, "disabled", div2_disabled_value = !/*forwardsEnabled*/ ctx[3]);
-    			add_location(div2, file, 51, 6, 1630);
+    			add_location(div2, file, 45, 6, 1377);
     			attr_dev(div3, "class", "w-1/4");
-    			add_location(div3, file, 50, 4, 1604);
+    			add_location(div3, file, 44, 4, 1351);
     			attr_dev(div4, "class", "flex sm:w-1/4 mx-auto my-4");
-    			add_location(div4, file, 37, 2, 1233);
+    			add_location(div4, file, 31, 2, 980);
     			attr_dev(th0, "class", "border-2");
-    			add_location(th0, file, 63, 8, 1940);
+    			add_location(th0, file, 57, 8, 1687);
     			attr_dev(th1, "class", "border-2");
-    			add_location(th1, file, 64, 8, 1979);
-    			add_location(tr, file, 62, 6, 1927);
-    			add_location(thead, file, 61, 4, 1913);
+    			add_location(th1, file, 58, 8, 1726);
+    			add_location(tr, file, 56, 6, 1674);
+    			add_location(thead, file, 55, 4, 1660);
     			attr_dev(table, "class", "table-auto w-full max-w-4xl mx-auto border-white border-2");
-    			add_location(table, file, 60, 2, 1835);
-    			add_location(main, file, 35, 0, 1200);
-    			add_location(h21, file, 97, 2, 2923);
+    			add_location(table, file, 54, 2, 1582);
+    			add_location(main, file, 29, 0, 947);
+    			add_location(h21, file, 91, 2, 2670);
     			attr_dev(input, "type", "text");
-    			add_location(input, file, 98, 2, 2949);
+    			add_location(input, file, 92, 2, 2696);
     			attr_dev(p1, "class", "mt-4");
-    			add_location(p1, file, 112, 2, 3335);
+    			add_location(p1, file, 106, 2, 3082);
     			attr_dev(section, "class", "mt-48");
-    			add_location(section, file, 96, 0, 2897);
-    			add_location(footer, file, 114, 0, 3391);
+    			add_location(section, file, 90, 0, 2644);
+    			add_location(footer, file, 108, 0, 3138);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -5236,9 +5244,9 @@ var archive = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(div0, "click", /*click_handler*/ ctx[9], false, false, false),
-    					listen_dev(div2, "click", /*click_handler_1*/ ctx[10], false, false, false),
-    					listen_dev(input, "input", /*input_input_handler*/ ctx[12])
+    					listen_dev(div0, "click", /*click_handler*/ ctx[8], false, false, false),
+    					listen_dev(div2, "click", /*click_handler_1*/ ctx[9], false, false, false),
+    					listen_dev(input, "input", /*input_input_handler*/ ctx[11])
     				];
 
     				mounted = true;
@@ -5321,14 +5329,6 @@ var archive = (function () {
     	let { db } = $$props;
     	const today = new Date();
     	const tomorrow = new Date(Number(today) + 24 * Math.pow(60, 2) * Math.pow(10, 3));
-
-    	const isTomorrow = date => {
-    		const diffInMilliseconds = Number(date) - Number(today);
-    		const diffInSeconds = diffInMilliseconds / Math.pow(10, 3);
-    		const diffInHours = diffInSeconds / Math.pow(60, 2);
-    		return 0 < diffInHours && diffInHours <= 24;
-    	};
-
     	let month = today.getMonth() + 1;
     	let year = today.getFullYear();
     	let dateQuery = dateToString(today);
@@ -5350,7 +5350,7 @@ var archive = (function () {
     	}
 
     	$$self.$$set = $$props => {
-    		if ('db' in $$props) $$invalidate(8, db = $$props.db);
+    		if ('db' in $$props) $$invalidate(7, db = $$props.db);
     	};
 
     	$$self.$capture_state = () => ({
@@ -5360,11 +5360,11 @@ var archive = (function () {
     		firstMonth,
     		getMemeOtd,
     		getMemesOfMonth,
+    		isTomorrow,
     		Header,
     		db,
     		today,
     		tomorrow,
-    		isTomorrow,
     		month,
     		year,
     		dateQuery,
@@ -5375,7 +5375,7 @@ var archive = (function () {
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('db' in $$props) $$invalidate(8, db = $$props.db);
+    		if ('db' in $$props) $$invalidate(7, db = $$props.db);
     		if ('month' in $$props) $$invalidate(0, month = $$props.month);
     		if ('year' in $$props) $$invalidate(1, year = $$props.year);
     		if ('dateQuery' in $$props) $$invalidate(2, dateQuery = $$props.dateQuery);
@@ -5410,11 +5410,11 @@ var archive = (function () {
     			$$invalidate(4, backwardsEnabled = firstMonth < compoundDate(1, month, year));
     		}
 
-    		if ($$self.$$.dirty & /*year, month, db*/ 259) {
+    		if ($$self.$$.dirty & /*year, month, db*/ 131) {
     			$$invalidate(6, archivedMemesPromise = getMemesOfMonth(year, month));
     		}
 
-    		if ($$self.$$.dirty & /*dateQuery, db*/ 260) {
+    		if ($$self.$$.dirty & /*dateQuery, db*/ 132) {
     			// TODO: Tomorrow's meme
     			$$invalidate(5, queriedMemePromise = getMemeOtd(stringToDate(dateQuery), db));
     		}
@@ -5428,7 +5428,6 @@ var archive = (function () {
     		backwardsEnabled,
     		queriedMemePromise,
     		archivedMemesPromise,
-    		isTomorrow,
     		db,
     		click_handler,
     		click_handler_1,
@@ -5440,7 +5439,7 @@ var archive = (function () {
     class Archive extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance, create_fragment, safe_not_equal, { db: 8 });
+    		init(this, options, instance, create_fragment, safe_not_equal, { db: 7 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -5452,7 +5451,7 @@ var archive = (function () {
     		const { ctx } = this.$$;
     		const props = options.props || {};
 
-    		if (/*db*/ ctx[8] === undefined && !('db' in props)) {
+    		if (/*db*/ ctx[7] === undefined && !('db' in props)) {
     			console.warn("<Archive> was created without expected prop 'db'");
     		}
     	}

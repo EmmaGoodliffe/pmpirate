@@ -24,9 +24,17 @@ const cacheMonth = (
   console.log({ cache });
 };
 
+export const isTomorrow = (date: Date) => {
+  const today = new Date();
+  const diffInMilliseconds = Number(date) - Number(today);
+  const diffInSeconds = diffInMilliseconds / 10 ** 3;
+  const diffInHours = diffInSeconds / 60 ** 2;
+  return 0 < diffInHours && diffInHours <= 24;
+};
+
 const isArchivedHere = (date: Date, theMonth: number, theYear: number) => {
   const today = new Date();
-  const goodDate = date <= today;
+  const goodDate = date <= today || isTomorrow(date);
   const [, month, year] = separateDate(date);
   const goodMonth = month === theMonth;
   const goodYear = year === theYear;

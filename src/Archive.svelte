@@ -6,20 +6,13 @@
     separateDate,
     stringToDate,
   } from "./date";
-  import { firstMonth, getMemeOtd, getMemesOfMonth } from "./db";
+  import { firstMonth, getMemeOtd, getMemesOfMonth, isTomorrow } from "./db";
   import Header from "./Header.svelte";
 
   export let db: Firestore;
 
   const today = new Date();
   const tomorrow = new Date(Number(today) + 24 * 60 ** 2 * 10 ** 3);
-
-  const isTomorrow = (date: Date) => {
-    const diffInMilliseconds = Number(date) - Number(today);
-    const diffInSeconds = diffInMilliseconds / 10 ** 3;
-    const diffInHours = diffInSeconds / 60 ** 2;
-    return 0 < diffInHours && diffInHours <= 24;
-  };
 
   let month = today.getMonth() + 1;
   let year = today.getFullYear();
@@ -43,7 +36,7 @@
 
   $: backwardsEnabled = firstMonth < compoundDate(1, month, year);
 
-  $: archivedMemesPromise =  getMemesOfMonth(year, month, db);
+  $: archivedMemesPromise = getMemesOfMonth(year, month, db);
   // TODO: Tomorrow's meme
 
   $: queriedMemePromise = getMemeOtd(stringToDate(dateQuery), db);

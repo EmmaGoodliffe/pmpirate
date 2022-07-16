@@ -6284,7 +6284,8 @@ var app = (function () {
     	"2022-06-10": "wrapped.png",
     	"2022-06-11": "USB.png",
     	"2022-06-14": "Ferris.png",
-    	"2022-06-16": "chicken.png"
+    	"2022-06-16": "chicken.png",
+    	"2022-07-17": "mugs.png"
     };
     var memes = {
     	otd: otd
@@ -6299,9 +6300,16 @@ var app = (function () {
         cache[year][month] = monthOfMemes;
         console.log({ cache });
     };
+    const isTomorrow = (date) => {
+        const today = new Date();
+        const diffInMilliseconds = Number(date) - Number(today);
+        const diffInSeconds = diffInMilliseconds / 10 ** 3;
+        const diffInHours = diffInSeconds / 60 ** 2;
+        return 0 < diffInHours && diffInHours <= 24;
+    };
     const isArchivedHere = (date, theMonth, theYear) => {
         const today = new Date();
-        const goodDate = date <= today;
+        const goodDate = date <= today || isTomorrow(date);
         const [, month, year] = separateDate(date);
         const goodMonth = month === theMonth;
         const goodYear = year === theYear;
