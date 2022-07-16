@@ -15,14 +15,22 @@ const toInt = (x: string) => {
     "XI",
     "XII",
   ];
-  return numerals.indexOf(x) + 1;
+  const index = numerals.indexOf(x);
+  if (index === -1) return index + 1;
 };
 
+export const separateDate = (date: Date) => [
+  date.getDate(),
+  date.getMonth() + 1,
+  date.getFullYear(),
+];
+
+export const compoundDate = (date: number, month: number, year: number) =>
+  new Date(year, month - 1, date);
+
 export const dateToString = (d: Date, splitter = "/", reverse = false) => {
-  const date = `${d.getDate()}`.padStart(2, "0");
-  const month = `${d.getMonth() + 1}`.padStart(2, "0");
-  const year = d.getFullYear();
-  const ogOrder = [date, month, year];
+  const [date, month, year] = separateDate(d).map(x => `${x}`);
+  const ogOrder = [date.padStart(2, "0"), month.padStart(2, "0"), year];
   const ordered = reverse ? ogOrder.reverse() : ogOrder;
   return ordered.join(splitter);
 };
@@ -35,19 +43,30 @@ const fixYear = (y: number | string): number => {
 };
 
 export const stringToDate = (d: string) => {
-  const today = new Date();
   const splitters = ["/", "-", "."];
   for (const splitter of splitters) {
     const [date, month, year] = d.split(splitter).map(toInt);
-    const result = new Date(fixYear(year), month - 1, date);
-    if (date <= 31 && `${result}` !== "Invalid Date") return result;
+    const result = compoundDate(date, month, fixYear(year));
+    if (![date, month, year].some(x => !x) && `${result}` !== "Invalid Date")
+      return result;
   }
   for (const splitter of splitters) {
     const [year, month, date] = d.split(splitter).map(toInt);
-    const result = new Date(fixYear(year), month - 1, date);
-    if (`${result}` !== "Invalid Date") return result;
+    const result = compoundDate(date, month, fixYear(year));
+    if (![date, month, year].some(x => !x) && `${result}` !== "Invalid Date")
+      return result;
   }
   const result = new Date(d);
   if (`${result}` !== "Invalid Date") return result;
-  return today;
+};
+
+export const getLengthOfMonth = (year: number, month: number) =>
+  new Date(year, month, 0).getDate();
+
+export const isTomorrow = (date: Date) => {
+  const today = new Date();
+  const diffInMilliseconds = Number(date) - Number(today);
+  const diffInSeconds = diffInMilliseconds / 10 ** 3;
+  const diffInHours = diffInSeconds / 60 ** 2;
+  return 0 < diffInHours && diffInHours <= 24;
 };

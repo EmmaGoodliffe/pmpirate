@@ -1,3 +1,5 @@
+import { separateDate } from "../../src/date";
+
 describe("home", () => {
   it("displays memes", () => {
     cy.visit("http://localhost:3000");
@@ -18,7 +20,7 @@ describe("home", () => {
             .should("have.attr", "src")
             .should("have.lengthOf.above", 0);
         } else {
-          cy.get("table tfoot").should("contain", "No memes");
+          cy.get("table tfoot").should("contain", ":(");
         }
       });
   });
@@ -30,8 +32,7 @@ describe("home", () => {
       .then(text => {
         const [month, year] = text.split("/").map(x => parseInt(x));
         const today = new Date();
-        const currentMonth = today.getMonth() + 1;
-        const currentYear = today.getFullYear();
+        const [, currentMonth, currentYear] = separateDate(today);
         const correctYear = currentMonth - 1 ? currentYear : currentYear - 1;
         const correctMonth = currentMonth - 1 || 12;
         expect(month).to.equal(correctMonth);
@@ -53,3 +54,5 @@ describe("home", () => {
     expectMemeForDate("02/02/2022");
   });
 });
+
+export {};

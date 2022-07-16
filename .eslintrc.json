@@ -27,7 +27,7 @@
     "project": "tsconfig.json",
     "sourceType": "module"
   },
-  "plugins": ["import", "@typescript-eslint", "ts-exports"],
+  "plugins": ["import", "@typescript-eslint"],
   "rules": {
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-empty-function": [
@@ -59,7 +59,6 @@
         "ignoreCase": true,
         "ignoreDeclarationSort": true
       }
-    ],
-    "ts-exports/unused-exports": "error"
+    ]
   }
 }
