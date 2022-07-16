@@ -6,7 +6,7 @@
 
 <h2>Meme of the Day</h2>
 {#if src}
-  <img class={className} {src} alt="Meme" />
+  <img class={className} src={`memes/${src}`} alt="Meme" />
 {:else}
   <p class={`${className} text-center`}>
     No meme today :( ... Send suggestions

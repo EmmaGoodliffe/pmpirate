@@ -1,5 +1,4 @@
 import { doc, Firestore, getDoc } from "firebase/firestore";
-import { collection } from "firebase/firestore";
 import {
   compoundDate,
   dateToString,
@@ -13,28 +12,16 @@ const cache: Record<number, Record<number, Record<number, string>>> = {};
 
 export const firstMonth = compoundDate(1, 9, 2021);
 
-const cacheMonth = (monthOfMemes: { meme: string; date: Date }[]) => {
-  const [, month, year] = separateDate(monthOfMemes[0].date);
+const cacheMonth = (
+  year: number,
+  month: number,
+  monthOfMemes: Record<number, string>,
+) => {
   if (!cache[year]) {
     cache[year] = {};
   }
-  const keys = monthOfMemes.map(meme => {
-    const [date, m, y] = separateDate(meme.date);
-    if (m !== month || y !== year) {
-      throw new Error(
-        `Expected ${m} and ${month} to be equal, as well as ${y} and ${year}`,
-      );
-    }
-    return date;
-  });
-  const values = monthOfMemes.map(meme => meme.meme);
-  const result = {};
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    const value = values[i];
-    result[key] = value;
-  }
-  cache[year][month] = result;
+  cache[year][month] = monthOfMemes;
+  console.log({ cache });
 };
 
 const isArchivedHere = (d: string, month: number, year: number) => {
@@ -53,43 +40,41 @@ const isMemeMonthPossible = (year: number, month: number) => {
   return firstMonth <= date && year <= currentYear;
 };
 
+const getMemesOfMonthFromJson = (year: number, month: number) => {
+  const dates = new Array(getLengthOfMonth(year, month))
+    .fill(null)
+    .map((x, i) => i + 1);
+  const result: Record<number, string> = {};
+  for (const date of dates) {
+    const d = compoundDate(date, month, year);
+    const key = dateToString(d, "-", true);
+    const url = memes.otd[key]
+    if (isArchivedHere(key, month, year) && url) {
+      result[date] = url;
+    }
+  }
+  return result;
+};
+
 const getMemesOfMonthFromDb = async (
   year: number,
   month: number,
   db: Firestore,
 ) => {
   if (!isMemeMonthPossible(year, month)) return null;
-  console.count(`${year}-${month}`);
+  const mm = `${month}`.padStart(2, "0");
+  const ref = `${year}-${mm}`;
+  console.count(ref);
   console.count("DB reads");
-  // console.log((await getDoc(doc(db, "memes", "2022-07"))).data()); // { 13: 'mugs.png' }
-  const monthOfMemes = new Array(getLengthOfMonth(year, month))
-    .fill(null)
-    .map((x, i) => {
-      const date = compoundDate(i + 1, month, year);
-      const key = dateToString(date, "-", true);
-      const url = memes.otd[key] && `memes/${memes.otd[key]}`;
-      return {
-        date,
-        meme: isArchivedHere(key, month, year) && url ? url : null,
-      };
-    });
-  cacheMonth(monthOfMemes);
-  return monthOfMemes;
+  // const memesOfMonth = (await getDoc(doc(db, "memes", ref))).data() ?? {};
+  const memesOfMonth = getMemesOfMonthFromJson(year, month);
+  cacheMonth(year, month, memesOfMonth);
+  return memesOfMonth;
 };
 
 const getMemesOfMonthFromCache = (year: number, month: number) => {
   try {
-    const fromCache = cache[year][month];
-    if (fromCache) {
-      return Object.keys(fromCache).map(key => {
-        const date = parseInt(key);
-        const meme = fromCache[date];
-        return {
-          date: compoundDate(date, month, year),
-          meme,
-        };
-      });
-    }
+    return cache[year][month];
   } catch (err) {
     console.log("Quelled cache error");
   }
@@ -104,8 +89,7 @@ export const getMemeOtd = async (d: Date, db: Firestore): Promise<string> => {
   const [date, month, year] = separateDate(d);
   if (!isMemeMonthPossible(year, month)) return null;
   try {
-    const fromCache = cache[year][month][date];
-    if (fromCache !== undefined) return fromCache;
+    return cache[year][month][date];
   } catch (err) {
     console.log("Quelled cache error");
   }

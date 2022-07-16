@@ -5800,11 +5800,16 @@ var app = (function () {
         return Array.from(element.childNodes);
     }
     function set_style(node, key, value, important) {
-        node.style.setProperty(key, value, important ? 'important' : '');
+        if (value === null) {
+            node.style.removeProperty(key);
+        }
+        else {
+            node.style.setProperty(key, value, important ? 'important' : '');
+        }
     }
-    function custom_event(type, detail, bubbles = false) {
+    function custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
         const e = document.createEvent('CustomEvent');
-        e.initCustomEvent(type, bubbles, false, detail);
+        e.initCustomEvent(type, bubbles, cancelable, detail);
         return e;
     }
 
@@ -5833,22 +5838,40 @@ var app = (function () {
     function add_render_callback(fn) {
         render_callbacks.push(fn);
     }
-    let flushing = false;
+    // flush() calls callbacks in this order:
+    // 1. All beforeUpdate callbacks, in order: parents before children
+    // 2. All bind:this callbacks, in reverse order: children before parents.
+    // 3. All afterUpdate callbacks, in order: parents before children. EXCEPT
+    //    for afterUpdates called during the initial onMount, which are called in
+    //    reverse order: children before parents.
+    // Since callbacks might update component values, which could trigger another
+    // call to flush(), the following steps guard against this:
+    // 1. During beforeUpdate, any updated components will be added to the
+    //    dirty_components array and will cause a reentrant call to flush(). Because
+    //    the flush index is kept outside the function, the reentrant call will pick
+    //    up where the earlier call left off and go through all dirty components. The
+    //    current_component value is saved and restored so that the reentrant call will
+    //    not interfere with the "parent" flush() call.
+    // 2. bind:this callbacks cannot trigger new flush() calls.
+    // 3. During afterUpdate, any updated components will NOT have their afterUpdate
+    //    callback called a second time; the seen_callbacks set, outside the flush()
+    //    function, guarantees this behavior.
     const seen_callbacks = new Set();
+    let flushidx = 0; // Do *not* move this inside the flush() function
     function flush() {
-        if (flushing)
-            return;
-        flushing = true;
+        const saved_component = current_component;
         do {
             // first, call beforeUpdate functions
             // and update components
-            for (let i = 0; i < dirty_components.length; i += 1) {
-                const component = dirty_components[i];
+            while (flushidx < dirty_components.length) {
+                const component = dirty_components[flushidx];
+                flushidx++;
                 set_current_component(component);
                 update(component.$$);
             }
             set_current_component(null);
             dirty_components.length = 0;
+            flushidx = 0;
             while (binding_callbacks.length)
                 binding_callbacks.pop()();
             // then, once components are updated, call
@@ -5868,8 +5891,8 @@ var app = (function () {
             flush_callbacks.pop()();
         }
         update_scheduled = false;
-        flushing = false;
         seen_callbacks.clear();
+        set_current_component(saved_component);
     }
     function update($$) {
         if ($$.fragment !== null) {
@@ -5916,6 +5939,9 @@ var app = (function () {
                 }
             });
             block.o(local);
+        }
+        else if (callback) {
+            callback();
         }
     }
 
@@ -6130,7 +6156,7 @@ var app = (function () {
     }
 
     function dispatch_dev(type, detail) {
-        document.dispatchEvent(custom_event(type, Object.assign({ version: '3.43.0' }, detail), true));
+        document.dispatchEvent(custom_event(type, Object.assign({ version: '3.49.0' }, detail), { bubbles: true }));
     }
     function append_dev(target, node) {
         dispatch_dev('SvelteDOMInsert', { target, node });
@@ -6314,26 +6340,12 @@ var app = (function () {
 
     const cache = {};
     const firstMonth = compoundDate(1, 9, 2021);
-    const cacheMonth = (monthOfMemes) => {
-        const [, month, year] = separateDate(monthOfMemes[0].date);
+    const cacheMonth = (year, month, monthOfMemes) => {
         if (!cache[year]) {
             cache[year] = {};
         }
-        const keys = monthOfMemes.map(meme => {
-            const [date, m, y] = separateDate(meme.date);
-            if (m !== month || y !== year) {
-                throw new Error(`Expected ${m} and ${month} to be equal, as well as ${y} and ${year}`);
-            }
-            return date;
-        });
-        const values = monthOfMemes.map(meme => meme.meme);
-        const result = {};
-        for (let i = 0; i < keys.length; i++) {
-            const key = keys[i];
-            const value = values[i];
-            result[key] = value;
-        }
-        cache[year][month] = result;
+        cache[year][month] = monthOfMemes;
+        console.log({ cache });
     };
     const isArchivedHere = (d, month, year) => {
         const date = stringToDate(d);
@@ -6349,39 +6361,36 @@ var app = (function () {
         const currentYear = separateDate(new Date())[2];
         return firstMonth <= date && year <= currentYear;
     };
+    const getMemesOfMonthFromJson = (year, month) => {
+        const dates = new Array(getLengthOfMonth(year, month))
+            .fill(null)
+            .map((x, i) => i + 1);
+        const result = {};
+        for (const date of dates) {
+            const d = compoundDate(date, month, year);
+            const key = dateToString(d, "-", true);
+            const url = memes.otd[key];
+            if (isArchivedHere(key, month, year) && url) {
+                result[date] = url;
+            }
+        }
+        return result;
+    };
     const getMemesOfMonthFromDb = async (year, month, db) => {
         if (!isMemeMonthPossible(year, month))
             return null;
-        console.count(`${year}-${month}`);
+        const mm = `${month}`.padStart(2, "0");
+        const ref = `${year}-${mm}`;
+        console.count(ref);
         console.count("DB reads");
-        // console.log((await getDoc(doc(db, "memes", "2022-07"))).data()); // { 13: 'mugs.png' }
-        const monthOfMemes = new Array(getLengthOfMonth(year, month))
-            .fill(null)
-            .map((x, i) => {
-            const date = compoundDate(i + 1, month, year);
-            const key = dateToString(date, "-", true);
-            const url = memes.otd[key] && `memes/${memes.otd[key]}`;
-            return {
-                date,
-                meme: isArchivedHere(key, month, year) && url ? url : null,
-            };
-        });
-        cacheMonth(monthOfMemes);
-        return monthOfMemes;
+        // const memesOfMonth = (await getDoc(doc(db, "memes", ref))).data() ?? {};
+        const memesOfMonth = getMemesOfMonthFromJson(year, month);
+        cacheMonth(year, month, memesOfMonth);
+        return memesOfMonth;
     };
     const getMemesOfMonthFromCache = (year, month) => {
         try {
-            const fromCache = cache[year][month];
-            if (fromCache) {
-                return Object.keys(fromCache).map(key => {
-                    const date = parseInt(key);
-                    const meme = fromCache[date];
-                    return {
-                        date: compoundDate(date, month, year),
-                        meme,
-                    };
-                });
-            }
+            return cache[year][month];
         }
         catch (err) {
             console.log("Quelled cache error");
@@ -6394,9 +6403,7 @@ var app = (function () {
         if (!isMemeMonthPossible(year, month))
             return null;
         try {
-            const fromCache = cache[year][month][date];
-            if (fromCache !== undefined)
-                return fromCache;
+            return cache[year][month][date];
         }
         catch (err) {
             console.log("Quelled cache error");
@@ -6405,7 +6412,7 @@ var app = (function () {
         return getMemeOtd(d);
     };
 
-    /* src/Doc.svelte generated by Svelte v3.43.0 */
+    /* src/Doc.svelte generated by Svelte v3.49.0 */
 
     const file$3 = "src/Doc.svelte";
 
@@ -6530,7 +6537,7 @@ var app = (function () {
     	}
     }
 
-    /* src/Header.svelte generated by Svelte v3.43.0 */
+    /* src/Header.svelte generated by Svelte v3.49.0 */
 
     const file$2 = "src/Header.svelte";
 
@@ -6617,7 +6624,7 @@ var app = (function () {
     	}
     }
 
-    /* src/Otd.svelte generated by Svelte v3.43.0 */
+    /* src/Otd.svelte generated by Svelte v3.49.0 */
 
     const file$1 = "src/Otd.svelte";
 
@@ -6631,7 +6638,7 @@ var app = (function () {
     			p = element("p");
     			t = text("No meme today :( ... Send suggestions");
     			attr_dev(p, "class", `${className} text-center`);
-    			add_location(p, file$1, 8, 2, 198);
+    			add_location(p, file$1, 8, 2, 213);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -6663,7 +6670,7 @@ var app = (function () {
     		c: function create() {
     			img = element("img");
     			attr_dev(img, "class", className);
-    			if (!src_url_equal(img.src, img_src_value = /*src*/ ctx[0])) attr_dev(img, "src", img_src_value);
+    			if (!src_url_equal(img.src, img_src_value = `memes/${/*src*/ ctx[0]}`)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
     			add_location(img, file$1, 6, 2, 145);
     		},
@@ -6671,7 +6678,7 @@ var app = (function () {
     			insert_dev(target, img, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*src*/ 1 && !src_url_equal(img.src, img_src_value = /*src*/ ctx[0])) {
+    			if (dirty & /*src*/ 1 && !src_url_equal(img.src, img_src_value = `memes/${/*src*/ ctx[0]}`)) {
     				attr_dev(img, "src", img_src_value);
     			}
     		},
@@ -6814,7 +6821,7 @@ var app = (function () {
     	}
     }
 
-    /* src/Home.svelte generated by Svelte v3.43.0 */
+    /* src/Home.svelte generated by Svelte v3.49.0 */
     const file = "src/Home.svelte";
 
     function get_each_context(ctx, list, i) {

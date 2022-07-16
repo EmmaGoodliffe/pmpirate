@@ -1,6 +1,11 @@
 <script lang="ts">
   import type { Firestore } from "firebase/firestore";
-  import { compoundDate, dateToString, stringToDate } from "./date";
+  import {
+    compoundDate,
+    dateToString,
+    separateDate,
+    stringToDate,
+  } from "./date";
   import { firstMonth, getMemeOtd, getMemesOfMonth } from "./db";
   import Header from "./Header.svelte";
 
@@ -8,7 +13,6 @@
 
   const today = new Date();
   const tomorrow = new Date(Number(today) + 24 * 60 ** 2 * 10 ** 3);
-  // const dates = Object.keys(memes.otd);
 
   const isTomorrow = (date: Date) => {
     const diffInMilliseconds = Number(date) - Number(today);
@@ -40,13 +44,8 @@
   $: backwardsEnabled = firstMonth < compoundDate(1, month, year);
   // $: backwardsEnabled = new Date(2021, 9 - 1, 1) < new Date(year, month - 1, 1);
 
-  $: tomorrowMeme = getMemeOtd(tomorrow, db);
-
-  $: archivedMemesPromise = async () =>
-    [
-      ...(await getMemesOfMonth(year, month, db)),
-      { date: tomorrow, meme: await tomorrowMeme },
-    ].filter(meme => !!meme.meme);
+  $: archivedMemesPromise =  getMemesOfMonth(year, month, db);
+  // TODO: Tomorrow's meme
 
   $: queriedMemePromise = getMemeOtd(stringToDate(dateQuery), db);
 </script>
@@ -84,13 +83,13 @@
         <th class="border-2">Meme</th>
       </tr>
     </thead>
-    {#await archivedMemesPromise() then archivedMemes}
+    {#await archivedMemesPromise then archivedMemes}
       <tbody>
-        {#each archivedMemes as meme}
+        {#each Object.keys(archivedMemes).map(x => parseInt(x)) as date}
           <tr>
             <td class="text-center">
-              {dateToString(meme.date, "/")}
-              {#if isTomorrow(meme.date)}
+              {dateToString(compoundDate(date, month, year), "/")}
+              {#if isTomorrow(compoundDate(date, month, year))}
                 <br />
                 (Sneak peek)
               {/if}
@@ -98,17 +97,17 @@
             <td>
               <img
                 class="max-w-sm mx-auto w-1/2 sm:w-auto"
-                src={meme.meme}
+                src={`memes/${archivedMemes[date]}`}
                 alt="Meme"
               />
             </td>
           </tr>
         {/each}
       </tbody>
-      {#if !archivedMemes.length}
+      {#if !Object.keys(archivedMemes).length}
         <tfoot class="p-4 inline-block text-center"
-          >No memes that month :(</tfoot
-        >
+          >No memes that month :(
+        </tfoot>
       {/if}
     {/await}
   </table>
@@ -120,7 +119,7 @@
     {#if queriedMeme}
       <img
         class="max-w-sm mx-auto w-1/2 sm:w-auto"
-        src={queriedMeme}
+        src={`memes/${queriedMeme}`}
         alt="Meme"
       />
     {:else}
