@@ -16,6 +16,19 @@ export const firstMonth = compoundDate(1, 9, 2021);
 const delay = (time: number) =>
   new Promise(resolve => setTimeout(resolve, time * 10 ** 3));
 
+const fetchFromDb = async (
+  db: Firestore,
+  collection: string,
+  docId: string,
+) => {
+  try {
+    return (await getDoc(doc(db, collection, docId))).data();
+  } catch (err) {
+    console.warn("Your DB emulations are likely not running correctly");
+    console.error(err);
+  }
+};
+
 const cacheMonth = (
   year: number,
   month: number,
@@ -66,19 +79,19 @@ const getMemesOfMonthFromDb = async (
 ) => {
   if (!isMemeMonthPossible(year, month)) return null;
   const mm = `${month}`.padStart(2, "0");
-  const ref = `${year}-${mm}`;
-  if (queue.has(ref)) {
+  const docId = `${year}-${mm}`;
+  if (queue.has(docId)) {
     await delay(1);
     return getMemesOfMonthFromCache(year, month);
   }
-  console.count(ref);
+  console.count(docId);
   console.count("DB reads");
-  queue.add(ref);
+  queue.add(docId);
   console.log(queue, cache);
-  // const memesOfMonth = (await getDoc(doc(db, "memes", ref))).data() ?? {};
-  const memesOfMonth = await getMemesOfMonthFromJson(year, month);
+  const memesOfMonth = (await fetchFromDb(db, "memes", docId)) ?? {};
+  // const memesOfMonth = await getMemesOfMonthFromJson(year, month);
   cacheMonth(year, month, memesOfMonth);
-  queue.delete(ref);
+  queue.delete(docId);
   console.log(queue, cache);
   return memesOfMonth;
 };
