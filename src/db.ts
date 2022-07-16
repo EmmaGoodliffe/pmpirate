@@ -1,3 +1,5 @@
+import { doc, Firestore, getDoc } from "firebase/firestore";
+import { collection } from "firebase/firestore";
 import {
   compoundDate,
   dateToString,
@@ -51,10 +53,15 @@ const isMemeMonthPossible = (year: number, month: number) => {
   return firstMonth <= date && year <= currentYear;
 };
 
-const getMemesOfMonthFromDb = (year: number, month: number) => {
+const getMemesOfMonthFromDb = async (
+  year: number,
+  month: number,
+  db: Firestore,
+) => {
   if (!isMemeMonthPossible(year, month)) return null;
   console.count(`${year}-${month}`);
   console.count("DB reads");
+  // console.log((await getDoc(doc(db, "memes", "2022-07"))).data()); // { 13: 'mugs.png' }
   const monthOfMemes = new Array(getLengthOfMonth(year, month))
     .fill(null)
     .map((x, i) => {
@@ -89,10 +96,11 @@ const getMemesOfMonthFromCache = (year: number, month: number) => {
   return undefined;
 };
 
-export const getMemesOfMonth = (year: number, month: number) =>
-  getMemesOfMonthFromCache(year, month) ?? getMemesOfMonthFromDb(year, month);
+export const getMemesOfMonth = (year: number, month: number, db: Firestore) =>
+  getMemesOfMonthFromCache(year, month) ??
+  getMemesOfMonthFromDb(year, month, db);
 
-export const getMemeOtd = (d: Date) => {
+export const getMemeOtd = async (d: Date, db: Firestore): Promise<string> => {
   const [date, month, year] = separateDate(d);
   if (!isMemeMonthPossible(year, month)) return null;
   try {
@@ -101,6 +109,6 @@ export const getMemeOtd = (d: Date) => {
   } catch (err) {
     console.log("Quelled cache error");
   }
-  getMemesOfMonth(year, month);
-  return getMemeOtd(d);
+  await getMemesOfMonth(year, month, db);
+  return getMemeOtd(d, db);
 };

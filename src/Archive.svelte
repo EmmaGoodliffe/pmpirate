@@ -1,7 +1,10 @@
 <script lang="ts">
+  import type { Firestore } from "firebase/firestore";
   import { compoundDate, dateToString, stringToDate } from "./date";
   import { firstMonth, getMemeOtd, getMemesOfMonth } from "./db";
   import Header from "./Header.svelte";
+
+  export let db: Firestore;
 
   const today = new Date();
   const tomorrow = new Date(Number(today) + 24 * 60 ** 2 * 10 ** 3);
@@ -37,14 +40,15 @@
   $: backwardsEnabled = firstMonth < compoundDate(1, month, year);
   // $: backwardsEnabled = new Date(2021, 9 - 1, 1) < new Date(year, month - 1, 1);
 
-  $: tomorrowMeme = getMemeOtd(tomorrow);
+  $: tomorrowMeme = getMemeOtd(tomorrow, db);
 
-  $: archivedMemes = [
-    ...getMemesOfMonth(year, month),
-    { date: tomorrow, meme: tomorrowMeme },
-  ].filter(meme => !!meme.meme);
+  $: archivedMemesPromise = async () =>
+    [
+      ...(await getMemesOfMonth(year, month, db)),
+      { date: tomorrow, meme: await tomorrowMeme },
+    ].filter(meme => !!meme.meme);
 
-  $: queriedMeme = getMemeOtd(stringToDate(dateQuery));
+  $: queriedMemePromise = getMemeOtd(stringToDate(dateQuery), db);
 </script>
 
 <Header />
@@ -80,45 +84,51 @@
         <th class="border-2">Meme</th>
       </tr>
     </thead>
-    <tbody>
-      {#each archivedMemes as meme}
-        <tr>
-          <td class="text-center">
-            {dateToString(meme.date, "/")}
-            {#if isTomorrow(meme.date)}
-              <br />
-              (Sneak peek)
-            {/if}
-          </td>
-          <td>
-            <img
-              class="max-w-sm mx-auto w-1/2 sm:w-auto"
-              src={meme.meme}
-              alt="Meme"
-            />
-          </td>
-        </tr>
-      {/each}
-    </tbody>
-    {#if !archivedMemes.length}
-      <tfoot class="p-4 inline-block text-center">No memes that month :(</tfoot>
-    {/if}
+    {#await archivedMemesPromise() then archivedMemes}
+      <tbody>
+        {#each archivedMemes as meme}
+          <tr>
+            <td class="text-center">
+              {dateToString(meme.date, "/")}
+              {#if isTomorrow(meme.date)}
+                <br />
+                (Sneak peek)
+              {/if}
+            </td>
+            <td>
+              <img
+                class="max-w-sm mx-auto w-1/2 sm:w-auto"
+                src={meme.meme}
+                alt="Meme"
+              />
+            </td>
+          </tr>
+        {/each}
+      </tbody>
+      {#if !archivedMemes.length}
+        <tfoot class="p-4 inline-block text-center"
+          >No memes that month :(</tfoot
+        >
+      {/if}
+    {/await}
   </table>
 </main>
 <section class="mt-48">
   <h2>Specify a date</h2>
   <input type="text" bind:value={dateQuery} />
-  {#if queriedMeme}
-    <img
-      class="max-w-sm mx-auto w-1/2 sm:w-auto"
-      src={queriedMeme}
-      alt="Meme"
-    />
-  {:else}
-    <p class="w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto text-center">
-      No memes that day :(
-    </p>
-  {/if}
+  {#await queriedMemePromise then queriedMeme}
+    {#if queriedMeme}
+      <img
+        class="max-w-sm mx-auto w-1/2 sm:w-auto"
+        src={queriedMeme}
+        alt="Meme"
+      />
+    {:else}
+      <p class="w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto text-center">
+        No memes that day :(
+      </p>
+    {/if}
+  {/await}
   <p class="mt-4">DVS-style dates accepted</p>
 </section>
 <footer />

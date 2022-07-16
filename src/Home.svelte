@@ -1,11 +1,14 @@
 <script lang="ts">
+  import type { Firestore } from "firebase/firestore";
   import { getMemeOtd } from "./db";
   import Doc from "./Doc.svelte";
   import Header from "./Header.svelte";
   import Otd from "./Otd.svelte";
 
+  export let db: Firestore;
+
   const today = new Date();
-  const otdSrc = getMemeOtd(today);
+  const otdSrcPromise = getMemeOtd(today, db);
 
   const mathsBooks = [
     "Pure Year 1",
@@ -70,7 +73,9 @@
 </main>
 <hr />
 <section id="otd">
-  <Otd src={otdSrc} />
+  {#await otdSrcPromise then otdSrc}
+    <Otd src={otdSrc} />
+  {/await}
   <p class="epilogue">
     <a class="hover:underline" href="archive.html">Meme Archive</a>
   </p>
