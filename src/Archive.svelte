@@ -42,7 +42,6 @@
   );
 
   $: backwardsEnabled = firstMonth < compoundDate(1, month, year);
-  // $: backwardsEnabled = new Date(2021, 9 - 1, 1) < new Date(year, month - 1, 1);
 
   $: archivedMemesPromise =  getMemesOfMonth(year, month, db);
   // TODO: Tomorrow's meme

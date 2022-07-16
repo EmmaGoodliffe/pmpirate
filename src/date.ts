@@ -15,7 +15,8 @@ const toInt = (x: string) => {
     "XI",
     "XII",
   ];
-  return numerals.indexOf(x) + 1;
+  const index = numerals.indexOf(x);
+  if (index === -1) return index + 1;
 };
 
 export const separateDate = (date: Date) => [
@@ -42,21 +43,21 @@ const fixYear = (y: number | string): number => {
 };
 
 export const stringToDate = (d: string) => {
-  const today = new Date();
   const splitters = ["/", "-", "."];
   for (const splitter of splitters) {
     const [date, month, year] = d.split(splitter).map(toInt);
     const result = compoundDate(date, month, fixYear(year));
-    if (date <= 31 && `${result}` !== "Invalid Date") return result;
+    if (![date, month, year].some(x => !x) && `${result}` !== "Invalid Date")
+      return result;
   }
   for (const splitter of splitters) {
     const [year, month, date] = d.split(splitter).map(toInt);
     const result = compoundDate(date, month, fixYear(year));
-    if (`${result}` !== "Invalid Date") return result;
+    if (![date, month, year].some(x => !x) && `${result}` !== "Invalid Date")
+      return result;
   }
   const result = new Date(d);
   if (`${result}` !== "Invalid Date") return result;
-  return today;
 };
 
 export const getLengthOfMonth = (year: number, month: number) =>

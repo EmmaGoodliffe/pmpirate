@@ -24,13 +24,12 @@ const cacheMonth = (
   console.log({ cache });
 };
 
-const isArchivedHere = (d: string, month: number, year: number) => {
-  const date = stringToDate(d);
+const isArchivedHere = (date: Date, theMonth: number, theYear: number) => {
   const today = new Date();
   const goodDate = date <= today;
-  const [, dMonth, dYear] = separateDate(date);
-  const goodMonth = dMonth === month;
-  const goodYear = dYear === year;
+  const [, month, year] = separateDate(date);
+  const goodMonth = month === theMonth;
+  const goodYear = year === theYear;
   return goodDate && goodMonth && goodYear;
 };
 
@@ -48,8 +47,8 @@ const getMemesOfMonthFromJson = (year: number, month: number) => {
   for (const date of dates) {
     const d = compoundDate(date, month, year);
     const key = dateToString(d, "-", true);
-    const url = memes.otd[key]
-    if (isArchivedHere(key, month, year) && url) {
+    const url = memes.otd[key];
+    if (isArchivedHere(d, month, year) && url) {
       result[date] = url;
     }
   }
@@ -85,7 +84,16 @@ export const getMemesOfMonth = (year: number, month: number, db: Firestore) =>
   getMemesOfMonthFromCache(year, month) ??
   getMemesOfMonthFromDb(year, month, db);
 
-export const getMemeOtd = async (d: Date, db: Firestore): Promise<string> => {
+export const getMemeOtd = async (
+  d: Date,
+  db: Firestore,
+  n = 0,
+): Promise<string> => {
+  if (!d) {
+    console.log("HERE!");
+    return null;
+  }
+  if (n >= 2) throw new Error("DB recursion");
   const [date, month, year] = separateDate(d);
   if (!isMemeMonthPossible(year, month)) return null;
   try {
@@ -94,5 +102,5 @@ export const getMemeOtd = async (d: Date, db: Firestore): Promise<string> => {
     console.log("Quelled cache error");
   }
   await getMemesOfMonth(year, month, db);
-  return getMemeOtd(d, db);
+  return getMemeOtd(d, db, n + 1);
 };
