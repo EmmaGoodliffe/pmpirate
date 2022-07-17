@@ -5,7 +5,7 @@
     separateDate,
     stringToDate,
   } from "../date";
-  import { Db, getMemeOtd } from "../db";
+  import { Db, getMemeOtd, scheduleMeme } from "../db";
   import Header from "./Header.svelte";
   import Loader from "./Loader.svelte";
 
@@ -14,7 +14,11 @@
   const today = new Date();
   const [currentDate, currentMonth, currentYear] = separateDate(today);
 
-  let chosenDate = null;
+  let chosenDate: Date = null;
+  let url = "";
+  let email = "";
+  let found = false;
+
   const optionsPromise = async () => {
     const options = (
       await Promise.all(
@@ -43,6 +47,13 @@
         ?.value ?? null;
     return options;
   };
+
+  const schedule = (e: Event) => {
+    e.preventDefault();
+    const author = email.split("@spgs.org")[0];
+    // TODO: Verify email
+    scheduleMeme(chosenDate, { author, found, url }, db);
+  };
 </script>
 
 <Header />
@@ -51,13 +62,22 @@
   {#await optionsPromise()}
     <Loader />
   {:then options}
-    <select class="font-mono" bind:value={chosenDate}>
-      {#each options as option}
-        <option value={option.value} disabled={!option.available}
-          >{option.text}</option
-        >
-      {/each}
-    </select>
+    <form class="flex flex-col justify-between max-w-sm h-60">
+      <select class="font-mono" bind:value={chosenDate}>
+        {#each options as option}
+          <option value={option.value} disabled={!option.available}
+            >{option.text}</option
+          >
+        {/each}
+      </select>
+      <input type="text" placeholder="URL" bind:value={url} />
+      <input type="email" placeholder="Email" bind:value={email} />
+      <div>
+        <label for="found-box">Found:</label>
+        <input type="checkbox" id="found-box" bind:value={found} />
+      </div>
+      <button class="btn px-4 py-2" on:click={schedule}>Schedule</button>
+    </form>
   {/await}
 </main>
 <footer />

@@ -45,7 +45,7 @@
   <div class="flex sm:w-1/4 mx-auto my-4">
     <div class="w-1/4">
       <div
-        class="flex-1 btn"
+        class="flex-1 btn max-w-[5rem] h-full font-mono text-3xl"
         on:click={() => backwardsEnabled && month--}
         disabled={!backwardsEnabled}
       >
@@ -57,7 +57,7 @@
     </p>
     <div class="w-1/4">
       <div
-        class="flex-1 btn"
+        class="flex-1 btn max-w-[5rem] h-full font-mono text-3xl"
         on:click={() => forwardsEnabled && month++}
         disabled={!forwardsEnabled}
       >

@@ -416,7 +416,7 @@ Ensure the default browser behavior of the `hidden` attribute.
   display: none;
 }
 
-.border-2, [type="text"], select, td {
+.border-2, [type="text"], [type="email"], select, td {
   --tw-border-opacity: 1;
   border-color: rgb(229 231 235 / var(--tw-border-opacity));
 }
@@ -478,6 +478,14 @@ Ensure the default browser behavior of the `hidden` attribute.
   display: table;
 }
 
+.h-full {
+  height: 100%;
+}
+
+.h-60 {
+  height: 15rem;
+}
+
 .w-11\/12 {
   width: 91.666667%;
 }
@@ -492,6 +500,10 @@ Ensure the default browser behavior of the `hidden` attribute.
 
 .w-1\/2 {
   width: 50%;
+}
+
+.max-w-\[5rem\] {
+  max-width: 5rem;
 }
 
 .max-w-4xl {
@@ -522,12 +534,8 @@ Ensure the default browser behavior of the `hidden` attribute.
   flex-direction: column;
 }
 
-.items-center {
-  align-items: center;
-}
-
-.justify-center {
-  justify-content: center;
+.justify-between {
+  justify-content: space-between;
 }
 
 .border-2 {
@@ -537,6 +545,16 @@ Ensure the default browser behavior of the `hidden` attribute.
 .border-white {
   --tw-border-opacity: 1;
   border-color: rgb(255 255 255 / var(--tw-border-opacity));
+}
+
+.px-4 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.py-2 {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
 .pt-2 {
@@ -553,6 +571,11 @@ Ensure the default browser behavior of the `hidden` attribute.
 
 .font-mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
 }
 
 .text-lg {
@@ -623,7 +646,8 @@ footer {
   margin-bottom: 1rem;
 }
 
-input[type="text"], select {
+input[type="text"], input[type="email"], select {
+  border-radius: 0.125rem;
   border-width: 1px;
   --tw-border-opacity: 1;
   border-color: rgb(255 255 255 / var(--tw-border-opacity));
@@ -636,11 +660,10 @@ input[type="text"], select {
 }
 
 .btn {
-  max-width: 5rem;
+  line-height: normal;
   margin-left: auto;
   margin-right: auto;
   display: flex;
-  height: 100%;
   cursor: pointer;
   align-items: center;
   justify-content: center;
@@ -650,9 +673,6 @@ input[type="text"], select {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
   text-align: center;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: 1.875rem;
-  line-height: 2.25rem;
   font-weight: 700;
 }
 

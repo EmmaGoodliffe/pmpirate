@@ -15925,9 +15925,9 @@ var index = (function () {
     const queue = new Set();
     const firstMonth = compoundDate(1, 9, 2021);
     const delay = (time) => new Promise(resolve => setTimeout(resolve, time * 10 ** 3));
-    async function fetchFromDb(db, collection, docId) {
+    async function getFromDb(db, collection, docId) {
         try {
-            console.count("DB");
+            console.count("DB reads");
             console.count(docId);
             const theDoc = await ll(Da(db, collection, docId));
             return theDoc.data();
@@ -15963,7 +15963,7 @@ var index = (function () {
             return getMemesOfMonthFromCache(year, month);
         }
         queue.add(docId);
-        const memesOfMonth = (_a = (await fetchFromDb(db, "memes", docId))) !== null && _a !== void 0 ? _a : {};
+        const memesOfMonth = (_a = (await getFromDb(db, "memes", docId))) !== null && _a !== void 0 ? _a : {};
         cacheMonth(year, month, memesOfMonth);
         queue.delete(docId);
         return memesOfMonth;
