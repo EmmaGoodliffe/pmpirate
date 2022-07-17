@@ -16,17 +16,31 @@
 
   let chosenDate = null;
   const optionsPromise = async () => {
-    const options = await Promise.all(
-      new Array(7).fill(0).map(async (x, i) => {
-        const date = compoundDate(currentDate + i, currentMonth, currentYear);
-        return {
-          value: dateToString(date),
-          text: dateToString(date),
-          availabe: !(await getMemeOtd(date, db)),
-        };
-      }),
-    );
-    chosenDate = options.filter(option => option.availabe)[0].value;
+    const options = (
+      await Promise.all(
+        new Array(11).fill(0).map(async (x, i) => {
+          const date = compoundDate(
+            currentDate + i - 2,
+            currentMonth,
+            currentYear,
+          );
+          const option = {
+            value: date,
+            text: dateToString(date),
+            available: !(await getMemeOtd(date, db)),
+          };
+          return dateToString(option.value) === dateToString(today)
+            ? [
+                { value: null, text: "".padStart(10, "-"), available: false },
+                option,
+              ]
+            : option;
+        }),
+      )
+    ).flat();
+    chosenDate = options.filter(
+      option => option.value >= today && option.available,
+    )[0].value;
     return options;
   };
 </script>
@@ -37,9 +51,9 @@
   {#await optionsPromise()}
     <Loader />
   {:then options}
-    <select bind:value={chosenDate}>
+    <select class="font-mono" bind:value={chosenDate}>
       {#each options as option}
-        <option value={option.value} disabled={!option.availabe}
+        <option value={option.value} disabled={!option.available}
           >{option.text}</option
         >
       {/each}

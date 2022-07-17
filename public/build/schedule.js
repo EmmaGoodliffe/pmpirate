@@ -16204,7 +16204,7 @@ var schedule = (function () {
     	return block;
     }
 
-    // (37:2) {:then options}
+    // (43:2) {:then options}
     function create_then_block(ctx) {
     	let select;
     	let mounted;
@@ -16225,8 +16225,9 @@ var schedule = (function () {
     				each_blocks[i].c();
     			}
 
+    			attr_dev(select, "class", "font-mono");
     			if (/*chosenDate*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[3].call(select));
-    			add_location(select, file, 37, 4, 1675);
+    			add_location(select, file, 43, 4, 1931);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, select, anchor);
@@ -16285,14 +16286,14 @@ var schedule = (function () {
     		block,
     		id: create_then_block.name,
     		type: "then",
-    		source: "(37:2) {:then options}",
+    		source: "(43:2) {:then options}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (39:6) {#each options as option}
+    // (45:6) {#each options as option}
     function create_each_block(ctx) {
     	let option;
     	let t_value = /*option*/ ctx[10].text + "";
@@ -16304,8 +16305,8 @@ var schedule = (function () {
     			t = text(t_value);
     			option.__value = /*option*/ ctx[10].value;
     			option.value = option.__value;
-    			option.disabled = !/*option*/ ctx[10].availabe;
-    			add_location(option, file, 39, 8, 1748);
+    			option.disabled = !/*option*/ ctx[10].available;
+    			add_location(option, file, 45, 8, 2022);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -16321,14 +16322,14 @@ var schedule = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(39:6) {#each options as option}",
+    		source: "(45:6) {#each options as option}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (35:27)      <Loader />   {:then options}
+    // (41:27)      <Loader />   {:then options}
     function create_pending_block(ctx) {
     	let loader;
     	let current;
@@ -16361,7 +16362,7 @@ var schedule = (function () {
     		block,
     		id: create_pending_block.name,
     		type: "pending",
-    		source: "(35:27)      <Loader />   {:then options}",
+    		source: "(41:27)      <Loader />   {:then options}",
     		ctx
     	});
 
@@ -16404,9 +16405,9 @@ var schedule = (function () {
     			info.block.c();
     			t3 = space();
     			footer = element("footer");
-    			add_location(h2, file, 33, 2, 1585);
-    			add_location(main, file, 32, 0, 1576);
-    			add_location(footer, file, 46, 0, 1895);
+    			add_location(h2, file, 39, 2, 1841);
+    			add_location(main, file, 38, 0, 1832);
+    			add_location(footer, file, 52, 0, 2170);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -16513,17 +16514,28 @@ var schedule = (function () {
     	let chosenDate = null;
 
     	const optionsPromise = () => __awaiter(void 0, void 0, void 0, function* () {
-    		const options = yield Promise.all(new Array(7).fill(0).map((x, i) => __awaiter(void 0, void 0, void 0, function* () {
-    			const date = compoundDate(currentDate + i, currentMonth, currentYear);
+    		const options = (yield Promise.all(new Array(11).fill(0).map((x, i) => __awaiter(void 0, void 0, void 0, function* () {
+    			const date = compoundDate(currentDate + i - 2, currentMonth, currentYear);
 
-    			return {
-    				value: dateToString(date),
+    			const option = {
+    				value: date,
     				text: dateToString(date),
-    				availabe: !(yield getMemeOtd(date, db))
+    				available: !(yield getMemeOtd(date, db))
     			};
-    		})));
 
-    		$$invalidate(0, chosenDate = options.filter(option => option.availabe)[0].value);
+    			return dateToString(option.value) === dateToString(today)
+    			? [
+    					{
+    						value: null,
+    						text: ("").padStart(10, "-"),
+    						available: false
+    					},
+    					option
+    				]
+    			: option;
+    		})))).flat();
+
+    		$$invalidate(0, chosenDate = options.filter(option => option.value >= today && option.available)[0].value);
     		return options;
     	});
 
