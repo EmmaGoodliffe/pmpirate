@@ -16226,7 +16226,7 @@ var schedule = (function () {
     			}
 
     			if (/*chosenDate*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[3].call(select));
-    			add_location(select, file, 37, 4, 1680);
+    			add_location(select, file, 37, 4, 1675);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, select, anchor);
@@ -16305,7 +16305,7 @@ var schedule = (function () {
     			option.__value = /*option*/ ctx[10].value;
     			option.value = option.__value;
     			option.disabled = !/*option*/ ctx[10].availabe;
-    			add_location(option, file, 39, 8, 1753);
+    			add_location(option, file, 39, 8, 1748);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -16404,9 +16404,9 @@ var schedule = (function () {
     			info.block.c();
     			t3 = space();
     			footer = element("footer");
-    			add_location(h2, file, 33, 2, 1590);
-    			add_location(main, file, 32, 0, 1581);
-    			add_location(footer, file, 46, 0, 1900);
+    			add_location(h2, file, 33, 2, 1585);
+    			add_location(main, file, 32, 0, 1576);
+    			add_location(footer, file, 46, 0, 1895);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -16514,7 +16514,7 @@ var schedule = (function () {
 
     	const optionsPromise = () => __awaiter(void 0, void 0, void 0, function* () {
     		const options = yield Promise.all(new Array(7).fill(0).map((x, i) => __awaiter(void 0, void 0, void 0, function* () {
-    			const date = compoundDate(14 + currentDate + i, currentMonth, currentYear);
+    			const date = compoundDate(currentDate + i, currentMonth, currentYear);
 
     			return {
     				value: dateToString(date),

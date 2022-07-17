@@ -18,11 +18,7 @@
   const optionsPromise = async () => {
     const options = await Promise.all(
       new Array(7).fill(0).map(async (x, i) => {
-        const date = compoundDate(
-          14 + currentDate + i,
-          currentMonth,
-          currentYear,
-        );
+        const date = compoundDate(currentDate + i, currentMonth, currentYear);
         return {
           value: dateToString(date),
           text: dateToString(date),
