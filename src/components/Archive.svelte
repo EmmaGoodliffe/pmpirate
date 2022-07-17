@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { compoundDate, dateToString, stringToDate } from "./date";
-  import { Db, firstMonth, getMemeOtd, getMemesOfMonth } from "./db";
+  import { compoundDate, dateToString, stringToDate } from "../date";
+  import { Db, firstMonth, getMemeOtd, getMemesOfMonth } from "../db";
   import Header from "./Header.svelte";
   import Loader from "./Loader.svelte";
   import Shelf from "./Shelf.svelte";

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Meme } from "./db";
+  import type { Meme } from "../db";
 
   export let meme: Meme;
 

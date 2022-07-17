@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Db, getMemeOtd } from "./db";
+  import { Db, getMemeOtd } from "../db";
   import Doc from "./Doc.svelte";
   import Header from "./Header.svelte";
   import Loader from "./Loader.svelte";

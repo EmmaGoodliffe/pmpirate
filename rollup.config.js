@@ -80,7 +80,7 @@ const options = {
 export default [
   {
     ...options,
-    input: "src/index.ts",
+    input: "src/routes/index.ts",
     output: {
       sourcemap: true,
       format: "iife",
@@ -90,7 +90,7 @@ export default [
   },
   {
     ...options,
-    input: "src/archive.ts",
+    input: "src/routes/archive.ts",
     output: {
       sourcemap: true,
       format: "iife",
