@@ -1,23 +1,28 @@
 <script lang="ts">
   import { dateToString } from "./date";
+  import type { Meme } from "./db";
 
   export let date: Date;
-  export let src: string;
+  export let meme: Meme;
   export let isTomorrow = false;
+
+  $: credit = meme.found ? "Found by" : "By";
+
+  $: badge = meme.author === "emma.goodliffe" ? " 🏴‍☠️" : "";
 </script>
 
 <tr>
   <td class="text-center">
-    {dateToString(date, "/")}
+    <p>{dateToString(date, "/")}</p>
+    <p>{credit} <span class="font-bold italic">{meme.author + badge}</span></p>
     {#if isTomorrow}
-      <br />
-      (Sneak peek)
+      <p>(Sneak peek)</p>
     {/if}
   </td>
   <td>
     <img
       class="max-w-sm mx-auto w-1/2 sm:w-auto"
-      src={`memes/${src}`}
+      src={`memes/${meme.url}`}
       alt="Meme"
     />
   </td>

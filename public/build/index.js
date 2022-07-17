@@ -15925,7 +15925,7 @@ var app = (function () {
     const queue = new Set();
     const firstMonth = compoundDate(1, 9, 2021);
     const delay = (time) => new Promise(resolve => setTimeout(resolve, time * 10 ** 3));
-    const fetchFromDb = async (db, collection, docId) => {
+    async function fetchFromDb(db, collection, docId) {
         try {
             console.count("DB");
             console.count(docId);
@@ -15936,12 +15936,12 @@ var app = (function () {
             console.warn("Your DB emulations are likely not running correctly");
             console.error(err);
         }
-    };
-    const cacheMonth = (year, month, monthOfMemes) => {
+    }
+    const cacheMonth = (year, month, memesOfMonth) => {
         if (!cache[year]) {
             cache[year] = {};
         }
-        cache[year][month] = monthOfMemes;
+        cache[year][month] = memesOfMonth;
     };
     const isMemeMonthPossible = (year, month) => {
         const date = compoundDate(1, month, year);
@@ -15961,7 +15961,6 @@ var app = (function () {
         }
         queue.add(docId);
         const memesOfMonth = (_a = (await fetchFromDb(db, "memes", docId))) !== null && _a !== void 0 ? _a : {};
-        // const memesOfMonth = await getMemesOfMonthFromJson(year, month);
         cacheMonth(year, month, memesOfMonth);
         queue.delete(docId);
         return memesOfMonth;
@@ -15973,7 +15972,6 @@ var app = (function () {
         catch (err) {
             console.count("Cache errors");
         }
-        return undefined;
     };
     const getMemesOfMonth = (year, month, db) => { var _a; return (_a = getMemesOfMonthFromCache(year, month)) !== null && _a !== void 0 ? _a : getMemesOfMonthFromDb(year, month, db); };
     const getMemeOtd = async (d, db, n = 0) => {
@@ -16284,7 +16282,7 @@ var app = (function () {
     			p = element("p");
     			t = text("No meme today :( ... Send suggestions");
     			attr_dev(p, "class", `${className} text-center`);
-    			add_location(p, file$1, 7, 2, 188);
+    			add_location(p, file$1, 7, 2, 195);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -16307,7 +16305,7 @@ var app = (function () {
     	return block;
     }
 
-    // (5:0) {#if src}
+    // (5:0) {#if meme}
     function create_if_block(ctx) {
     	let img;
     	let img_src_value;
@@ -16316,15 +16314,15 @@ var app = (function () {
     		c: function create() {
     			img = element("img");
     			attr_dev(img, "class", className);
-    			if (!src_url_equal(img.src, img_src_value = `memes/${/*src*/ ctx[0]}`)) attr_dev(img, "src", img_src_value);
+    			if (!src_url_equal(img.src, img_src_value = `memes/${/*meme*/ ctx[0].url}`)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file$1, 5, 2, 120);
+    			add_location(img, file$1, 5, 2, 122);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*src*/ 1 && !src_url_equal(img.src, img_src_value = `memes/${/*src*/ ctx[0]}`)) {
+    			if (dirty & /*meme*/ 1 && !src_url_equal(img.src, img_src_value = `memes/${/*meme*/ ctx[0].url}`)) {
     				attr_dev(img, "src", img_src_value);
     			}
     		},
@@ -16337,7 +16335,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(5:0) {#if src}",
+    		source: "(5:0) {#if meme}",
     		ctx
     	});
 
@@ -16348,7 +16346,7 @@ var app = (function () {
     	let if_block_anchor;
 
     	function select_block_type(ctx, dirty) {
-    		if (/*src*/ ctx[0]) return create_if_block;
+    		if (/*meme*/ ctx[0]) return create_if_block;
     		return create_else_block;
     	}
 
@@ -16404,34 +16402,34 @@ var app = (function () {
     function instance$1($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Otd', slots, []);
-    	let { src } = $$props;
-    	const writable_props = ['src'];
+    	let { meme } = $$props;
+    	const writable_props = ['meme'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Otd> was created with unknown prop '${key}'`);
     	});
 
     	$$self.$$set = $$props => {
-    		if ('src' in $$props) $$invalidate(0, src = $$props.src);
+    		if ('meme' in $$props) $$invalidate(0, meme = $$props.meme);
     	};
 
-    	$$self.$capture_state = () => ({ src, className });
+    	$$self.$capture_state = () => ({ meme, className });
 
     	$$self.$inject_state = $$props => {
-    		if ('src' in $$props) $$invalidate(0, src = $$props.src);
+    		if ('meme' in $$props) $$invalidate(0, meme = $$props.meme);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [src];
+    	return [meme];
     }
 
     class Otd extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { src: 0 });
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { meme: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -16443,16 +16441,16 @@ var app = (function () {
     		const { ctx } = this.$$;
     		const props = options.props || {};
 
-    		if (/*src*/ ctx[0] === undefined && !('src' in props)) {
-    			console.warn("<Otd> was created without expected prop 'src'");
+    		if (/*meme*/ ctx[0] === undefined && !('meme' in props)) {
+    			console.warn("<Otd> was created without expected prop 'meme'");
     		}
     	}
 
-    	get src() {
+    	get meme() {
     		throw new Error("<Otd>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
-    	set src(value) {
+    	set meme(value) {
     		throw new Error("<Otd>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
@@ -16641,13 +16639,13 @@ var app = (function () {
     	return block;
     }
 
-    // (75:2) {:then otdSrc}
+    // (75:2) {:then memeOtd}
     function create_then_block(ctx) {
     	let otd;
     	let current;
 
     	otd = new Otd({
-    			props: { src: /*otdSrc*/ ctx[6] },
+    			props: { meme: /*memeOtd*/ ctx[6] },
     			$$inline: true
     		});
 
@@ -16678,14 +16676,14 @@ var app = (function () {
     		block,
     		id: create_then_block.name,
     		type: "then",
-    		source: "(75:2) {:then otdSrc}",
+    		source: "(75:2) {:then memeOtd}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (73:24)      <Loader />   {:then otdSrc}
+    // (73:25)      <Loader />   {:then memeOtd}
     function create_pending_block(ctx) {
     	let loader;
     	let current;
@@ -16718,7 +16716,7 @@ var app = (function () {
     		block,
     		id: create_pending_block.name,
     		type: "pending",
-    		source: "(73:24)      <Loader />   {:then otdSrc}",
+    		source: "(73:25)      <Loader />   {:then memeOtd}",
     		ctx
     	});
 
@@ -16829,7 +16827,7 @@ var app = (function () {
     		blocks: [,,,]
     	};
 
-    	handle_promise(/*otdSrcPromise*/ ctx[0], info);
+    	handle_promise(/*memeOtdPromise*/ ctx[0], info);
 
     	const block = {
     		c: function create() {
@@ -16896,34 +16894,34 @@ var app = (function () {
     			a.textContent = "Meme Archive";
     			t24 = space();
     			footer = element("footer");
-    			add_location(h20, file, 36, 2, 793);
+    			add_location(h20, file, 36, 2, 794);
     			attr_dev(div0, "class", "book-section");
-    			add_location(div0, file, 37, 2, 810);
-    			add_location(hr0, file, 42, 2, 940);
-    			add_location(h21, file, 43, 2, 949);
+    			add_location(div0, file, 37, 2, 811);
+    			add_location(hr0, file, 42, 2, 941);
+    			add_location(h21, file, 43, 2, 950);
     			attr_dev(div1, "class", "book-section");
-    			add_location(div1, file, 44, 2, 974);
+    			add_location(div1, file, 44, 2, 975);
     			attr_dev(p0, "class", "epilogue");
-    			add_location(p0, file, 49, 2, 1111);
-    			add_location(hr1, file, 52, 2, 1220);
-    			add_location(h22, file, 53, 2, 1229);
+    			add_location(p0, file, 49, 2, 1112);
+    			add_location(hr1, file, 52, 2, 1221);
+    			add_location(h22, file, 53, 2, 1230);
     			attr_dev(div2, "class", "book-section");
-    			add_location(div2, file, 54, 2, 1253);
-    			add_location(hr2, file, 62, 2, 1456);
-    			add_location(h23, file, 63, 2, 1465);
+    			add_location(div2, file, 54, 2, 1254);
+    			add_location(hr2, file, 62, 2, 1457);
+    			add_location(h23, file, 63, 2, 1466);
     			attr_dev(div3, "class", "book-section");
-    			add_location(div3, file, 64, 2, 1484);
-    			add_location(main, file, 35, 0, 784);
-    			add_location(hr3, file, 69, 0, 1634);
-    			add_location(h24, file, 71, 2, 1662);
+    			add_location(div3, file, 64, 2, 1485);
+    			add_location(main, file, 35, 0, 785);
+    			add_location(hr3, file, 69, 0, 1635);
+    			add_location(h24, file, 71, 2, 1663);
     			attr_dev(a, "class", "hover:underline");
     			attr_dev(a, "href", "archive.html");
-    			add_location(a, file, 78, 4, 1807);
+    			add_location(a, file, 78, 4, 1812);
     			attr_dev(p1, "class", "epilogue");
-    			add_location(p1, file, 77, 2, 1782);
+    			add_location(p1, file, 77, 2, 1787);
     			attr_dev(section, "id", "otd");
-    			add_location(section, file, 70, 0, 1641);
-    			add_location(footer, file, 81, 0, 1889);
+    			add_location(section, file, 70, 0, 1642);
+    			add_location(footer, file, 81, 0, 1894);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -17166,7 +17164,7 @@ var app = (function () {
     	validate_slots('Home', slots, []);
     	let { db } = $$props;
     	const today = new Date();
-    	const otdSrcPromise = getMemeOtd(today, db);
+    	const memeOtdPromise = getMemeOtd(today, db);
     	const mathsBooks = ["Pure Year 1", "Pure Year 2", "Applied Year 1", "Applied Year 2"];
     	const furtherMathsBooks = ["Further Mech", "Further Pure Year 1", "Further Pure Year 2", "Further Stats"];
 
@@ -17201,7 +17199,7 @@ var app = (function () {
     		Otd,
     		db,
     		today,
-    		otdSrcPromise,
+    		memeOtdPromise,
     		mathsBooks,
     		furtherMathsBooks,
     		gbdBooklets
@@ -17215,7 +17213,7 @@ var app = (function () {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [otdSrcPromise, mathsBooks, furtherMathsBooks, gbdBooklets, db];
+    	return [memeOtdPromise, mathsBooks, furtherMathsBooks, gbdBooklets, db];
     }
 
     class Home extends SvelteComponentDev {

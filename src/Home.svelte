@@ -8,7 +8,7 @@
   export let db: Db;
 
   const today = new Date();
-  const otdSrcPromise = getMemeOtd(today, db);
+  const memeOtdPromise = getMemeOtd(today, db);
 
   const mathsBooks = [
     "Pure Year 1",
@@ -74,10 +74,10 @@
 <hr />
 <section id="otd">
   <h2>Meme of the Day</h2>
-  {#await otdSrcPromise}
+  {#await memeOtdPromise}
     <Loader />
-  {:then otdSrc}
-    <Otd src={otdSrc} />
+  {:then memeOtd}
+    <Otd meme={memeOtd} />
   {/await}
   <p class="epilogue">
     <a class="hover:underline" href="archive.html">Meme Archive</a>

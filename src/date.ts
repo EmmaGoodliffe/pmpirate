@@ -59,6 +59,3 @@ export const stringToDate = (d: string) => {
   const result = new Date(d);
   if (`${result}` !== "Invalid Date") return result;
 };
-
-export const getLengthOfMonth = (year: number, month: number) =>
-  new Date(year, month, 0).getDate();

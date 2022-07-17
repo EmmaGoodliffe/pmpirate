@@ -84,7 +84,7 @@
           {#if compoundDate(date, month, year) <= stringToDate(dateToString(today))}
             <Shelf
               date={compoundDate(date, month, year)}
-              src={archivedMemes[date]}
+              meme={archivedMemes[date]}
             />
           {/if}
         {/each}
@@ -92,7 +92,7 @@
           <Loader />
         {:then tomorrowMeme}
           {#if tomorrowMeme}
-            <Shelf date={tomorrow} src={tomorrowMeme} isTomorrow={true} />
+            <Shelf date={tomorrow} meme={tomorrowMeme} isTomorrow={true} />
           {/if}
         {/await}
       </tbody>
@@ -111,7 +111,7 @@
     {#if queriedMeme}
       <img
         class="max-w-sm mx-auto w-1/2 sm:w-auto"
-        src={`memes/${queriedMeme}`}
+        src={`memes/${queriedMeme.url}`}
         alt="Meme"
       />
     {:else}

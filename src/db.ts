@@ -1,14 +1,13 @@
 import type { Firestore } from "firebase/firestore";
 import { doc, getDoc } from "firebase/firestore";
-import {
-  compoundDate,
-  // dateToString,
-  // getLengthOfMonth, // Only use of the function
-  separateDate,
-} from "./date";
-// import memes from "./memes.json";
+import { compoundDate, separateDate } from "./date";
 
-type MemesOfMonth = Record<number, string>;
+export interface Meme {
+  url: string;
+  author: string;
+  found: boolean;
+}
+type MemesOfMonth = Record<number | string, Meme>;
 export type Db = Firestore;
 
 const cache: Record<number, Record<number, MemesOfMonth>> = {};
@@ -18,22 +17,6 @@ export const firstMonth = compoundDate(1, 9, 2021);
 
 const delay = (time: number) =>
   new Promise(resolve => setTimeout(resolve, time * 10 ** 3));
-
-// const fetchFromDb = async (
-//   db: Db,
-//   collection: string,
-//   docId: string,
-// ) => {
-//   try {
-//     console.count("DB");
-//     console.count(docId);
-//     const theDoc = await getDoc(doc(db, collection, docId));
-//     return theDoc.data();
-//   } catch (err) {
-//     console.warn("Your DB emulations are likely not running correctly");
-//     console.error(err);
-//   }
-// };
 
 async function fetchFromDb(
   db: Db,
@@ -63,37 +46,12 @@ const cacheMonth = (
   cache[year][month] = memesOfMonth;
 };
 
-// const isArchivedHere = (date: Date, theMonth: number, theYear: number) => {
-//   const goodDate = true;
-//   const [, month, year] = separateDate(date);
-//   const goodMonth = month === theMonth;
-//   const goodYear = year === theYear;
-//   return goodDate && goodMonth && goodYear;
-// };
-
 const isMemeMonthPossible = (year: number, month: number) => {
   const date = compoundDate(1, month, year);
   const today = new Date();
   const currentYear = separateDate(today)[2];
   return firstMonth <= date && year <= currentYear;
 };
-
-// const getMemesOfMonthFromJson = async (year: number, month: number) => {
-//   const dates = new Array(getLengthOfMonth(year, month))
-//     .fill(null)
-//     .map((x, i) => i + 1);
-//   const result: MemesOfMonth = {};
-//   for (const date of dates) {
-//     const d = compoundDate(date, month, year);
-//     const key = dateToString(d, "-", true);
-//     const url = memes.otd[key];
-//     if (isArchivedHere(d, month, year) && url) {
-//       result[date] = url;
-//     }
-//   }
-//   await delay(2);
-//   return result;
-// };
 
 const getMemesOfMonthFromDb = async (year: number, month: number, db: Db) => {
   if (!isMemeMonthPossible(year, month)) return null;
@@ -105,7 +63,6 @@ const getMemesOfMonthFromDb = async (year: number, month: number, db: Db) => {
   }
   queue.add(docId);
   const memesOfMonth = (await fetchFromDb(db, "memes", docId)) ?? {};
-  // const memesOfMonth = await getMemesOfMonthFromJson(year, month);
   cacheMonth(year, month, memesOfMonth);
   queue.delete(docId);
   return memesOfMonth;
@@ -123,7 +80,7 @@ export const getMemesOfMonth = (year: number, month: number, db: Db) =>
   getMemesOfMonthFromCache(year, month) ??
   getMemesOfMonthFromDb(year, month, db);
 
-export const getMemeOtd = async (d: Date, db: Db, n = 0): Promise<string> => {
+export const getMemeOtd = async (d: Date, db: Db, n = 0): Promise<Meme> => {
   if (!d) return null;
   if (n >= 12) throw new Error("DB recursion");
   const [date, month, year] = separateDate(d);
