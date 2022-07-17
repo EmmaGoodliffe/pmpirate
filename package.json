@@ -12,7 +12,7 @@
     "dev:svelte": "rollup -c -w",
     "dev": "concurrently \"npm:dev:*\" -c \"bold\"",
     "e2e": "cypress open",
-    "lint": "eslint \".\" --fix && prettier \".\" --write && svelte-check",
+    "lint": "tsc --noEmit && eslint \".\" --fix && prettier \".\" --write && svelte-check",
     "start": "firebase emulators:start",
     "test": "cypress run"
   },

@@ -14498,7 +14498,7 @@ var archive = (function () {
     	return child_ctx;
     }
 
-    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate, }
+    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate }
     function create_catch_block_2(ctx) {
     	const block = {
     		c: noop,
@@ -14513,7 +14513,7 @@ var archive = (function () {
     		block,
     		id: create_catch_block_2.name,
     		type: "catch",
-    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate, }",
+    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate }",
     		ctx
     	});
 
@@ -14569,7 +14569,7 @@ var archive = (function () {
     			t1 = space();
     			if (if_block) if_block.c();
     			if_block_anchor = empty();
-    			add_location(tbody, file, 68, 6, 1984);
+    			add_location(tbody, file, 68, 6, 1983);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tbody, anchor);
@@ -14805,7 +14805,7 @@ var archive = (function () {
     	return block;
     }
 
-    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate, }
+    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate }
     function create_catch_block_1(ctx) {
     	const block = {
     		c: noop,
@@ -14820,7 +14820,7 @@ var archive = (function () {
     		block,
     		id: create_catch_block_1.name,
     		type: "catch",
-    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate, }",
+    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate }",
     		ctx
     	});
 
@@ -14993,7 +14993,7 @@ var archive = (function () {
     		c: function create() {
     			tfoot = element("tfoot");
     			tfoot.textContent = "No memes that month :(";
-    			add_location(tfoot, file, 88, 8, 2647);
+    			add_location(tfoot, file, 88, 8, 2646);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tfoot, anchor);
@@ -15025,7 +15025,7 @@ var archive = (function () {
     		c: function create() {
     			tfoot = element("tfoot");
     			create_component(loader.$$.fragment);
-    			add_location(tfoot, file, 64, 6, 1910);
+    			add_location(tfoot, file, 64, 6, 1909);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tfoot, anchor);
@@ -15059,7 +15059,7 @@ var archive = (function () {
     	return block;
     }
 
-    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate, }
+    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate }
     function create_catch_block(ctx) {
     	const block = {
     		c: noop,
@@ -15074,7 +15074,7 @@ var archive = (function () {
     		block,
     		id: create_catch_block.name,
     		type: "catch",
-    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate, }",
+    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate }",
     		ctx
     	});
 
@@ -15143,7 +15143,7 @@ var archive = (function () {
     			p = element("p");
     			p.textContent = "No memes that day :(";
     			attr_dev(p, "class", "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto text-center");
-    			add_location(p, file, 106, 6, 3058);
+    			add_location(p, file, 106, 6, 3057);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -15176,7 +15176,7 @@ var archive = (function () {
     			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
     			if (!src_url_equal(img.src, img_src_value = `memes/${/*queriedMeme*/ ctx[15]}`)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file, 100, 6, 2921);
+    			add_location(img, file, 100, 6, 2920);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
@@ -15364,42 +15364,42 @@ var archive = (function () {
     			p1.textContent = "DVS-style dates accepted";
     			t21 = space();
     			footer = element("footer");
-    			add_location(h20, file, 32, 2, 1044);
+    			add_location(h20, file, 32, 2, 1043);
     			attr_dev(span0, "class", "-mt-1.5");
-    			add_location(span0, file, 40, 8, 1277);
+    			add_location(span0, file, 40, 8, 1276);
     			attr_dev(div0, "class", "flex-1 btn");
     			attr_dev(div0, "disabled", div0_disabled_value = !/*backwardsEnabled*/ ctx[4]);
-    			add_location(div0, file, 35, 6, 1139);
+    			add_location(div0, file, 35, 6, 1138);
     			attr_dev(div1, "class", "w-1/4");
-    			add_location(div1, file, 34, 4, 1113);
+    			add_location(div1, file, 34, 4, 1112);
     			attr_dev(p0, "class", "flex-1 my-2 text-lg text-center");
-    			add_location(p0, file, 43, 4, 1339);
+    			add_location(p0, file, 43, 4, 1338);
     			attr_dev(span1, "class", "-mt-1.5");
-    			add_location(span1, file, 52, 8, 1601);
+    			add_location(span1, file, 52, 8, 1600);
     			attr_dev(div2, "class", "flex-1 btn");
     			attr_dev(div2, "disabled", div2_disabled_value = !/*forwardsEnabled*/ ctx[3]);
-    			add_location(div2, file, 47, 6, 1465);
+    			add_location(div2, file, 47, 6, 1464);
     			attr_dev(div3, "class", "w-1/4");
-    			add_location(div3, file, 46, 4, 1439);
+    			add_location(div3, file, 46, 4, 1438);
     			attr_dev(div4, "class", "flex sm:w-1/4 mx-auto my-4");
-    			add_location(div4, file, 33, 2, 1068);
+    			add_location(div4, file, 33, 2, 1067);
     			attr_dev(th0, "class", "border-2");
-    			add_location(th0, file, 59, 8, 1775);
+    			add_location(th0, file, 59, 8, 1774);
     			attr_dev(th1, "class", "border-2");
-    			add_location(th1, file, 60, 8, 1814);
-    			add_location(tr, file, 58, 6, 1762);
-    			add_location(thead, file, 57, 4, 1748);
+    			add_location(th1, file, 60, 8, 1813);
+    			add_location(tr, file, 58, 6, 1761);
+    			add_location(thead, file, 57, 4, 1747);
     			attr_dev(table, "class", "table-auto w-full max-w-4xl mx-auto border-white border-2");
-    			add_location(table, file, 56, 2, 1670);
-    			add_location(main, file, 31, 0, 1035);
-    			add_location(h21, file, 94, 2, 2755);
+    			add_location(table, file, 56, 2, 1669);
+    			add_location(main, file, 31, 0, 1034);
+    			add_location(h21, file, 94, 2, 2754);
     			attr_dev(input, "type", "text");
-    			add_location(input, file, 95, 2, 2781);
+    			add_location(input, file, 95, 2, 2780);
     			attr_dev(p1, "class", "mt-4");
-    			add_location(p1, file, 111, 2, 3187);
+    			add_location(p1, file, 111, 2, 3186);
     			attr_dev(section, "class", "mt-48");
-    			add_location(section, file, 93, 0, 2729);
-    			add_location(footer, file, 113, 0, 3243);
+    			add_location(section, file, 93, 0, 2728);
+    			add_location(footer, file, 113, 0, 3242);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
