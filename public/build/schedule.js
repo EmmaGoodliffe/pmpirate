@@ -16204,7 +16204,7 @@ var schedule = (function () {
     	return block;
     }
 
-    // (43:2) {:then options}
+    // (44:2) {:then options}
     function create_then_block(ctx) {
     	let select;
     	let mounted;
@@ -16227,7 +16227,7 @@ var schedule = (function () {
 
     			attr_dev(select, "class", "font-mono");
     			if (/*chosenDate*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[3].call(select));
-    			add_location(select, file, 43, 4, 1931);
+    			add_location(select, file, 44, 4, 2039);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, select, anchor);
@@ -16286,14 +16286,14 @@ var schedule = (function () {
     		block,
     		id: create_then_block.name,
     		type: "then",
-    		source: "(43:2) {:then options}",
+    		source: "(44:2) {:then options}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (45:6) {#each options as option}
+    // (46:6) {#each options as option}
     function create_each_block(ctx) {
     	let option;
     	let t_value = /*option*/ ctx[10].text + "";
@@ -16306,7 +16306,7 @@ var schedule = (function () {
     			option.__value = /*option*/ ctx[10].value;
     			option.value = option.__value;
     			option.disabled = !/*option*/ ctx[10].available;
-    			add_location(option, file, 45, 8, 2022);
+    			add_location(option, file, 46, 8, 2130);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -16322,14 +16322,14 @@ var schedule = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(45:6) {#each options as option}",
+    		source: "(46:6) {#each options as option}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (41:27)      <Loader />   {:then options}
+    // (42:27)      <Loader />   {:then options}
     function create_pending_block(ctx) {
     	let loader;
     	let current;
@@ -16362,7 +16362,7 @@ var schedule = (function () {
     		block,
     		id: create_pending_block.name,
     		type: "pending",
-    		source: "(41:27)      <Loader />   {:then options}",
+    		source: "(42:27)      <Loader />   {:then options}",
     		ctx
     	});
 
@@ -16405,9 +16405,9 @@ var schedule = (function () {
     			info.block.c();
     			t3 = space();
     			footer = element("footer");
-    			add_location(h2, file, 39, 2, 1841);
-    			add_location(main, file, 38, 0, 1832);
-    			add_location(footer, file, 52, 0, 2170);
+    			add_location(h2, file, 40, 2, 1949);
+    			add_location(main, file, 39, 0, 1940);
+    			add_location(footer, file, 53, 0, 2278);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -16514,6 +16514,8 @@ var schedule = (function () {
     	let chosenDate = null;
 
     	const optionsPromise = () => __awaiter(void 0, void 0, void 0, function* () {
+    		var _a, _b;
+
     		const options = (yield Promise.all(new Array(11).fill(0).map((x, i) => __awaiter(void 0, void 0, void 0, function* () {
     			const date = compoundDate(currentDate + i - 2, currentMonth, currentYear);
 
@@ -16535,7 +16537,12 @@ var schedule = (function () {
     			: option;
     		})))).flat();
 
-    		$$invalidate(0, chosenDate = options.filter(option => option.value >= today && option.available)[0].value);
+    		$$invalidate(0, chosenDate = (_b = (_a = options.filter(option => option.value >= today && option.available)[0]) === null || _a === void 0
+    		? void 0
+    		: _a.value) !== null && _b !== void 0
+    		? _b
+    		: null);
+
     		return options;
     	});
 

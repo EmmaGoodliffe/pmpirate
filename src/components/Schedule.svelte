@@ -38,9 +38,9 @@
         }),
       )
     ).flat();
-    chosenDate = options.filter(
-      option => option.value >= today && option.available,
-    )[0].value;
+    chosenDate =
+      options.filter(option => option.value >= today && option.available)[0]
+        ?.value ?? null;
     return options;
   };
 </script>
