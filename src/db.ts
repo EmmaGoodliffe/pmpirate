@@ -22,7 +22,10 @@ const fetchFromDb = async (
   docId: string,
 ) => {
   try {
-    return (await getDoc(doc(db, collection, docId))).data();
+    console.count("DB");
+    console.count(docId);
+    const theDoc = await getDoc(doc(db, collection, docId));
+    return theDoc.data();
   } catch (err) {
     console.warn("Your DB emulations are likely not running correctly");
     console.error(err);
@@ -84,15 +87,11 @@ const getMemesOfMonthFromDb = async (
     await delay(1);
     return getMemesOfMonthFromCache(year, month);
   }
-  console.count(docId);
-  console.count("DB reads");
   queue.add(docId);
-  console.log(queue, cache);
   const memesOfMonth = (await fetchFromDb(db, "memes", docId)) ?? {};
   // const memesOfMonth = await getMemesOfMonthFromJson(year, month);
   cacheMonth(year, month, memesOfMonth);
   queue.delete(docId);
-  console.log(queue, cache);
   return memesOfMonth;
 };
 
