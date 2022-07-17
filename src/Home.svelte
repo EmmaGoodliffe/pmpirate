@@ -1,12 +1,11 @@
 <script lang="ts">
-  import type { Firestore } from "@firebase/firestore";
-  import { getMemeOtd } from "./db";
+  import { Db, getMemeOtd } from "./db";
   import Doc from "./Doc.svelte";
   import Header from "./Header.svelte";
   import Loader from "./Loader.svelte";
   import Otd from "./Otd.svelte";
 
-  export let db: Firestore;
+  export let db: Db;
 
   const today = new Date();
   const otdSrcPromise = getMemeOtd(today, db);

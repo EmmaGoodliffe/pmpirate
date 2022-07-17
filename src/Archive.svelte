@@ -1,12 +1,11 @@
 <script lang="ts">
-  import type { Firestore } from "@firebase/firestore";
   import { compoundDate, dateToString, stringToDate } from "./date";
-  import { firstMonth, getMemeOtd, getMemesOfMonth } from "./db";
+  import { Db, firstMonth, getMemeOtd, getMemesOfMonth } from "./db";
   import Header from "./Header.svelte";
   import Loader from "./Loader.svelte";
   import Shelf from "./Shelf.svelte";
 
-  export let db: Firestore;
+  export let db: Db;
 
   const today = new Date();
   const tomorrow = new Date(Number(today) + 24 * 60 ** 2 * 10 ** 3);

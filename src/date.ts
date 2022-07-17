@@ -62,11 +62,3 @@ export const stringToDate = (d: string) => {
 
 export const getLengthOfMonth = (year: number, month: number) =>
   new Date(year, month, 0).getDate();
-
-export const isTomorrow = (date: Date) => {
-  const today = new Date();
-  const diffInMilliseconds = Number(date) - Number(today);
-  const diffInSeconds = diffInMilliseconds / 10 ** 3;
-  const diffInHours = diffInSeconds / 60 ** 2;
-  return 0 < diffInHours && diffInHours <= 24;
-};
