@@ -449,14 +449,6 @@ Ensure the default browser behavior of the `hidden` attribute.
   margin-top: -0.25rem;
 }
 
-.mt-48 {
-  margin-top: 12rem;
-}
-
-.mt-4 {
-  margin-top: 1rem;
-}
-
 .ml-4 {
   margin-left: 1rem;
 }
@@ -599,7 +591,6 @@ footer {
 }
 
 input[type="text"] {
-  margin-bottom: 1rem;
   border-width: 1px;
   --tw-border-opacity: 1;
   border-color: rgb(255 255 255 / var(--tw-border-opacity));

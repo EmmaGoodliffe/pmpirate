@@ -31,7 +31,7 @@ footer {
 }
 
 input[type="text"] {
-  @apply bg-bg border-white border mb-4 px-2 py-1;
+  @apply bg-bg border-white border px-2 py-1;
 }
 
 .btn {

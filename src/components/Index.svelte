@@ -79,6 +79,10 @@
   {:then memeOtd}
     <Otd meme={memeOtd} />
   {/await}
+</section>
+<hr />
+<section>
+  <h2>Meme Archive</h2>
   <p class="epilogue">
     <a class="hover:underline" href="archive.html">Meme Archive</a>
   </p>

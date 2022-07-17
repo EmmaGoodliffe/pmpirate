@@ -41,7 +41,7 @@
 
 <Header />
 <main>
-  <h2>Meme archive</h2>
+  <h2>Meme Archive</h2>
   <div class="flex sm:w-1/4 mx-auto my-4">
     <div class="w-1/4">
       <div
@@ -102,9 +102,11 @@
     {/await}
   </table>
 </main>
-<section class="mt-48">
-  <h2>Specify a date</h2>
+<hr />
+<section>
+  <h2>Specify a Date</h2>
   <input type="text" bind:value={dateQuery} />
+  <p class="my-4">DVS-style dates accepted</p>
   {#await queriedMemePromise}
     <Loader />
   {:then queriedMeme}
@@ -120,6 +122,12 @@
       </p>
     {/if}
   {/await}
-  <p class="mt-4">DVS-style dates accepted</p>
+</section>
+<hr />
+<section>
+  <h2>Schedule a Meme</h2>
+  <p class="epilogue">
+    <a class="hover:underline" href="schedule.html">Schedule a Meme</a>
+  </p>
 </section>
 <footer />
