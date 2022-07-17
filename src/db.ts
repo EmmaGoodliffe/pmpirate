@@ -53,10 +53,14 @@ const isMemeMonthPossible = (year: number, month: number) => {
   return firstMonth <= date && year <= currentYear;
 };
 
+const getDocId = (year: number, month: number) => {
+  const mm = `${month}`.padStart(2, "0");
+  return `${year}-${mm}`;
+};
+
 const getMemesOfMonthFromDb = async (year: number, month: number, db: Db) => {
   if (!isMemeMonthPossible(year, month)) return null;
-  const mm = `${month}`.padStart(2, "0");
-  const docId = `${year}-${mm}`;
+  const docId = getDocId(year, month);
   if (queue.has(docId)) {
     await delay(1);
     return getMemesOfMonthFromCache(year, month);

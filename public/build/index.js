@@ -1,6 +1,6 @@
 
 (function(l, r) { if (!l || l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (self.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(self.document);
-var app = (function () {
+var index = (function () {
     'use strict';
 
     /**
@@ -15949,12 +15949,15 @@ var app = (function () {
         const currentYear = separateDate(today)[2];
         return firstMonth <= date && year <= currentYear;
     };
+    const getDocId = (year, month) => {
+        const mm = `${month}`.padStart(2, "0");
+        return `${year}-${mm}`;
+    };
     const getMemesOfMonthFromDb = async (year, month, db) => {
         var _a;
         if (!isMemeMonthPossible(year, month))
             return null;
-        const mm = `${month}`.padStart(2, "0");
-        const docId = `${year}-${mm}`;
+        const docId = getDocId(year, month);
         if (queue.has(docId)) {
             await delay(1);
             return getMemesOfMonthFromCache(year, month);

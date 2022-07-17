@@ -1,6 +1,6 @@
 
 (function(l, r) { if (!l || l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (self.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(self.document);
-var archive = (function () {
+var schedule = (function () {
     'use strict';
 
     /**
@@ -15481,9 +15481,6 @@ var archive = (function () {
     function space() {
         return text(' ');
     }
-    function empty() {
-        return text('');
-    }
     function listen(node, event, handler, options) {
         node.addEventListener(event, handler, options);
         return () => node.removeEventListener(event, handler, options);
@@ -15497,9 +15494,6 @@ var archive = (function () {
     function children(element) {
         return Array.from(element.childNodes);
     }
-    function set_input_value(input, value) {
-        input.value = value == null ? '' : value;
-    }
     function set_style(node, key, value, important) {
         if (value === null) {
             node.style.removeProperty(key);
@@ -15507,6 +15501,20 @@ var archive = (function () {
         else {
             node.style.setProperty(key, value, important ? 'important' : '');
         }
+    }
+    function select_option(select, value) {
+        for (let i = 0; i < select.options.length; i += 1) {
+            const option = select.options[i];
+            if (option.__value === value) {
+                option.selected = true;
+                return;
+            }
+        }
+        select.selectedIndex = -1; // no option should be selected
+    }
+    function select_value(select) {
+        const selected_option = select.querySelector(':checked') || select.options[0];
+        return selected_option && selected_option.__value;
     }
     function custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
         const e = document.createEvent('CustomEvent');
@@ -15727,12 +15735,6 @@ var archive = (function () {
         }
         info.block.p(child_ctx, dirty);
     }
-
-    const globals = (typeof window !== 'undefined'
-        ? window
-        : typeof globalThis !== 'undefined'
-            ? globalThis
-            : global);
     function create_component(block) {
         block && block.c();
     }
@@ -15897,13 +15899,6 @@ var archive = (function () {
         else
             dispatch_dev('SvelteDOMSetAttribute', { node, attribute, value });
     }
-    function set_data_dev(text, data) {
-        data = '' + data;
-        if (text.wholeText === data)
-            return;
-        dispatch_dev('SvelteDOMSetData', { node: text, data });
-        text.data = data;
-    }
     function validate_each_argument(arg) {
         if (typeof arg !== 'string' && !(arg && typeof arg === 'object' && 'length' in arg)) {
             let msg = '{#each} only iterates over array-like objects.';
@@ -15940,28 +15935,6 @@ var archive = (function () {
         $inject_state() { }
     }
 
-    const toInt = (x) => {
-        const intX = parseInt(x);
-        if (!isNaN(intX))
-            return intX;
-        const numerals = [
-            "I",
-            "II",
-            "III",
-            "IV",
-            "V",
-            "VI",
-            "VII",
-            "VIII",
-            "IX",
-            "X",
-            "XI",
-            "XII",
-        ];
-        const index = numerals.indexOf(x);
-        if (index === -1)
-            return index + 1;
-    };
     const separateDate = (date) => [
         date.getDate(),
         date.getMonth() + 1,
@@ -15973,32 +15946,6 @@ var archive = (function () {
         const ogOrder = [date.padStart(2, "0"), month.padStart(2, "0"), year];
         const ordered = reverse ? ogOrder.reverse() : ogOrder;
         return ordered.join(splitter);
-    };
-    const fixYear = (y) => {
-        const year = `${y}`;
-        if (year.length <= 2)
-            return fixYear("20" + year.padStart(2, "0"));
-        if (year.length === 3)
-            return null;
-        return parseInt(year);
-    };
-    const stringToDate = (d) => {
-        const splitters = ["/", "-", "."];
-        for (const splitter of splitters) {
-            const [date, month, year] = d.split(splitter).map(toInt);
-            const result = compoundDate(date, month, fixYear(year));
-            if (![date, month, year].some(x => !x) && `${result}` !== "Invalid Date")
-                return result;
-        }
-        for (const splitter of splitters) {
-            const [year, month, date] = d.split(splitter).map(toInt);
-            const result = compoundDate(date, month, fixYear(year));
-            if (![date, month, year].some(x => !x) && `${result}` !== "Invalid Date")
-                return result;
-        }
-        const result = new Date(d);
-        if (`${result}` !== "Invalid Date")
-            return result;
     };
 
     const cache = {};
@@ -16077,9 +16024,9 @@ var archive = (function () {
 
     /* src/components/Header.svelte generated by Svelte v3.49.0 */
 
-    const file$3 = "src/components/Header.svelte";
+    const file$2 = "src/components/Header.svelte";
 
-    function create_fragment$3(ctx) {
+    function create_fragment$2(ctx) {
     	let header;
     	let a;
     	let img;
@@ -16099,13 +16046,13 @@ var archive = (function () {
     			set_style(img, "height", "2.5em");
     			if (!src_url_equal(img.src, img_src_value = "./favicon.png")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Logo");
-    			add_location(img, file$3, 2, 4, 46);
+    			add_location(img, file$2, 2, 4, 46);
     			attr_dev(h1, "class", "inline-block ml-4");
-    			add_location(h1, file$3, 8, 4, 161);
+    			add_location(h1, file$2, 8, 4, 161);
     			attr_dev(a, "href", "/");
-    			add_location(a, file$3, 1, 2, 29);
+    			add_location(a, file$2, 1, 2, 29);
     			attr_dev(header, "class", "my-8 flex");
-    			add_location(header, file$3, 0, 0, 0);
+    			add_location(header, file$2, 0, 0, 0);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -16127,7 +16074,7 @@ var archive = (function () {
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_fragment$3.name,
+    		id: create_fragment$2.name,
     		type: "component",
     		source: "",
     		ctx
@@ -16136,7 +16083,7 @@ var archive = (function () {
     	return block;
     }
 
-    function instance$3($$self, $$props) {
+    function instance$2($$self, $$props) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Header', slots, []);
     	const writable_props = [];
@@ -16151,29 +16098,29 @@ var archive = (function () {
     class Header extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$3, create_fragment$3, safe_not_equal, {});
+    		init(this, options, instance$2, create_fragment$2, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
     			tagName: "Header",
     			options,
-    			id: create_fragment$3.name
+    			id: create_fragment$2.name
     		});
     	}
     }
 
     /* src/components/Loader.svelte generated by Svelte v3.49.0 */
 
-    const file$2 = "src/components/Loader.svelte";
+    const file$1 = "src/components/Loader.svelte";
 
-    function create_fragment$2(ctx) {
+    function create_fragment$1(ctx) {
     	let p;
 
     	const block = {
     		c: function create() {
     			p = element("p");
     			p.textContent = "It's loading, bro...";
-    			add_location(p, file$2, 0, 0, 0);
+    			add_location(p, file$1, 0, 0, 0);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -16186,173 +16133,6 @@ var archive = (function () {
     		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(p);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_fragment$2.name,
-    		type: "component",
-    		source: "",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function instance$2($$self, $$props) {
-    	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Loader', slots, []);
-    	const writable_props = [];
-
-    	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Loader> was created with unknown prop '${key}'`);
-    	});
-
-    	return [];
-    }
-
-    class Loader extends SvelteComponentDev {
-    	constructor(options) {
-    		super(options);
-    		init(this, options, instance$2, create_fragment$2, safe_not_equal, {});
-
-    		dispatch_dev("SvelteRegisterComponent", {
-    			component: this,
-    			tagName: "Loader",
-    			options,
-    			id: create_fragment$2.name
-    		});
-    	}
-    }
-
-    /* src/components/Shelf.svelte generated by Svelte v3.49.0 */
-    const file$1 = "src/components/Shelf.svelte";
-
-    // (13:4) {#if isTomorrow}
-    function create_if_block$1(ctx) {
-    	let p;
-
-    	const block = {
-    		c: function create() {
-    			p = element("p");
-    			p.textContent = "(Sneak peek)";
-    			add_location(p, file$1, 13, 6, 415);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, p, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(p);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block$1.name,
-    		type: "if",
-    		source: "(13:4) {#if isTomorrow}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    function create_fragment$1(ctx) {
-    	let tr;
-    	let td0;
-    	let p0;
-    	let t0_value = dateToString(/*date*/ ctx[0], "/") + "";
-    	let t0;
-    	let t1;
-    	let p1;
-    	let t2;
-    	let t3;
-    	let span;
-    	let t4_value = /*meme*/ ctx[1].author + /*badge*/ ctx[3] + "";
-    	let t4;
-    	let t5;
-    	let t6;
-    	let td1;
-    	let img;
-    	let img_src_value;
-    	let if_block = /*isTomorrow*/ ctx[2] && create_if_block$1(ctx);
-
-    	const block = {
-    		c: function create() {
-    			tr = element("tr");
-    			td0 = element("td");
-    			p0 = element("p");
-    			t0 = text(t0_value);
-    			t1 = space();
-    			p1 = element("p");
-    			t2 = text(/*credit*/ ctx[4]);
-    			t3 = space();
-    			span = element("span");
-    			t4 = text(t4_value);
-    			t5 = space();
-    			if (if_block) if_block.c();
-    			t6 = space();
-    			td1 = element("td");
-    			img = element("img");
-    			add_location(p0, file$1, 10, 4, 275);
-    			attr_dev(span, "class", "font-bold italic");
-    			add_location(span, file$1, 11, 16, 324);
-    			add_location(p1, file$1, 11, 4, 312);
-    			attr_dev(td0, "class", "text-center");
-    			add_location(td0, file$1, 9, 2, 246);
-    			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
-    			if (!src_url_equal(img.src, img_src_value = `memes/${/*meme*/ ctx[1].url}`)) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "alt", "Meme");
-    			add_location(img, file$1, 17, 4, 464);
-    			add_location(td1, file$1, 16, 2, 455);
-    			add_location(tr, file$1, 8, 0, 239);
-    		},
-    		l: function claim(nodes) {
-    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, tr, anchor);
-    			append_dev(tr, td0);
-    			append_dev(td0, p0);
-    			append_dev(p0, t0);
-    			append_dev(td0, t1);
-    			append_dev(td0, p1);
-    			append_dev(p1, t2);
-    			append_dev(p1, t3);
-    			append_dev(p1, span);
-    			append_dev(span, t4);
-    			append_dev(td0, t5);
-    			if (if_block) if_block.m(td0, null);
-    			append_dev(tr, t6);
-    			append_dev(tr, td1);
-    			append_dev(td1, img);
-    		},
-    		p: function update(ctx, [dirty]) {
-    			if (dirty & /*date*/ 1 && t0_value !== (t0_value = dateToString(/*date*/ ctx[0], "/") + "")) set_data_dev(t0, t0_value);
-    			if (dirty & /*credit*/ 16) set_data_dev(t2, /*credit*/ ctx[4]);
-    			if (dirty & /*meme, badge*/ 10 && t4_value !== (t4_value = /*meme*/ ctx[1].author + /*badge*/ ctx[3] + "")) set_data_dev(t4, t4_value);
-
-    			if (/*isTomorrow*/ ctx[2]) {
-    				if (if_block) ; else {
-    					if_block = create_if_block$1(ctx);
-    					if_block.c();
-    					if_block.m(td0, null);
-    				}
-    			} else if (if_block) {
-    				if_block.d(1);
-    				if_block = null;
-    			}
-
-    			if (dirty & /*meme*/ 2 && !src_url_equal(img.src, img_src_value = `memes/${/*meme*/ ctx[1].url}`)) {
-    				attr_dev(img, "src", img_src_value);
-    			}
-    		},
-    		i: noop,
-    		o: noop,
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(tr);
-    			if (if_block) if_block.d();
     		}
     	};
 
@@ -16367,682 +16147,42 @@ var archive = (function () {
     	return block;
     }
 
-    function instance$1($$self, $$props, $$invalidate) {
-    	let credit;
-    	let badge;
+    function instance$1($$self, $$props) {
     	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Shelf', slots, []);
-    	let { date } = $$props;
-    	let { meme } = $$props;
-    	let { isTomorrow = false } = $$props;
-    	const writable_props = ['date', 'meme', 'isTomorrow'];
+    	validate_slots('Loader', slots, []);
+    	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Shelf> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Loader> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$$set = $$props => {
-    		if ('date' in $$props) $$invalidate(0, date = $$props.date);
-    		if ('meme' in $$props) $$invalidate(1, meme = $$props.meme);
-    		if ('isTomorrow' in $$props) $$invalidate(2, isTomorrow = $$props.isTomorrow);
-    	};
-
-    	$$self.$capture_state = () => ({
-    		dateToString,
-    		date,
-    		meme,
-    		isTomorrow,
-    		badge,
-    		credit
-    	});
-
-    	$$self.$inject_state = $$props => {
-    		if ('date' in $$props) $$invalidate(0, date = $$props.date);
-    		if ('meme' in $$props) $$invalidate(1, meme = $$props.meme);
-    		if ('isTomorrow' in $$props) $$invalidate(2, isTomorrow = $$props.isTomorrow);
-    		if ('badge' in $$props) $$invalidate(3, badge = $$props.badge);
-    		if ('credit' in $$props) $$invalidate(4, credit = $$props.credit);
-    	};
-
-    	if ($$props && "$$inject" in $$props) {
-    		$$self.$inject_state($$props.$$inject);
-    	}
-
-    	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*meme*/ 2) {
-    			$$invalidate(4, credit = meme.found ? "Found by" : "By");
-    		}
-
-    		if ($$self.$$.dirty & /*meme*/ 2) {
-    			$$invalidate(3, badge = meme.author === "emma.goodliffe" ? " 🏴‍☠️" : "");
-    		}
-    	};
-
-    	return [date, meme, isTomorrow, badge, credit];
+    	return [];
     }
 
-    class Shelf extends SvelteComponentDev {
+    class Loader extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { date: 0, meme: 1, isTomorrow: 2 });
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, {});
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
-    			tagName: "Shelf",
+    			tagName: "Loader",
     			options,
     			id: create_fragment$1.name
     		});
-
-    		const { ctx } = this.$$;
-    		const props = options.props || {};
-
-    		if (/*date*/ ctx[0] === undefined && !('date' in props)) {
-    			console.warn("<Shelf> was created without expected prop 'date'");
-    		}
-
-    		if (/*meme*/ ctx[1] === undefined && !('meme' in props)) {
-    			console.warn("<Shelf> was created without expected prop 'meme'");
-    		}
-    	}
-
-    	get date() {
-    		throw new Error("<Shelf>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set date(value) {
-    		throw new Error("<Shelf>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	get meme() {
-    		throw new Error("<Shelf>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set meme(value) {
-    		throw new Error("<Shelf>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	get isTomorrow() {
-    		throw new Error("<Shelf>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set isTomorrow(value) {
-    		throw new Error("<Shelf>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
 
-    /* src/components/Archive.svelte generated by Svelte v3.49.0 */
-
-    const { Object: Object_1 } = globals;
-    const file = "src/components/Archive.svelte";
+    /* src/components/Schedule.svelte generated by Svelte v3.49.0 */
+    const file = "src/components/Schedule.svelte";
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[18] = list[i];
+    	child_ctx[10] = list[i];
     	return child_ctx;
     }
 
-    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate }
-    function create_catch_block_2(ctx) {
-    	const block = {
-    		c: noop,
-    		m: noop,
-    		p: noop,
-    		i: noop,
-    		o: noop,
-    		d: noop
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_catch_block_2.name,
-    		type: "catch",
-    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate }",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (68:4) {:then archivedMemes}
-    function create_then_block_1(ctx) {
-    	let tbody;
-    	let t0;
-    	let promise;
-    	let t1;
-    	let show_if = !Object.keys(/*archivedMemes*/ ctx[16]).length;
-    	let if_block_anchor;
-    	let current;
-    	let each_value = Object.keys(/*archivedMemes*/ ctx[16]).map(/*func*/ ctx[13]).sort(func_1);
-    	validate_each_argument(each_value);
-    	let each_blocks = [];
-
-    	for (let i = 0; i < each_value.length; i += 1) {
-    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
-    	}
-
-    	const out = i => transition_out(each_blocks[i], 1, 1, () => {
-    		each_blocks[i] = null;
-    	});
-
-    	let info = {
-    		ctx,
-    		current: null,
-    		token: null,
-    		hasCatch: false,
-    		pending: create_pending_block_2,
-    		then: create_then_block_2,
-    		catch: create_catch_block_1,
-    		value: 17,
-    		blocks: [,,,]
-    	};
-
-    	handle_promise(promise = /*tomorrowMemePromise*/ ctx[6], info);
-    	let if_block = show_if && create_if_block_1(ctx);
-
-    	const block = {
-    		c: function create() {
-    			tbody = element("tbody");
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].c();
-    			}
-
-    			t0 = space();
-    			info.block.c();
-    			t1 = space();
-    			if (if_block) if_block.c();
-    			if_block_anchor = empty();
-    			add_location(tbody, file, 68, 6, 1985);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, tbody, anchor);
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				each_blocks[i].m(tbody, null);
-    			}
-
-    			append_dev(tbody, t0);
-    			info.block.m(tbody, info.anchor = null);
-    			info.mount = () => tbody;
-    			info.anchor = null;
-    			insert_dev(target, t1, anchor);
-    			if (if_block) if_block.m(target, anchor);
-    			insert_dev(target, if_block_anchor, anchor);
-    			current = true;
-    		},
-    		p: function update(new_ctx, dirty) {
-    			ctx = new_ctx;
-
-    			if (dirty & /*compoundDate, Object, archivedMemesPromise, parseInt, month, year, stringToDate, dateToString, today*/ 387) {
-    				each_value = Object.keys(/*archivedMemes*/ ctx[16]).map(/*func*/ ctx[13]).sort(func_1);
-    				validate_each_argument(each_value);
-    				let i;
-
-    				for (i = 0; i < each_value.length; i += 1) {
-    					const child_ctx = get_each_context(ctx, each_value, i);
-
-    					if (each_blocks[i]) {
-    						each_blocks[i].p(child_ctx, dirty);
-    						transition_in(each_blocks[i], 1);
-    					} else {
-    						each_blocks[i] = create_each_block(child_ctx);
-    						each_blocks[i].c();
-    						transition_in(each_blocks[i], 1);
-    						each_blocks[i].m(tbody, t0);
-    					}
-    				}
-
-    				group_outros();
-
-    				for (i = each_value.length; i < each_blocks.length; i += 1) {
-    					out(i);
-    				}
-
-    				check_outros();
-    			}
-
-    			info.ctx = ctx;
-
-    			if (dirty & /*tomorrowMemePromise*/ 64 && promise !== (promise = /*tomorrowMemePromise*/ ctx[6]) && handle_promise(promise, info)) ; else {
-    				update_await_block_branch(info, ctx, dirty);
-    			}
-
-    			if (dirty & /*archivedMemesPromise*/ 128) show_if = !Object.keys(/*archivedMemes*/ ctx[16]).length;
-
-    			if (show_if) {
-    				if (if_block) ; else {
-    					if_block = create_if_block_1(ctx);
-    					if_block.c();
-    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
-    				}
-    			} else if (if_block) {
-    				if_block.d(1);
-    				if_block = null;
-    			}
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-
-    			for (let i = 0; i < each_value.length; i += 1) {
-    				transition_in(each_blocks[i]);
-    			}
-
-    			transition_in(info.block);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			each_blocks = each_blocks.filter(Boolean);
-
-    			for (let i = 0; i < each_blocks.length; i += 1) {
-    				transition_out(each_blocks[i]);
-    			}
-
-    			for (let i = 0; i < 3; i += 1) {
-    				const block = info.blocks[i];
-    				transition_out(block);
-    			}
-
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(tbody);
-    			destroy_each(each_blocks, detaching);
-    			info.block.d();
-    			info.token = null;
-    			info = null;
-    			if (detaching) detach_dev(t1);
-    			if (if_block) if_block.d(detaching);
-    			if (detaching) detach_dev(if_block_anchor);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_then_block_1.name,
-    		type: "then",
-    		source: "(68:4) {:then archivedMemes}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (73:10) {#if compoundDate(date, month, year) <= stringToDate(dateToString(today))}
-    function create_if_block_3(ctx) {
-    	let shelf;
-    	let current;
-
-    	shelf = new Shelf({
-    			props: {
-    				date: compoundDate(/*date*/ ctx[18], /*month*/ ctx[0], /*year*/ ctx[1]),
-    				meme: /*archivedMemes*/ ctx[16][/*date*/ ctx[18]]
-    			},
-    			$$inline: true
-    		});
-
-    	const block = {
-    		c: function create() {
-    			create_component(shelf.$$.fragment);
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(shelf, target, anchor);
-    			current = true;
-    		},
-    		p: function update(ctx, dirty) {
-    			const shelf_changes = {};
-    			if (dirty & /*archivedMemesPromise, month, year*/ 131) shelf_changes.date = compoundDate(/*date*/ ctx[18], /*month*/ ctx[0], /*year*/ ctx[1]);
-    			if (dirty & /*archivedMemesPromise*/ 128) shelf_changes.meme = /*archivedMemes*/ ctx[16][/*date*/ ctx[18]];
-    			shelf.$set(shelf_changes);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(shelf.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(shelf.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(shelf, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_3.name,
-    		type: "if",
-    		source: "(73:10) {#if compoundDate(date, month, year) <= stringToDate(dateToString(today))}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (70:8) {#each Object.keys(archivedMemes)           .map(x => parseInt(x))           .sort((a, b) => a - b) as date}
-    function create_each_block(ctx) {
-    	let show_if = compoundDate(/*date*/ ctx[18], /*month*/ ctx[0], /*year*/ ctx[1]) <= stringToDate(dateToString(/*today*/ ctx[8]));
-    	let if_block_anchor;
-    	let current;
-    	let if_block = show_if && create_if_block_3(ctx);
-
-    	const block = {
-    		c: function create() {
-    			if (if_block) if_block.c();
-    			if_block_anchor = empty();
-    		},
-    		m: function mount(target, anchor) {
-    			if (if_block) if_block.m(target, anchor);
-    			insert_dev(target, if_block_anchor, anchor);
-    			current = true;
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*archivedMemesPromise, month, year*/ 131) show_if = compoundDate(/*date*/ ctx[18], /*month*/ ctx[0], /*year*/ ctx[1]) <= stringToDate(dateToString(/*today*/ ctx[8]));
-
-    			if (show_if) {
-    				if (if_block) {
-    					if_block.p(ctx, dirty);
-
-    					if (dirty & /*archivedMemesPromise, month, year*/ 131) {
-    						transition_in(if_block, 1);
-    					}
-    				} else {
-    					if_block = create_if_block_3(ctx);
-    					if_block.c();
-    					transition_in(if_block, 1);
-    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
-    				}
-    			} else if (if_block) {
-    				group_outros();
-
-    				transition_out(if_block, 1, 1, () => {
-    					if_block = null;
-    				});
-
-    				check_outros();
-    			}
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(if_block);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(if_block);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (if_block) if_block.d(detaching);
-    			if (detaching) detach_dev(if_block_anchor);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_each_block.name,
-    		type: "each",
-    		source: "(70:8) {#each Object.keys(archivedMemes)           .map(x => parseInt(x))           .sort((a, b) => a - b) as date}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate }
-    function create_catch_block_1(ctx) {
-    	const block = {
-    		c: noop,
-    		m: noop,
-    		p: noop,
-    		i: noop,
-    		o: noop,
-    		d: noop
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_catch_block_1.name,
-    		type: "catch",
-    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate }",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (82:8) {:then tomorrowMeme}
-    function create_then_block_2(ctx) {
-    	let if_block_anchor;
-    	let current;
-    	let if_block = /*tomorrowMeme*/ ctx[17] && create_if_block_2(ctx);
-
-    	const block = {
-    		c: function create() {
-    			if (if_block) if_block.c();
-    			if_block_anchor = empty();
-    		},
-    		m: function mount(target, anchor) {
-    			if (if_block) if_block.m(target, anchor);
-    			insert_dev(target, if_block_anchor, anchor);
-    			current = true;
-    		},
-    		p: function update(ctx, dirty) {
-    			if (/*tomorrowMeme*/ ctx[17]) {
-    				if (if_block) {
-    					if_block.p(ctx, dirty);
-
-    					if (dirty & /*tomorrowMemePromise*/ 64) {
-    						transition_in(if_block, 1);
-    					}
-    				} else {
-    					if_block = create_if_block_2(ctx);
-    					if_block.c();
-    					transition_in(if_block, 1);
-    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
-    				}
-    			} else if (if_block) {
-    				group_outros();
-
-    				transition_out(if_block, 1, 1, () => {
-    					if_block = null;
-    				});
-
-    				check_outros();
-    			}
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(if_block);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(if_block);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (if_block) if_block.d(detaching);
-    			if (detaching) detach_dev(if_block_anchor);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_then_block_2.name,
-    		type: "then",
-    		source: "(82:8) {:then tomorrowMeme}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (83:10) {#if tomorrowMeme}
-    function create_if_block_2(ctx) {
-    	let shelf;
-    	let current;
-
-    	shelf = new Shelf({
-    			props: {
-    				date: /*tomorrow*/ ctx[9],
-    				meme: /*tomorrowMeme*/ ctx[17],
-    				isTomorrow: true
-    			},
-    			$$inline: true
-    		});
-
-    	const block = {
-    		c: function create() {
-    			create_component(shelf.$$.fragment);
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(shelf, target, anchor);
-    			current = true;
-    		},
-    		p: function update(ctx, dirty) {
-    			const shelf_changes = {};
-    			if (dirty & /*tomorrowMemePromise*/ 64) shelf_changes.meme = /*tomorrowMeme*/ ctx[17];
-    			shelf.$set(shelf_changes);
-    		},
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(shelf.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(shelf.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(shelf, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_2.name,
-    		type: "if",
-    		source: "(83:10) {#if tomorrowMeme}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (80:36)            <Loader />         {:then tomorrowMeme}
-    function create_pending_block_2(ctx) {
-    	let loader;
-    	let current;
-    	loader = new Loader({ $$inline: true });
-
-    	const block = {
-    		c: function create() {
-    			create_component(loader.$$.fragment);
-    		},
-    		m: function mount(target, anchor) {
-    			mount_component(loader, target, anchor);
-    			current = true;
-    		},
-    		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(loader.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(loader.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			destroy_component(loader, detaching);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_pending_block_2.name,
-    		type: "pending",
-    		source: "(80:36)            <Loader />         {:then tomorrowMeme}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (88:6) {#if !Object.keys(archivedMemes).length}
-    function create_if_block_1(ctx) {
-    	let tfoot;
-
-    	const block = {
-    		c: function create() {
-    			tfoot = element("tfoot");
-    			tfoot.textContent = "No memes that month :(";
-    			add_location(tfoot, file, 88, 8, 2650);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, tfoot, anchor);
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(tfoot);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block_1.name,
-    		type: "if",
-    		source: "(88:6) {#if !Object.keys(archivedMemes).length}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (64:33)        <tfoot>         <Loader />       </tfoot>     {:then archivedMemes}
-    function create_pending_block_1(ctx) {
-    	let tfoot;
-    	let loader;
-    	let current;
-    	loader = new Loader({ $$inline: true });
-
-    	const block = {
-    		c: function create() {
-    			tfoot = element("tfoot");
-    			create_component(loader.$$.fragment);
-    			add_location(tfoot, file, 64, 6, 1911);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, tfoot, anchor);
-    			mount_component(loader, tfoot, null);
-    			current = true;
-    		},
-    		p: noop,
-    		i: function intro(local) {
-    			if (current) return;
-    			transition_in(loader.$$.fragment, local);
-    			current = true;
-    		},
-    		o: function outro(local) {
-    			transition_out(loader.$$.fragment, local);
-    			current = false;
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(tfoot);
-    			destroy_component(loader);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_pending_block_1.name,
-    		type: "pending",
-    		source: "(64:33)        <tfoot>         <Loader />       </tfoot>     {:then archivedMemes}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate }
+    // (1:0) <script lang="ts">var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }
     function create_catch_block(ctx) {
     	const block = {
     		c: noop,
@@ -17057,52 +16197,87 @@ var archive = (function () {
     		block,
     		id: create_catch_block.name,
     		type: "catch",
-    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate }",
+    		source: "(1:0) <script lang=\\\"ts\\\">var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }",
     		ctx
     	});
 
     	return block;
     }
 
-    // (101:2) {:then queriedMeme}
+    // (37:2) {:then options}
     function create_then_block(ctx) {
-    	let if_block_anchor;
+    	let select;
+    	let mounted;
+    	let dispose;
+    	let each_value = /*options*/ ctx[9];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
 
-    	function select_block_type(ctx, dirty) {
-    		if (/*queriedMeme*/ ctx[15]) return create_if_block;
-    		return create_else_block;
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
     	}
-
-    	let current_block_type = select_block_type(ctx);
-    	let if_block = current_block_type(ctx);
 
     	const block = {
     		c: function create() {
-    			if_block.c();
-    			if_block_anchor = empty();
+    			select = element("select");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			if (/*chosenDate*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[3].call(select));
+    			add_location(select, file, 37, 4, 1680);
     		},
     		m: function mount(target, anchor) {
-    			if_block.m(target, anchor);
-    			insert_dev(target, if_block_anchor, anchor);
+    			insert_dev(target, select, anchor);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(select, null);
+    			}
+
+    			select_option(select, /*chosenDate*/ ctx[0]);
+
+    			if (!mounted) {
+    				dispose = listen_dev(select, "change", /*select_change_handler*/ ctx[3]);
+    				mounted = true;
+    			}
     		},
     		p: function update(ctx, dirty) {
-    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
-    				if_block.p(ctx, dirty);
-    			} else {
-    				if_block.d(1);
-    				if_block = current_block_type(ctx);
+    			if (dirty & /*optionsPromise*/ 2) {
+    				each_value = /*options*/ ctx[9];
+    				validate_each_argument(each_value);
+    				let i;
 
-    				if (if_block) {
-    					if_block.c();
-    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(select, null);
+    					}
     				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+
+    			if (dirty & /*chosenDate, optionsPromise*/ 3) {
+    				select_option(select, /*chosenDate*/ ctx[0]);
     			}
     		},
     		i: noop,
     		o: noop,
     		d: function destroy(detaching) {
-    			if_block.d(detaching);
-    			if (detaching) detach_dev(if_block_anchor);
+    			if (detaching) detach_dev(select);
+    			destroy_each(each_blocks, detaching);
+    			mounted = false;
+    			dispose();
     		}
     	};
 
@@ -17110,82 +16285,50 @@ var archive = (function () {
     		block,
     		id: create_then_block.name,
     		type: "then",
-    		source: "(101:2) {:then queriedMeme}",
+    		source: "(37:2) {:then options}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (108:4) {:else}
-    function create_else_block(ctx) {
-    	let p;
+    // (39:6) {#each options as option}
+    function create_each_block(ctx) {
+    	let option;
+    	let t_value = /*option*/ ctx[10].text + "";
+    	let t;
 
     	const block = {
     		c: function create() {
-    			p = element("p");
-    			p.textContent = "No memes that day :(";
-    			attr_dev(p, "class", "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto text-center");
-    			add_location(p, file, 108, 6, 3105);
+    			option = element("option");
+    			t = text(t_value);
+    			option.__value = /*option*/ ctx[10].value;
+    			option.value = option.__value;
+    			option.disabled = !/*option*/ ctx[10].availabe;
+    			add_location(option, file, 39, 8, 1753);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, p, anchor);
+    			insert_dev(target, option, anchor);
+    			append_dev(option, t);
     		},
     		p: noop,
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(p);
+    			if (detaching) detach_dev(option);
     		}
     	};
 
     	dispatch_dev("SvelteRegisterBlock", {
     		block,
-    		id: create_else_block.name,
-    		type: "else",
-    		source: "(108:4) {:else}",
+    		id: create_each_block.name,
+    		type: "each",
+    		source: "(39:6) {#each options as option}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (102:4) {#if queriedMeme}
-    function create_if_block(ctx) {
-    	let img;
-    	let img_src_value;
-
-    	const block = {
-    		c: function create() {
-    			img = element("img");
-    			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
-    			if (!src_url_equal(img.src, img_src_value = `memes/${/*queriedMeme*/ ctx[15].url}`)) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "alt", "Meme");
-    			add_location(img, file, 102, 6, 2964);
-    		},
-    		m: function mount(target, anchor) {
-    			insert_dev(target, img, anchor);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*queriedMemePromise*/ 32 && !src_url_equal(img.src, img_src_value = `memes/${/*queriedMeme*/ ctx[15].url}`)) {
-    				attr_dev(img, "src", img_src_value);
-    			}
-    		},
-    		d: function destroy(detaching) {
-    			if (detaching) detach_dev(img);
-    		}
-    	};
-
-    	dispatch_dev("SvelteRegisterBlock", {
-    		block,
-    		id: create_if_block.name,
-    		type: "if",
-    		source: "(102:4) {#if queriedMeme}",
-    		ctx
-    	});
-
-    	return block;
-    }
-
-    // (99:29)      <Loader />   {:then queriedMeme}
+    // (35:27)      <Loader />   {:then options}
     function create_pending_block(ctx) {
     	let loader;
     	let current;
@@ -17218,7 +16361,7 @@ var archive = (function () {
     		block,
     		id: create_pending_block.name,
     		type: "pending",
-    		source: "(99:29)      <Loader />   {:then queriedMeme}",
+    		source: "(35:27)      <Loader />   {:then options}",
     		ctx
     	});
 
@@ -17229,57 +16372,11 @@ var archive = (function () {
     	let header;
     	let t0;
     	let main;
-    	let h20;
+    	let h2;
     	let t2;
-    	let div4;
-    	let div1;
-    	let div0;
-    	let span0;
-    	let div0_disabled_value;
-    	let t4;
-    	let p0;
-    	let t5_value = `${/*month*/ ctx[0]}`.padStart(2, "0") + "";
-    	let t5;
-    	let t6;
-    	let t7;
-    	let t8;
-    	let div3;
-    	let div2;
-    	let span1;
-    	let div2_disabled_value;
-    	let t10;
-    	let table;
-    	let thead;
-    	let tr;
-    	let th0;
-    	let t12;
-    	let th1;
-    	let t14;
-    	let promise;
-    	let t15;
-    	let hr0;
-    	let t16;
-    	let section0;
-    	let h21;
-    	let t18;
-    	let input;
-    	let t19;
-    	let p1;
-    	let t21;
-    	let promise_1;
-    	let t22;
-    	let hr1;
-    	let t23;
-    	let section1;
-    	let h22;
-    	let t25;
-    	let p2;
-    	let a;
-    	let t27;
+    	let t3;
     	let footer;
     	let current;
-    	let mounted;
-    	let dispose;
     	header = new Header({ $$inline: true });
 
     	let info = {
@@ -17287,132 +16384,29 @@ var archive = (function () {
     		current: null,
     		token: null,
     		hasCatch: false,
-    		pending: create_pending_block_1,
-    		then: create_then_block_1,
-    		catch: create_catch_block_2,
-    		value: 16,
-    		blocks: [,,,]
-    	};
-
-    	handle_promise(promise = /*archivedMemesPromise*/ ctx[7], info);
-
-    	let info_1 = {
-    		ctx,
-    		current: null,
-    		token: null,
-    		hasCatch: false,
     		pending: create_pending_block,
     		then: create_then_block,
     		catch: create_catch_block,
-    		value: 15,
+    		value: 9,
     		blocks: [,,,]
     	};
 
-    	handle_promise(promise_1 = /*queriedMemePromise*/ ctx[5], info_1);
+    	handle_promise(/*optionsPromise*/ ctx[1](), info);
 
     	const block = {
     		c: function create() {
     			create_component(header.$$.fragment);
     			t0 = space();
     			main = element("main");
-    			h20 = element("h2");
-    			h20.textContent = "Meme Archive";
+    			h2 = element("h2");
+    			h2.textContent = "Schedule a Meme";
     			t2 = space();
-    			div4 = element("div");
-    			div1 = element("div");
-    			div0 = element("div");
-    			span0 = element("span");
-    			span0.textContent = "<";
-    			t4 = space();
-    			p0 = element("p");
-    			t5 = text(t5_value);
-    			t6 = text("/");
-    			t7 = text(/*year*/ ctx[1]);
-    			t8 = space();
-    			div3 = element("div");
-    			div2 = element("div");
-    			span1 = element("span");
-    			span1.textContent = ">";
-    			t10 = space();
-    			table = element("table");
-    			thead = element("thead");
-    			tr = element("tr");
-    			th0 = element("th");
-    			th0.textContent = "Date";
-    			t12 = space();
-    			th1 = element("th");
-    			th1.textContent = "Meme";
-    			t14 = space();
     			info.block.c();
-    			t15 = space();
-    			hr0 = element("hr");
-    			t16 = space();
-    			section0 = element("section");
-    			h21 = element("h2");
-    			h21.textContent = "Specify a Date";
-    			t18 = space();
-    			input = element("input");
-    			t19 = space();
-    			p1 = element("p");
-    			p1.textContent = "DVS-style dates accepted";
-    			t21 = space();
-    			info_1.block.c();
-    			t22 = space();
-    			hr1 = element("hr");
-    			t23 = space();
-    			section1 = element("section");
-    			h22 = element("h2");
-    			h22.textContent = "Schedule a Meme";
-    			t25 = space();
-    			p2 = element("p");
-    			a = element("a");
-    			a.textContent = "Schedule a Meme";
-    			t27 = space();
+    			t3 = space();
     			footer = element("footer");
-    			add_location(h20, file, 32, 2, 1045);
-    			attr_dev(span0, "class", "-mt-1.5");
-    			add_location(span0, file, 40, 8, 1278);
-    			attr_dev(div0, "class", "flex-1 btn");
-    			attr_dev(div0, "disabled", div0_disabled_value = !/*backwardsEnabled*/ ctx[4]);
-    			add_location(div0, file, 35, 6, 1140);
-    			attr_dev(div1, "class", "w-1/4");
-    			add_location(div1, file, 34, 4, 1114);
-    			attr_dev(p0, "class", "flex-1 my-2 text-lg text-center");
-    			add_location(p0, file, 43, 4, 1340);
-    			attr_dev(span1, "class", "-mt-1.5");
-    			add_location(span1, file, 52, 8, 1602);
-    			attr_dev(div2, "class", "flex-1 btn");
-    			attr_dev(div2, "disabled", div2_disabled_value = !/*forwardsEnabled*/ ctx[3]);
-    			add_location(div2, file, 47, 6, 1466);
-    			attr_dev(div3, "class", "w-1/4");
-    			add_location(div3, file, 46, 4, 1440);
-    			attr_dev(div4, "class", "flex sm:w-1/4 mx-auto my-4");
-    			add_location(div4, file, 33, 2, 1069);
-    			attr_dev(th0, "class", "border-2");
-    			add_location(th0, file, 59, 8, 1776);
-    			attr_dev(th1, "class", "border-2");
-    			add_location(th1, file, 60, 8, 1815);
-    			add_location(tr, file, 58, 6, 1763);
-    			add_location(thead, file, 57, 4, 1749);
-    			attr_dev(table, "class", "table-auto w-full max-w-4xl mx-auto border-white border-2");
-    			add_location(table, file, 56, 2, 1671);
-    			add_location(main, file, 31, 0, 1036);
-    			add_location(hr0, file, 93, 0, 2732);
-    			add_location(h21, file, 95, 2, 2751);
-    			attr_dev(input, "type", "text");
-    			add_location(input, file, 96, 2, 2777);
-    			attr_dev(p1, "class", "my-4");
-    			add_location(p1, file, 97, 2, 2824);
-    			add_location(section0, file, 94, 0, 2739);
-    			add_location(hr1, file, 114, 0, 3243);
-    			add_location(h22, file, 116, 2, 3262);
-    			attr_dev(a, "class", "hover:underline");
-    			attr_dev(a, "href", "schedule.html");
-    			add_location(a, file, 118, 4, 3314);
-    			attr_dev(p2, "class", "epilogue");
-    			add_location(p2, file, 117, 2, 3289);
-    			add_location(section1, file, 115, 0, 3250);
-    			add_location(footer, file, 121, 0, 3400);
+    			add_location(h2, file, 33, 2, 1590);
+    			add_location(main, file, 32, 0, 1581);
+    			add_location(footer, file, 46, 0, 1900);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -17421,103 +16415,23 @@ var archive = (function () {
     			mount_component(header, target, anchor);
     			insert_dev(target, t0, anchor);
     			insert_dev(target, main, anchor);
-    			append_dev(main, h20);
+    			append_dev(main, h2);
     			append_dev(main, t2);
-    			append_dev(main, div4);
-    			append_dev(div4, div1);
-    			append_dev(div1, div0);
-    			append_dev(div0, span0);
-    			append_dev(div4, t4);
-    			append_dev(div4, p0);
-    			append_dev(p0, t5);
-    			append_dev(p0, t6);
-    			append_dev(p0, t7);
-    			append_dev(div4, t8);
-    			append_dev(div4, div3);
-    			append_dev(div3, div2);
-    			append_dev(div2, span1);
-    			append_dev(main, t10);
-    			append_dev(main, table);
-    			append_dev(table, thead);
-    			append_dev(thead, tr);
-    			append_dev(tr, th0);
-    			append_dev(tr, t12);
-    			append_dev(tr, th1);
-    			append_dev(table, t14);
-    			info.block.m(table, info.anchor = null);
-    			info.mount = () => table;
+    			info.block.m(main, info.anchor = null);
+    			info.mount = () => main;
     			info.anchor = null;
-    			insert_dev(target, t15, anchor);
-    			insert_dev(target, hr0, anchor);
-    			insert_dev(target, t16, anchor);
-    			insert_dev(target, section0, anchor);
-    			append_dev(section0, h21);
-    			append_dev(section0, t18);
-    			append_dev(section0, input);
-    			set_input_value(input, /*dateQuery*/ ctx[2]);
-    			append_dev(section0, t19);
-    			append_dev(section0, p1);
-    			append_dev(section0, t21);
-    			info_1.block.m(section0, info_1.anchor = null);
-    			info_1.mount = () => section0;
-    			info_1.anchor = null;
-    			insert_dev(target, t22, anchor);
-    			insert_dev(target, hr1, anchor);
-    			insert_dev(target, t23, anchor);
-    			insert_dev(target, section1, anchor);
-    			append_dev(section1, h22);
-    			append_dev(section1, t25);
-    			append_dev(section1, p2);
-    			append_dev(p2, a);
-    			insert_dev(target, t27, anchor);
+    			insert_dev(target, t3, anchor);
     			insert_dev(target, footer, anchor);
     			current = true;
-
-    			if (!mounted) {
-    				dispose = [
-    					listen_dev(div0, "click", /*click_handler*/ ctx[11], false, false, false),
-    					listen_dev(div2, "click", /*click_handler_1*/ ctx[12], false, false, false),
-    					listen_dev(input, "input", /*input_input_handler*/ ctx[14])
-    				];
-
-    				mounted = true;
-    			}
     		},
     		p: function update(new_ctx, [dirty]) {
     			ctx = new_ctx;
-
-    			if (!current || dirty & /*backwardsEnabled*/ 16 && div0_disabled_value !== (div0_disabled_value = !/*backwardsEnabled*/ ctx[4])) {
-    				attr_dev(div0, "disabled", div0_disabled_value);
-    			}
-
-    			if ((!current || dirty & /*month*/ 1) && t5_value !== (t5_value = `${/*month*/ ctx[0]}`.padStart(2, "0") + "")) set_data_dev(t5, t5_value);
-    			if (!current || dirty & /*year*/ 2) set_data_dev(t7, /*year*/ ctx[1]);
-
-    			if (!current || dirty & /*forwardsEnabled*/ 8 && div2_disabled_value !== (div2_disabled_value = !/*forwardsEnabled*/ ctx[3])) {
-    				attr_dev(div2, "disabled", div2_disabled_value);
-    			}
-
-    			info.ctx = ctx;
-
-    			if (dirty & /*archivedMemesPromise*/ 128 && promise !== (promise = /*archivedMemesPromise*/ ctx[7]) && handle_promise(promise, info)) ; else {
-    				update_await_block_branch(info, ctx, dirty);
-    			}
-
-    			if (dirty & /*dateQuery*/ 4 && input.value !== /*dateQuery*/ ctx[2]) {
-    				set_input_value(input, /*dateQuery*/ ctx[2]);
-    			}
-
-    			info_1.ctx = ctx;
-
-    			if (dirty & /*queriedMemePromise*/ 32 && promise_1 !== (promise_1 = /*queriedMemePromise*/ ctx[5]) && handle_promise(promise_1, info_1)) ; else {
-    				update_await_block_branch(info_1, ctx, dirty);
-    			}
+    			update_await_block_branch(info, ctx, dirty);
     		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(header.$$.fragment, local);
     			transition_in(info.block);
-    			transition_in(info_1.block);
     			current = true;
     		},
     		o: function outro(local) {
@@ -17525,11 +16439,6 @@ var archive = (function () {
 
     			for (let i = 0; i < 3; i += 1) {
     				const block = info.blocks[i];
-    				transition_out(block);
-    			}
-
-    			for (let i = 0; i < 3; i += 1) {
-    				const block = info_1.blocks[i];
     				transition_out(block);
     			}
 
@@ -17542,21 +16451,8 @@ var archive = (function () {
     			info.block.d();
     			info.token = null;
     			info = null;
-    			if (detaching) detach_dev(t15);
-    			if (detaching) detach_dev(hr0);
-    			if (detaching) detach_dev(t16);
-    			if (detaching) detach_dev(section0);
-    			info_1.block.d();
-    			info_1.token = null;
-    			info_1 = null;
-    			if (detaching) detach_dev(t22);
-    			if (detaching) detach_dev(hr1);
-    			if (detaching) detach_dev(t23);
-    			if (detaching) detach_dev(section1);
-    			if (detaching) detach_dev(t27);
+    			if (detaching) detach_dev(t3);
     			if (detaching) detach_dev(footer);
-    			mounted = false;
-    			run_all(dispose);
     		}
     	};
 
@@ -17571,141 +16467,120 @@ var archive = (function () {
     	return block;
     }
 
-    const func_1 = (a, b) => a - b;
-
     function instance($$self, $$props, $$invalidate) {
-    	let archivedMemesPromise;
-    	let tomorrowMemePromise;
-    	let queriedMemePromise;
     	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Archive', slots, []);
+    	validate_slots('Schedule', slots, []);
+
+    	var __awaiter = this && this.__awaiter || function (thisArg, _arguments, P, generator) {
+    		function adopt(value) {
+    			return value instanceof P
+    			? value
+    			: new P(function (resolve) {
+    						resolve(value);
+    					});
+    		}
+
+    		return new (P || (P = Promise))(function (resolve, reject) {
+    				function fulfilled(value) {
+    					try {
+    						step(generator.next(value));
+    					} catch(e) {
+    						reject(e);
+    					}
+    				}
+
+    				function rejected(value) {
+    					try {
+    						step(generator["throw"](value));
+    					} catch(e) {
+    						reject(e);
+    					}
+    				}
+
+    				function step(result) {
+    					result.done
+    					? resolve(result.value)
+    					: adopt(result.value).then(fulfilled, rejected);
+    				}
+
+    				step((generator = generator.apply(thisArg, _arguments || [])).next());
+    			});
+    	};
+
     	let { db } = $$props;
     	const today = new Date();
-    	const tomorrow = new Date(Number(today) + 24 * Math.pow(60, 2) * Math.pow(10, 3));
-    	let month = today.getMonth() + 1;
-    	let year = today.getFullYear();
-    	let dateQuery = dateToString(today);
-    	let forwardsEnabled = true;
-    	let backwardsEnabled = true;
-    	const writable_props = ['db'];
+    	const [currentDate, currentMonth, currentYear] = separateDate(today);
+    	let chosenDate = null;
 
-    	Object_1.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Archive> was created with unknown prop '${key}'`);
+    	const optionsPromise = () => __awaiter(void 0, void 0, void 0, function* () {
+    		const options = yield Promise.all(new Array(7).fill(0).map((x, i) => __awaiter(void 0, void 0, void 0, function* () {
+    			const date = compoundDate(14 + currentDate + i, currentMonth, currentYear);
+
+    			return {
+    				value: dateToString(date),
+    				text: dateToString(date),
+    				availabe: !(yield getMemeOtd(date, db))
+    			};
+    		})));
+
+    		$$invalidate(0, chosenDate = options.filter(option => option.availabe)[0].value);
+    		return options;
     	});
 
-    	const click_handler = () => backwardsEnabled && $$invalidate(0, month--, month);
-    	const click_handler_1 = () => forwardsEnabled && $$invalidate(0, month++, month);
-    	const func = x => parseInt(x);
+    	const writable_props = ['db'];
 
-    	function input_input_handler() {
-    		dateQuery = this.value;
-    		$$invalidate(2, dateQuery);
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Schedule> was created with unknown prop '${key}'`);
+    	});
+
+    	function select_change_handler() {
+    		chosenDate = select_value(this);
+    		$$invalidate(0, chosenDate);
+    		$$invalidate(1, optionsPromise);
     	}
 
     	$$self.$$set = $$props => {
-    		if ('db' in $$props) $$invalidate(10, db = $$props.db);
+    		if ('db' in $$props) $$invalidate(2, db = $$props.db);
     	};
 
     	$$self.$capture_state = () => ({
+    		__awaiter,
     		compoundDate,
     		dateToString,
-    		stringToDate,
-    		firstMonth,
+    		separateDate,
     		getMemeOtd,
-    		getMemesOfMonth,
     		Header,
     		Loader,
-    		Shelf,
     		db,
     		today,
-    		tomorrow,
-    		month,
-    		year,
-    		dateQuery,
-    		forwardsEnabled,
-    		backwardsEnabled,
-    		queriedMemePromise,
-    		tomorrowMemePromise,
-    		archivedMemesPromise
+    		currentDate,
+    		currentMonth,
+    		currentYear,
+    		chosenDate,
+    		optionsPromise
     	});
 
     	$$self.$inject_state = $$props => {
-    		if ('db' in $$props) $$invalidate(10, db = $$props.db);
-    		if ('month' in $$props) $$invalidate(0, month = $$props.month);
-    		if ('year' in $$props) $$invalidate(1, year = $$props.year);
-    		if ('dateQuery' in $$props) $$invalidate(2, dateQuery = $$props.dateQuery);
-    		if ('forwardsEnabled' in $$props) $$invalidate(3, forwardsEnabled = $$props.forwardsEnabled);
-    		if ('backwardsEnabled' in $$props) $$invalidate(4, backwardsEnabled = $$props.backwardsEnabled);
-    		if ('queriedMemePromise' in $$props) $$invalidate(5, queriedMemePromise = $$props.queriedMemePromise);
-    		if ('tomorrowMemePromise' in $$props) $$invalidate(6, tomorrowMemePromise = $$props.tomorrowMemePromise);
-    		if ('archivedMemesPromise' in $$props) $$invalidate(7, archivedMemesPromise = $$props.archivedMemesPromise);
+    		if ('__awaiter' in $$props) __awaiter = $$props.__awaiter;
+    		if ('db' in $$props) $$invalidate(2, db = $$props.db);
+    		if ('chosenDate' in $$props) $$invalidate(0, chosenDate = $$props.chosenDate);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*month, year*/ 3) {
-    			{
-    				if (month < 1) {
-    					$$invalidate(0, month = 12);
-    					$$invalidate(1, year--, year);
-    				} else if (month > 12) {
-    					$$invalidate(0, month = 1);
-    					$$invalidate(1, year++, year);
-    				}
-    			}
-    		}
-
-    		if ($$self.$$.dirty & /*month, year*/ 3) {
-    			$$invalidate(3, forwardsEnabled = !(today.getMonth() + 1 === month && today.getFullYear() === year));
-    		}
-
-    		if ($$self.$$.dirty & /*month, year*/ 3) {
-    			$$invalidate(4, backwardsEnabled = firstMonth < compoundDate(1, month, year));
-    		}
-
-    		if ($$self.$$.dirty & /*year, month, db*/ 1027) {
-    			$$invalidate(7, archivedMemesPromise = getMemesOfMonth(year, month, db));
-    		}
-
-    		if ($$self.$$.dirty & /*db*/ 1024) {
-    			$$invalidate(6, tomorrowMemePromise = getMemeOtd(tomorrow, db));
-    		}
-
-    		if ($$self.$$.dirty & /*dateQuery, db*/ 1028) {
-    			$$invalidate(5, queriedMemePromise = getMemeOtd(stringToDate(dateQuery), db));
-    		}
-    	};
-
-    	return [
-    		month,
-    		year,
-    		dateQuery,
-    		forwardsEnabled,
-    		backwardsEnabled,
-    		queriedMemePromise,
-    		tomorrowMemePromise,
-    		archivedMemesPromise,
-    		today,
-    		tomorrow,
-    		db,
-    		click_handler,
-    		click_handler_1,
-    		func,
-    		input_input_handler
-    	];
+    	return [chosenDate, optionsPromise, db, select_change_handler];
     }
 
-    class Archive extends SvelteComponentDev {
+    class Schedule extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance, create_fragment, safe_not_equal, { db: 10 });
+    		init(this, options, instance, create_fragment, safe_not_equal, { db: 2 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
-    			tagName: "Archive",
+    			tagName: "Schedule",
     			options,
     			id: create_fragment.name
     		});
@@ -17713,28 +16588,28 @@ var archive = (function () {
     		const { ctx } = this.$$;
     		const props = options.props || {};
 
-    		if (/*db*/ ctx[10] === undefined && !('db' in props)) {
-    			console.warn("<Archive> was created without expected prop 'db'");
+    		if (/*db*/ ctx[2] === undefined && !('db' in props)) {
+    			console.warn("<Schedule> was created without expected prop 'db'");
     		}
     	}
 
     	get db() {
-    		throw new Error("<Archive>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    		throw new Error("<Schedule>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
 
     	set db(value) {
-    		throw new Error("<Archive>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    		throw new Error("<Schedule>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
 
-    const archive = new Archive({
+    const schedule = new Schedule({
         target: document.body,
         props: {
             db,
         },
     });
 
-    return archive;
+    return schedule;
 
 })();
-//# sourceMappingURL=archive.js.map
+//# sourceMappingURL=schedule.js.map

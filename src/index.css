@@ -30,7 +30,7 @@ footer {
   @apply mb-4;
 }
 
-input[type="text"] {
+input[type="text"], select {
   @apply bg-bg border-white border px-2 py-1;
 }
 
