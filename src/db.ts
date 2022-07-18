@@ -1,4 +1,3 @@
-import type { Firestore } from "firebase/firestore";
 import { doc, getDoc } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import {
@@ -6,16 +5,10 @@ import {
   dateToString,
   separateDate,
 } from "../functions/src/date";
+import type { Db, Meme, MemeRequest } from "../functions/src/types";
 import { functions } from "./common";
 
-export interface Meme {
-  url: string;
-  author: string;
-  found: boolean;
-}
 type MemesOfMonth = Record<number | string, Meme>;
-export type Db = Firestore;
-
 const cache: Record<number, Record<number, MemesOfMonth>> = {};
 const queue = new Set<string>();
 
@@ -106,16 +99,16 @@ export const getMemeOtd = async (d: Date, db: Db, n = 0): Promise<Meme> => {
 
 async function callCloudFunction<T>(
   func: "submitMeme",
-  data: { date: string; meme: Meme },
+  data: { date: string; meme: MemeRequest },
 ): Promise<T>;
 async function callCloudFunction(func: string, data: unknown) {
   return httpsCallable(functions, func)(data);
 }
 
-export const submitMeme = async (date: Date, meme: Meme) => {
-    const response = await callCloudFunction("submitMeme", {
-      date: dateToString(date),
-      meme,
-    });
-    return response;
+export const submitMeme = async (date: Date, meme: MemeRequest) => {
+  const response = await callCloudFunction("submitMeme", {
+    date: dateToString(date),
+    meme,
+  });
+  return response;
 };

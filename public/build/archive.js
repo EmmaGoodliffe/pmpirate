@@ -16774,7 +16774,7 @@ var archive = (function () {
     	return child_ctx;
     }
 
-    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate }
+    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate, }
     function create_catch_block_2(ctx) {
     	const block = {
     		c: noop,
@@ -16789,7 +16789,7 @@ var archive = (function () {
     		block,
     		id: create_catch_block_2.name,
     		type: "catch",
-    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate }",
+    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate, }",
     		ctx
     	});
 
@@ -16845,7 +16845,7 @@ var archive = (function () {
     			t1 = space();
     			if (if_block) if_block.c();
     			if_block_anchor = empty();
-    			add_location(tbody, file, 68, 6, 2080);
+    			add_location(tbody, file, 68, 6, 2081);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tbody, anchor);
@@ -17081,7 +17081,7 @@ var archive = (function () {
     	return block;
     }
 
-    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate }
+    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate, }
     function create_catch_block_1(ctx) {
     	const block = {
     		c: noop,
@@ -17096,7 +17096,7 @@ var archive = (function () {
     		block,
     		id: create_catch_block_1.name,
     		type: "catch",
-    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate }",
+    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate, }",
     		ctx
     	});
 
@@ -17269,7 +17269,7 @@ var archive = (function () {
     		c: function create() {
     			tfoot = element("tfoot");
     			tfoot.textContent = "No memes that month :(";
-    			add_location(tfoot, file, 88, 8, 2745);
+    			add_location(tfoot, file, 88, 8, 2746);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tfoot, anchor);
@@ -17301,7 +17301,7 @@ var archive = (function () {
     		c: function create() {
     			tfoot = element("tfoot");
     			create_component(loader.$$.fragment);
-    			add_location(tfoot, file, 64, 6, 2006);
+    			add_location(tfoot, file, 64, 6, 2007);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tfoot, anchor);
@@ -17335,7 +17335,7 @@ var archive = (function () {
     	return block;
     }
 
-    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate }
+    // (1:0) <script lang="ts">import { compoundDate, dateToString, stringToDate, }
     function create_catch_block(ctx) {
     	const block = {
     		c: noop,
@@ -17350,7 +17350,7 @@ var archive = (function () {
     		block,
     		id: create_catch_block.name,
     		type: "catch",
-    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate }",
+    		source: "(1:0) <script lang=\\\"ts\\\">import { compoundDate, dateToString, stringToDate, }",
     		ctx
     	});
 
@@ -17419,7 +17419,7 @@ var archive = (function () {
     			p = element("p");
     			p.textContent = "No memes that day :(";
     			attr_dev(p, "class", "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto text-center");
-    			add_location(p, file, 108, 6, 3200);
+    			add_location(p, file, 108, 6, 3201);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -17452,7 +17452,7 @@ var archive = (function () {
     			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
     			if (!src_url_equal(img.src, img_src_value = `memes/${/*queriedMeme*/ ctx[15].url}`)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file, 102, 6, 3059);
+    			add_location(img, file, 102, 6, 3060);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
@@ -17662,50 +17662,50 @@ var archive = (function () {
     			a.textContent = "Schedule a Meme";
     			t27 = space();
     			footer = element("footer");
-    			add_location(h20, file, 32, 2, 1062);
+    			add_location(h20, file, 32, 2, 1063);
     			attr_dev(span0, "class", "-mt-1.5");
-    			add_location(span0, file, 40, 8, 1334);
+    			add_location(span0, file, 40, 8, 1335);
     			attr_dev(div0, "class", "flex-1 btn max-w-[5rem] h-full font-mono text-3xl");
     			attr_dev(div0, "disabled", div0_disabled_value = !/*backwardsEnabled*/ ctx[4]);
-    			add_location(div0, file, 35, 6, 1157);
+    			add_location(div0, file, 35, 6, 1158);
     			attr_dev(div1, "class", "w-1/4");
-    			add_location(div1, file, 34, 4, 1131);
+    			add_location(div1, file, 34, 4, 1132);
     			attr_dev(p0, "class", "flex-1 my-2 text-lg text-center");
-    			add_location(p0, file, 43, 4, 1396);
+    			add_location(p0, file, 43, 4, 1397);
     			attr_dev(span1, "class", "-mt-1.5");
-    			add_location(span1, file, 52, 8, 1697);
+    			add_location(span1, file, 52, 8, 1698);
     			attr_dev(div2, "class", "flex-1 btn max-w-[5rem] h-full font-mono text-3xl");
     			attr_dev(div2, "disabled", div2_disabled_value = !/*forwardsEnabled*/ ctx[3]);
-    			add_location(div2, file, 47, 6, 1522);
+    			add_location(div2, file, 47, 6, 1523);
     			attr_dev(div3, "class", "w-1/4");
-    			add_location(div3, file, 46, 4, 1496);
+    			add_location(div3, file, 46, 4, 1497);
     			attr_dev(div4, "class", "flex sm:w-1/4 mx-auto my-4");
-    			add_location(div4, file, 33, 2, 1086);
+    			add_location(div4, file, 33, 2, 1087);
     			attr_dev(th0, "class", "border-2");
-    			add_location(th0, file, 59, 8, 1871);
+    			add_location(th0, file, 59, 8, 1872);
     			attr_dev(th1, "class", "border-2");
-    			add_location(th1, file, 60, 8, 1910);
-    			add_location(tr, file, 58, 6, 1858);
-    			add_location(thead, file, 57, 4, 1844);
+    			add_location(th1, file, 60, 8, 1911);
+    			add_location(tr, file, 58, 6, 1859);
+    			add_location(thead, file, 57, 4, 1845);
     			attr_dev(table, "class", "table-auto w-full max-w-4xl mx-auto border-white border-2");
-    			add_location(table, file, 56, 2, 1766);
-    			add_location(main, file, 31, 0, 1053);
-    			add_location(hr0, file, 93, 0, 2827);
-    			add_location(h21, file, 95, 2, 2846);
+    			add_location(table, file, 56, 2, 1767);
+    			add_location(main, file, 31, 0, 1054);
+    			add_location(hr0, file, 93, 0, 2828);
+    			add_location(h21, file, 95, 2, 2847);
     			attr_dev(input, "type", "text");
-    			add_location(input, file, 96, 2, 2872);
+    			add_location(input, file, 96, 2, 2873);
     			attr_dev(p1, "class", "my-4");
-    			add_location(p1, file, 97, 2, 2919);
-    			add_location(section0, file, 94, 0, 2834);
-    			add_location(hr1, file, 114, 0, 3338);
-    			add_location(h22, file, 116, 2, 3357);
+    			add_location(p1, file, 97, 2, 2920);
+    			add_location(section0, file, 94, 0, 2835);
+    			add_location(hr1, file, 114, 0, 3339);
+    			add_location(h22, file, 116, 2, 3358);
     			attr_dev(a, "class", "hover:underline");
     			attr_dev(a, "href", "schedule.html");
-    			add_location(a, file, 118, 4, 3409);
+    			add_location(a, file, 118, 4, 3410);
     			attr_dev(p2, "class", "epilogue");
-    			add_location(p2, file, 117, 2, 3384);
-    			add_location(section1, file, 115, 0, 3345);
-    			add_location(footer, file, 121, 0, 3495);
+    			add_location(p2, file, 117, 2, 3385);
+    			add_location(section1, file, 115, 0, 3346);
+    			add_location(footer, file, 121, 0, 3496);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");

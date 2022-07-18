@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Db, getMemeOtd } from "../db";
+  import type { Db } from "../../functions/src/types";
+  import { getMemeOtd } from "../db";
   import Doc from "./Doc.svelte";
   import Header from "./Header.svelte";
   import Loader from "./Loader.svelte";

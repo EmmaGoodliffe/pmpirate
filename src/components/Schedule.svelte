@@ -5,7 +5,8 @@
     separateDate,
     stringToDate,
   } from "../../functions/src/date";
-  import { Db, getMemeOtd, submitMeme } from "../db";
+  import type { Db } from "../../functions/src/types";
+  import { getMemeOtd, submitMeme } from "../db";
   import Header from "./Header.svelte";
   import Loader from "./Loader.svelte";
 
@@ -52,9 +53,7 @@
 
   const schedule = (e: Event) => {
     e.preventDefault();
-    const author = email.split("@spgs.org")[0];
-    // submitMeme(chosenDate, { url, author, found });
-    submitMeme(chosenDate, { url, author, found })
+    submitMeme(chosenDate, { email, url, found })
       .then(response => {
         // TODO: Show success
         console.log({ response });

@@ -16966,7 +16966,7 @@ var schedule = (function () {
     	return block;
     }
 
-    // (69:2) {:then options}
+    // (67:2) {:then options}
     function create_then_block(ctx) {
     	let form;
     	let select;
@@ -17015,23 +17015,23 @@ var schedule = (function () {
     			button.textContent = "Schedule";
     			attr_dev(select, "class", "font-mono");
     			if (/*chosenDate*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[7].call(select));
-    			add_location(select, file, 70, 6, 2861);
+    			add_location(select, file, 68, 6, 2757);
     			attr_dev(input0, "type", "text");
     			attr_dev(input0, "placeholder", "URL");
-    			add_location(input0, file, 77, 6, 3099);
+    			add_location(input0, file, 75, 6, 2995);
     			attr_dev(input1, "type", "email");
     			attr_dev(input1, "placeholder", "Email");
-    			add_location(input1, file, 78, 6, 3162);
+    			add_location(input1, file, 76, 6, 3058);
     			attr_dev(label, "for", "found-box");
-    			add_location(label, file, 80, 8, 3244);
+    			add_location(label, file, 78, 8, 3140);
     			attr_dev(input2, "type", "checkbox");
     			attr_dev(input2, "id", "found-box");
-    			add_location(input2, file, 81, 8, 3290);
-    			add_location(div, file, 79, 6, 3230);
+    			add_location(input2, file, 79, 8, 3186);
+    			add_location(div, file, 77, 6, 3126);
     			attr_dev(button, "class", "btn px-4 py-2");
-    			add_location(button, file, 83, 6, 3369);
+    			add_location(button, file, 81, 6, 3265);
     			attr_dev(form, "class", "flex flex-col justify-between max-w-sm h-60");
-    			add_location(form, file, 69, 4, 2796);
+    			add_location(form, file, 67, 4, 2692);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, form, anchor);
@@ -17124,14 +17124,14 @@ var schedule = (function () {
     		block,
     		id: create_then_block.name,
     		type: "then",
-    		source: "(69:2) {:then options}",
+    		source: "(67:2) {:then options}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (72:8) {#each options as option}
+    // (70:8) {#each options as option}
     function create_each_block(ctx) {
     	let option;
     	let t_value = /*option*/ ctx[17].text + "";
@@ -17144,7 +17144,7 @@ var schedule = (function () {
     			option.__value = /*option*/ ctx[17].value;
     			option.value = option.__value;
     			option.disabled = !/*option*/ ctx[17].available;
-    			add_location(option, file, 72, 10, 2956);
+    			add_location(option, file, 70, 10, 2852);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -17160,14 +17160,14 @@ var schedule = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(72:8) {#each options as option}",
+    		source: "(70:8) {#each options as option}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (67:27)      <Loader />   {:then options}
+    // (65:27)      <Loader />   {:then options}
     function create_pending_block(ctx) {
     	let loader;
     	let current;
@@ -17200,7 +17200,7 @@ var schedule = (function () {
     		block,
     		id: create_pending_block.name,
     		type: "pending",
-    		source: "(67:27)      <Loader />   {:then options}",
+    		source: "(65:27)      <Loader />   {:then options}",
     		ctx
     	});
 
@@ -17243,9 +17243,9 @@ var schedule = (function () {
     			info.block.c();
     			t3 = space();
     			footer = element("footer");
-    			add_location(h2, file, 65, 2, 2706);
-    			add_location(main, file, 64, 0, 2697);
-    			add_location(footer, file, 87, 0, 3468);
+    			add_location(h2, file, 63, 2, 2602);
+    			add_location(main, file, 62, 0, 2593);
+    			add_location(footer, file, 85, 0, 3364);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -17389,10 +17389,8 @@ var schedule = (function () {
 
     	const schedule = e => {
     		e.preventDefault();
-    		const author = email.split("@spgs.org")[0];
 
-    		// submitMeme(chosenDate, { url, author, found });
-    		submitMeme(chosenDate, { url, author, found }).then(response => {
+    		submitMeme(chosenDate, { email, url, found }).then(response => {
     			// TODO: Show success
     			console.log({ response });
     		}).catch(err => {

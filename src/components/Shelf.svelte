@@ -1,6 +1,6 @@
 <script lang="ts">
   import { dateToString } from "../../functions/src/date";
-  import type { Meme } from "../db";
+  import type { Meme } from "../../functions/src/types";
 
   export let date: Date;
   export let meme: Meme;
