@@ -17,6 +17,10 @@
       "env": { "cypress/globals": true },
       "parserOptions": { "project": "cypress/tsconfig.json" },
       "plugins": ["cypress"]
+    },
+    {
+      "files": ["functions/**/*.ts"],
+      "parserOptions": { "project": "functions/tsconfig.json" }
     }
   ],
   "parser": "@typescript-eslint/parser",

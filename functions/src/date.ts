@@ -17,6 +17,7 @@ const toInt = (x: string) => {
   ];
   const index = numerals.indexOf(x);
   if (index === -1) return index + 1;
+  return NaN;
 };
 
 export const separateDate = (date: Date) => [
@@ -38,7 +39,7 @@ export const dateToString = (d: Date, splitter = "/", reverse = false) => {
 const fixYear = (y: number | string): number => {
   const year = `${y}`;
   if (year.length <= 2) return fixYear("20" + year.padStart(2, "0"));
-  if (year.length === 3) return null;
+  if (year.length === 3) return NaN;
   return parseInt(year);
 };
 
@@ -46,16 +47,17 @@ export const stringToDate = (d: string) => {
   const splitters = ["/", "-", "."];
   for (const splitter of splitters) {
     const [date, month, year] = d.split(splitter).map(toInt);
-    const result = compoundDate(date, month, fixYear(year));
+    const result = compoundDate(date ?? NaN, month ?? NaN, fixYear(year ?? NaN));
     if (![date, month, year].some(x => !x) && `${result}` !== "Invalid Date")
       return result;
   }
   for (const splitter of splitters) {
     const [year, month, date] = d.split(splitter).map(toInt);
-    const result = compoundDate(date, month, fixYear(year));
+    const result = compoundDate(date ?? NaN, month ?? NaN, fixYear(year ?? NaN));
     if (![date, month, year].some(x => !x) && `${result}` !== "Invalid Date")
       return result;
   }
   const result = new Date(d);
   if (`${result}` !== "Invalid Date") return result;
+  return undefined;
 };

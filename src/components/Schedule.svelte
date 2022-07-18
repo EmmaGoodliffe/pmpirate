@@ -4,8 +4,8 @@
     dateToString,
     separateDate,
     stringToDate,
-  } from "../date";
-  import { Db, getMemeOtd, scheduleMeme } from "../db";
+  } from "../../functions/src/date";
+  import { Db, getMemeOtd, submitMeme } from "../db";
   import Header from "./Header.svelte";
   import Loader from "./Loader.svelte";
 
@@ -43,16 +43,35 @@
       )
     ).flat();
     chosenDate =
-      options.filter(option => option.value >= today && option.available)[0]
-        ?.value ?? null;
+      options.filter(
+        option =>
+          option.value >= stringToDate(dateToString(today)) && option.available,
+      )[0]?.value ?? null;
     return options;
   };
 
   const schedule = (e: Event) => {
     e.preventDefault();
     const author = email.split("@spgs.org")[0];
-    // TODO: Verify email
-    scheduleMeme(chosenDate, { author, found, url }, db);
+    // submitMeme(chosenDate, { url, author, found });
+    submitMeme(chosenDate, { url, author, found })
+      .then(response => {
+        // TODO: Show success
+        console.log({ response });
+      })
+      .catch(err => {
+        if (
+          err.code === "functions/invalid-argument" ||
+          err.code === "functions/out-of-range"
+        ) {
+          // TODO: Show bad date error
+          console.warn(err);
+        } else {
+          // TODO: Show error
+          throw err;
+        }
+      });
+    // TODO: Show loading
   };
 </script>
 

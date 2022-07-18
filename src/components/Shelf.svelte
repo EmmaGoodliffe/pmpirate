@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { dateToString } from "../date";
+  import { dateToString } from "../../functions/src/date";
   import type { Meme } from "../db";
 
   export let date: Date;

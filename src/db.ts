@@ -1,6 +1,12 @@
 import type { Firestore } from "firebase/firestore";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { compoundDate, separateDate } from "./date";
+import { doc, getDoc } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
+import {
+  compoundDate,
+  dateToString,
+  separateDate,
+} from "../functions/src/date";
+import { functions } from "./common";
 
 export interface Meme {
   url: string;
@@ -20,31 +26,15 @@ const delay = (time: number) =>
 
 async function getFromDb(
   db: Db,
-  collection: "memes",
+  collectionId: "memes",
   docId: string,
 ): Promise<MemesOfMonth>;
-async function getFromDb(db: Db, collection: string, docId: string) {
+async function getFromDb(db: Db, collectionId: string, docId: string) {
   try {
     console.count("DB reads");
     console.count(docId);
-    const theDoc = await getDoc(doc(db, collection, docId));
+    const theDoc = await getDoc(doc(db, collectionId, docId));
     return theDoc.data();
-  } catch (err) {
-    console.warn("Your DB emulations are likely not running correctly");
-    console.error(err);
-  }
-}
-
-async function setToDb(
-  db: Db,
-  collection: "memes",
-  docId: string,
-  data: MemesOfMonth,
-): Promise<void>;
-async function setToDb<T>(db: Db, collection: string, docId: string, data: T) {
-  try {
-    console.count("DB writes");
-    await setDoc(doc(db, collection, docId), data);
   } catch (err) {
     console.warn("Your DB emulations are likely not running correctly");
     console.error(err);
@@ -114,23 +104,18 @@ export const getMemeOtd = async (d: Date, db: Db, n = 0): Promise<Meme> => {
   return getMemeOtd(d, db, n + 1);
 };
 
-const setsAreEqual = <T>(setA: Set<T>, setB: Set<T>) =>
-  [...setA].length === [...setB].length &&
-  [...setA].length === [...new Set([...setA, ...setB])].length;
+async function callCloudFunction<T>(
+  func: "submitMeme",
+  data: { date: string; meme: Meme },
+): Promise<T>;
+async function callCloudFunction(func: string, data: unknown) {
+  return httpsCallable(functions, func)(data);
+}
 
-// TODO: This should not be client-side
-const scheduleMemeToDb = async (d: Date, meme: Meme, db: Db) => {
-  const [date, month, year] = separateDate(d);
-  const docId = getDocId(year, month);
-  const oldData = await getFromDb(db, "memes", docId);
-  const data = { [date]: meme, ...oldData };
-  if (setsAreEqual(new Set(Object.keys(oldData)), new Set(Object.keys(data)))) {
-    console.log("Cancelled a redundant write");
-    return;
-  }
-  await setToDb(db, "memes", docId, data);
-};
-
-export const scheduleMeme = async (date: Date, meme: Meme, db: Db) => {
-  await scheduleMemeToDb(date, meme, db);
+export const submitMeme = async (date: Date, meme: Meme) => {
+    const response = await callCloudFunction("submitMeme", {
+      date: dateToString(date),
+      meme,
+    });
+    return response;
 };

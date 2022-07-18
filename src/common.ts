@@ -1,6 +1,7 @@
 import { getAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
+import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDfGaweLVDXcfxJDZ4ztoMoilhU9fv4uXU",
@@ -15,7 +16,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 getAnalytics(app);
 const db = getFirestore(app);
+const functions = getFunctions(app, 'europe-west2');
 const isEmulation =
   location.href.includes("localhost") || location.href.includes("127.0.0.1");
-isEmulation && connectFirestoreEmulator(db, "localhost", 8080);
-export { db };
+if (isEmulation) {
+  connectFirestoreEmulator(db, "localhost", 8080);
+  connectFunctionsEmulator(functions, "localhost", 5001);
+}
+export { db, functions };

@@ -1698,14 +1698,14 @@ var archive = (function () {
 
     const name$4 = "@firebase/storage";
 
-    const name$3 = "@firebase/storage-compat";
+    const name$3$1 = "@firebase/storage-compat";
 
     const name$2$1 = "@firebase/firestore";
 
     const name$1$1 = "@firebase/firestore-compat";
 
     const name$p = "firebase";
-    const version$3 = "9.9.0";
+    const version$4 = "9.9.0";
 
     /**
      * @license
@@ -1751,7 +1751,7 @@ var archive = (function () {
         [name$6]: 'fire-rc',
         [name$5]: 'fire-rc-compat',
         [name$4]: 'fire-gcs',
-        [name$3]: 'fire-gcs-compat',
+        [name$3$1]: 'fire-gcs-compat',
         [name$2$1]: 'fire-fst',
         [name$1$1]: 'fire-fst-compat',
         'fire-js': 'fire-js',
@@ -1957,7 +1957,7 @@ var archive = (function () {
      *
      * @public
      */
-    const SDK_VERSION = version$3;
+    const SDK_VERSION = version$4;
     function initializeApp(options, rawConfig = {}) {
         if (typeof rawConfig !== 'object') {
             const name = rawConfig;
@@ -2405,8 +2405,8 @@ var archive = (function () {
      */
     registerCoreComponents('');
 
-    const name$2 = "@firebase/installations";
-    const version$2 = "0.5.12";
+    const name$3 = "@firebase/installations";
+    const version$3 = "0.5.12";
 
     /**
      * @license
@@ -2425,7 +2425,7 @@ var archive = (function () {
      * limitations under the License.
      */
     const PENDING_TIMEOUT_MS = 10000;
-    const PACKAGE_VERSION = `w:${version$2}`;
+    const PACKAGE_VERSION = `w:${version$3}`;
     const INTERNAL_AUTH_VERSION = 'FIS_v2';
     const INSTALLATIONS_API_URL = 'https://firebaseinstallations.googleapis.com/v1';
     const TOKEN_EXPIRATION_BUFFER = 60 * 60 * 1000; // One hour
@@ -3382,9 +3382,9 @@ var archive = (function () {
      * @packageDocumentation
      */
     registerInstallations();
-    registerVersion(name$2, version$2);
+    registerVersion(name$3, version$3);
     // BUILD_TARGET will be replaced by values like esm5, esm2017, cjs5, etc during the compilation
-    registerVersion(name$2, version$2, 'esm2017');
+    registerVersion(name$3, version$3, 'esm2017');
 
     /**
      * @license
@@ -4268,8 +4268,8 @@ var archive = (function () {
         logEvent$1(wrappedGtagFunction, initializationPromisesMap[analyticsInstance.app.options.appId], eventName, eventParams, options).catch(e => logger.error(e));
     }
 
-    const name$1 = "@firebase/analytics";
-    const version$1 = "0.8.0";
+    const name$2 = "@firebase/analytics";
+    const version$2 = "0.8.0";
 
     /**
      * Firebase Analytics
@@ -4286,9 +4286,9 @@ var archive = (function () {
             return factory(app, installations, analyticsOptions);
         }, "PUBLIC" /* PUBLIC */));
         _registerComponent(new Component('analytics-internal', internalFactory, "PRIVATE" /* PRIVATE */));
-        registerVersion(name$1, version$1);
+        registerVersion(name$2, version$2);
         // BUILD_TARGET will be replaced by values like esm5, esm2017, cjs5, etc during the compilation
-        registerVersion(name$1, version$1, 'esm2017');
+        registerVersion(name$2, version$2, 'esm2017');
         function internalFactory(container) {
             try {
                 const analytics = container.getProvider(ANALYTICS_TYPE).getImmediate();
@@ -4305,8 +4305,8 @@ var archive = (function () {
     }
     registerAnalytics();
 
-    var name = "firebase";
-    var version = "9.9.0";
+    var name$1 = "firebase";
+    var version$1 = "9.9.0";
 
     /**
      * @license
@@ -4324,7 +4324,7 @@ var archive = (function () {
      * See the License for the specific language governing permissions and
      * limitations under the License.
      */
-    registerVersion(name, version, 'app');
+    registerVersion(name$1, version$1, 'app');
 
     var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -15407,6 +15407,293 @@ var archive = (function () {
         registerVersion(D, "3.4.12", "esm2017");
     }();
 
+    /**
+     * @license
+     * Copyright 2020 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * Type constant for Firebase Functions.
+     */
+    const FUNCTIONS_TYPE = 'functions';
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * Helper class to get metadata that should be included with a function call.
+     * @internal
+     */
+    class ContextProvider {
+        constructor(authProvider, messagingProvider, appCheckProvider) {
+            this.auth = null;
+            this.messaging = null;
+            this.appCheck = null;
+            this.auth = authProvider.getImmediate({ optional: true });
+            this.messaging = messagingProvider.getImmediate({
+                optional: true
+            });
+            if (!this.auth) {
+                authProvider.get().then(auth => (this.auth = auth), () => {
+                    /* get() never rejects */
+                });
+            }
+            if (!this.messaging) {
+                messagingProvider.get().then(messaging => (this.messaging = messaging), () => {
+                    /* get() never rejects */
+                });
+            }
+            if (!this.appCheck) {
+                appCheckProvider.get().then(appCheck => (this.appCheck = appCheck), () => {
+                    /* get() never rejects */
+                });
+            }
+        }
+        async getAuthToken() {
+            if (!this.auth) {
+                return undefined;
+            }
+            try {
+                const token = await this.auth.getToken();
+                return token === null || token === void 0 ? void 0 : token.accessToken;
+            }
+            catch (e) {
+                // If there's any error when trying to get the auth token, leave it off.
+                return undefined;
+            }
+        }
+        async getMessagingToken() {
+            if (!this.messaging ||
+                !('Notification' in self) ||
+                Notification.permission !== 'granted') {
+                return undefined;
+            }
+            try {
+                return await this.messaging.getToken();
+            }
+            catch (e) {
+                // We don't warn on this, because it usually means messaging isn't set up.
+                // console.warn('Failed to retrieve instance id token.', e);
+                // If there's any error when trying to get the token, leave it off.
+                return undefined;
+            }
+        }
+        async getAppCheckToken() {
+            if (this.appCheck) {
+                const result = await this.appCheck.getToken();
+                if (result.error) {
+                    // Do not send the App Check header to the functions endpoint if
+                    // there was an error from the App Check exchange endpoint. The App
+                    // Check SDK will already have logged the error to console.
+                    return null;
+                }
+                return result.token;
+            }
+            return null;
+        }
+        async getContext() {
+            const authToken = await this.getAuthToken();
+            const messagingToken = await this.getMessagingToken();
+            const appCheckToken = await this.getAppCheckToken();
+            return { authToken, messagingToken, appCheckToken };
+        }
+    }
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    const DEFAULT_REGION = 'us-central1';
+    /**
+     * The main class for the Firebase Functions SDK.
+     * @internal
+     */
+    class FunctionsService {
+        /**
+         * Creates a new Functions service for the given app.
+         * @param app - The FirebaseApp to use.
+         */
+        constructor(app, authProvider, messagingProvider, appCheckProvider, regionOrCustomDomain = DEFAULT_REGION, fetchImpl) {
+            this.app = app;
+            this.fetchImpl = fetchImpl;
+            this.emulatorOrigin = null;
+            this.contextProvider = new ContextProvider(authProvider, messagingProvider, appCheckProvider);
+            // Cancels all ongoing requests when resolved.
+            this.cancelAllRequests = new Promise(resolve => {
+                this.deleteService = () => {
+                    return Promise.resolve(resolve());
+                };
+            });
+            // Resolve the region or custom domain overload by attempting to parse it.
+            try {
+                const url = new URL(regionOrCustomDomain);
+                this.customDomain = url.origin;
+                this.region = DEFAULT_REGION;
+            }
+            catch (e) {
+                this.customDomain = null;
+                this.region = regionOrCustomDomain;
+            }
+        }
+        _delete() {
+            return this.deleteService();
+        }
+        /**
+         * Returns the URL for a callable with the given name.
+         * @param name - The name of the callable.
+         * @internal
+         */
+        _url(name) {
+            const projectId = this.app.options.projectId;
+            if (this.emulatorOrigin !== null) {
+                const origin = this.emulatorOrigin;
+                return `${origin}/${projectId}/${this.region}/${name}`;
+            }
+            if (this.customDomain !== null) {
+                return `${this.customDomain}/${name}`;
+            }
+            return `https://${this.region}-${projectId}.cloudfunctions.net/${name}`;
+        }
+    }
+    /**
+     * Modify this instance to communicate with the Cloud Functions emulator.
+     *
+     * Note: this must be called before this instance has been used to do any operations.
+     *
+     * @param host The emulator host (ex: localhost)
+     * @param port The emulator port (ex: 5001)
+     * @public
+     */
+    function connectFunctionsEmulator$1(functionsInstance, host, port) {
+        functionsInstance.emulatorOrigin = `http://${host}:${port}`;
+    }
+
+    const name = "@firebase/functions";
+    const version = "0.8.4";
+
+    /**
+     * @license
+     * Copyright 2019 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    const AUTH_INTERNAL_NAME = 'auth-internal';
+    const APP_CHECK_INTERNAL_NAME = 'app-check-internal';
+    const MESSAGING_INTERNAL_NAME = 'messaging-internal';
+    function registerFunctions(fetchImpl, variant) {
+        const factory = (container, { instanceIdentifier: regionOrCustomDomain }) => {
+            // Dependencies
+            const app = container.getProvider('app').getImmediate();
+            const authProvider = container.getProvider(AUTH_INTERNAL_NAME);
+            const messagingProvider = container.getProvider(MESSAGING_INTERNAL_NAME);
+            const appCheckProvider = container.getProvider(APP_CHECK_INTERNAL_NAME);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return new FunctionsService(app, authProvider, messagingProvider, appCheckProvider, regionOrCustomDomain, fetchImpl);
+        };
+        _registerComponent(new Component(FUNCTIONS_TYPE, factory, "PUBLIC" /* PUBLIC */).setMultipleInstances(true));
+        registerVersion(name, version, variant);
+        // BUILD_TARGET will be replaced by values like esm5, esm2017, cjs5, etc during the compilation
+        registerVersion(name, version, 'esm2017');
+    }
+
+    /**
+     * @license
+     * Copyright 2020 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * Returns a {@link Functions} instance for the given app.
+     * @param app - The {@link @firebase/app#FirebaseApp} to use.
+     * @param regionOrCustomDomain - one of:
+     *   a) The region the callable functions are located in (ex: us-central1)
+     *   b) A custom domain hosting the callable functions (ex: https://mydomain.com)
+     * @public
+     */
+    function getFunctions(app = getApp(), regionOrCustomDomain = DEFAULT_REGION) {
+        // Dependencies
+        const functionsProvider = _getProvider(getModularInstance(app), FUNCTIONS_TYPE);
+        const functionsInstance = functionsProvider.getImmediate({
+            identifier: regionOrCustomDomain
+        });
+        return functionsInstance;
+    }
+    /**
+     * Modify this instance to communicate with the Cloud Functions emulator.
+     *
+     * Note: this must be called before this instance has been used to do any operations.
+     *
+     * @param host - The emulator host (ex: localhost)
+     * @param port - The emulator port (ex: 5001)
+     * @public
+     */
+    function connectFunctionsEmulator(functionsInstance, host, port) {
+        connectFunctionsEmulator$1(getModularInstance(functionsInstance), host, port);
+    }
+
+    /**
+     * Cloud Functions for Firebase
+     *
+     * @packageDocumentation
+     */
+    registerFunctions(fetch.bind(self));
+
     const firebaseConfig = {
         apiKey: "AIzaSyDfGaweLVDXcfxJDZ4ztoMoilhU9fv4uXU",
         authDomain: "pmpirate.firebaseapp.com",
@@ -15419,8 +15706,12 @@ var archive = (function () {
     const app = initializeApp(firebaseConfig);
     getAnalytics(app);
     const db = Ba(app);
+    const functions = getFunctions(app, 'europe-west2');
     const isEmulation = location.href.includes("localhost") || location.href.includes("127.0.0.1");
-    isEmulation && Ra(db, "localhost", 8080);
+    if (isEmulation) {
+        Ra(db, "localhost", 8080);
+        connectFunctionsEmulator(functions, "localhost", 5001);
+    }
 
     function noop() { }
     function is_promise(value) {
@@ -15961,6 +16252,7 @@ var archive = (function () {
         const index = numerals.indexOf(x);
         if (index === -1)
             return index + 1;
+        return NaN;
     };
     const separateDate = (date) => [
         date.getDate(),
@@ -15979,37 +16271,38 @@ var archive = (function () {
         if (year.length <= 2)
             return fixYear("20" + year.padStart(2, "0"));
         if (year.length === 3)
-            return null;
+            return NaN;
         return parseInt(year);
     };
     const stringToDate = (d) => {
         const splitters = ["/", "-", "."];
         for (const splitter of splitters) {
             const [date, month, year] = d.split(splitter).map(toInt);
-            const result = compoundDate(date, month, fixYear(year));
+            const result = compoundDate(date !== null && date !== void 0 ? date : NaN, month !== null && month !== void 0 ? month : NaN, fixYear(year !== null && year !== void 0 ? year : NaN));
             if (![date, month, year].some(x => !x) && `${result}` !== "Invalid Date")
                 return result;
         }
         for (const splitter of splitters) {
             const [year, month, date] = d.split(splitter).map(toInt);
-            const result = compoundDate(date, month, fixYear(year));
+            const result = compoundDate(date !== null && date !== void 0 ? date : NaN, month !== null && month !== void 0 ? month : NaN, fixYear(year !== null && year !== void 0 ? year : NaN));
             if (![date, month, year].some(x => !x) && `${result}` !== "Invalid Date")
                 return result;
         }
         const result = new Date(d);
         if (`${result}` !== "Invalid Date")
             return result;
+        return undefined;
     };
 
     const cache = {};
     const queue = new Set();
     const firstMonth = compoundDate(1, 9, 2021);
     const delay = (time) => new Promise(resolve => setTimeout(resolve, time * 10 ** 3));
-    async function getFromDb(db, collection, docId) {
+    async function getFromDb(db, collectionId, docId) {
         try {
             console.count("DB reads");
             console.count(docId);
-            const theDoc = await ll(Da(db, collection, docId));
+            const theDoc = await ll(Da(db, collectionId, docId));
             return theDoc.data();
         }
         catch (err) {
@@ -16237,7 +16530,7 @@ var archive = (function () {
     		c: function create() {
     			p = element("p");
     			p.textContent = "(Sneak peek)";
-    			add_location(p, file$1, 13, 6, 415);
+    			add_location(p, file$1, 13, 6, 432);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -16295,18 +16588,18 @@ var archive = (function () {
     			t6 = space();
     			td1 = element("td");
     			img = element("img");
-    			add_location(p0, file$1, 10, 4, 275);
+    			add_location(p0, file$1, 10, 4, 292);
     			attr_dev(span, "class", "font-bold italic");
-    			add_location(span, file$1, 11, 16, 324);
-    			add_location(p1, file$1, 11, 4, 312);
+    			add_location(span, file$1, 11, 16, 341);
+    			add_location(p1, file$1, 11, 4, 329);
     			attr_dev(td0, "class", "text-center");
-    			add_location(td0, file$1, 9, 2, 246);
+    			add_location(td0, file$1, 9, 2, 263);
     			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
     			if (!src_url_equal(img.src, img_src_value = `memes/${/*meme*/ ctx[1].url}`)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file$1, 17, 4, 464);
-    			add_location(td1, file$1, 16, 2, 455);
-    			add_location(tr, file$1, 8, 0, 239);
+    			add_location(img, file$1, 17, 4, 481);
+    			add_location(td1, file$1, 16, 2, 472);
+    			add_location(tr, file$1, 8, 0, 256);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -16552,7 +16845,7 @@ var archive = (function () {
     			t1 = space();
     			if (if_block) if_block.c();
     			if_block_anchor = empty();
-    			add_location(tbody, file, 68, 6, 2063);
+    			add_location(tbody, file, 68, 6, 2080);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tbody, anchor);
@@ -16976,7 +17269,7 @@ var archive = (function () {
     		c: function create() {
     			tfoot = element("tfoot");
     			tfoot.textContent = "No memes that month :(";
-    			add_location(tfoot, file, 88, 8, 2728);
+    			add_location(tfoot, file, 88, 8, 2745);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tfoot, anchor);
@@ -17008,7 +17301,7 @@ var archive = (function () {
     		c: function create() {
     			tfoot = element("tfoot");
     			create_component(loader.$$.fragment);
-    			add_location(tfoot, file, 64, 6, 1989);
+    			add_location(tfoot, file, 64, 6, 2006);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tfoot, anchor);
@@ -17126,7 +17419,7 @@ var archive = (function () {
     			p = element("p");
     			p.textContent = "No memes that day :(";
     			attr_dev(p, "class", "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto text-center");
-    			add_location(p, file, 108, 6, 3183);
+    			add_location(p, file, 108, 6, 3200);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -17159,7 +17452,7 @@ var archive = (function () {
     			attr_dev(img, "class", "max-w-sm mx-auto w-1/2 sm:w-auto");
     			if (!src_url_equal(img.src, img_src_value = `memes/${/*queriedMeme*/ ctx[15].url}`)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file, 102, 6, 3042);
+    			add_location(img, file, 102, 6, 3059);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
@@ -17369,50 +17662,50 @@ var archive = (function () {
     			a.textContent = "Schedule a Meme";
     			t27 = space();
     			footer = element("footer");
-    			add_location(h20, file, 32, 2, 1045);
+    			add_location(h20, file, 32, 2, 1062);
     			attr_dev(span0, "class", "-mt-1.5");
-    			add_location(span0, file, 40, 8, 1317);
+    			add_location(span0, file, 40, 8, 1334);
     			attr_dev(div0, "class", "flex-1 btn max-w-[5rem] h-full font-mono text-3xl");
     			attr_dev(div0, "disabled", div0_disabled_value = !/*backwardsEnabled*/ ctx[4]);
-    			add_location(div0, file, 35, 6, 1140);
+    			add_location(div0, file, 35, 6, 1157);
     			attr_dev(div1, "class", "w-1/4");
-    			add_location(div1, file, 34, 4, 1114);
+    			add_location(div1, file, 34, 4, 1131);
     			attr_dev(p0, "class", "flex-1 my-2 text-lg text-center");
-    			add_location(p0, file, 43, 4, 1379);
+    			add_location(p0, file, 43, 4, 1396);
     			attr_dev(span1, "class", "-mt-1.5");
-    			add_location(span1, file, 52, 8, 1680);
+    			add_location(span1, file, 52, 8, 1697);
     			attr_dev(div2, "class", "flex-1 btn max-w-[5rem] h-full font-mono text-3xl");
     			attr_dev(div2, "disabled", div2_disabled_value = !/*forwardsEnabled*/ ctx[3]);
-    			add_location(div2, file, 47, 6, 1505);
+    			add_location(div2, file, 47, 6, 1522);
     			attr_dev(div3, "class", "w-1/4");
-    			add_location(div3, file, 46, 4, 1479);
+    			add_location(div3, file, 46, 4, 1496);
     			attr_dev(div4, "class", "flex sm:w-1/4 mx-auto my-4");
-    			add_location(div4, file, 33, 2, 1069);
+    			add_location(div4, file, 33, 2, 1086);
     			attr_dev(th0, "class", "border-2");
-    			add_location(th0, file, 59, 8, 1854);
+    			add_location(th0, file, 59, 8, 1871);
     			attr_dev(th1, "class", "border-2");
-    			add_location(th1, file, 60, 8, 1893);
-    			add_location(tr, file, 58, 6, 1841);
-    			add_location(thead, file, 57, 4, 1827);
+    			add_location(th1, file, 60, 8, 1910);
+    			add_location(tr, file, 58, 6, 1858);
+    			add_location(thead, file, 57, 4, 1844);
     			attr_dev(table, "class", "table-auto w-full max-w-4xl mx-auto border-white border-2");
-    			add_location(table, file, 56, 2, 1749);
-    			add_location(main, file, 31, 0, 1036);
-    			add_location(hr0, file, 93, 0, 2810);
-    			add_location(h21, file, 95, 2, 2829);
+    			add_location(table, file, 56, 2, 1766);
+    			add_location(main, file, 31, 0, 1053);
+    			add_location(hr0, file, 93, 0, 2827);
+    			add_location(h21, file, 95, 2, 2846);
     			attr_dev(input, "type", "text");
-    			add_location(input, file, 96, 2, 2855);
+    			add_location(input, file, 96, 2, 2872);
     			attr_dev(p1, "class", "my-4");
-    			add_location(p1, file, 97, 2, 2902);
-    			add_location(section0, file, 94, 0, 2817);
-    			add_location(hr1, file, 114, 0, 3321);
-    			add_location(h22, file, 116, 2, 3340);
+    			add_location(p1, file, 97, 2, 2919);
+    			add_location(section0, file, 94, 0, 2834);
+    			add_location(hr1, file, 114, 0, 3338);
+    			add_location(h22, file, 116, 2, 3357);
     			attr_dev(a, "class", "hover:underline");
     			attr_dev(a, "href", "schedule.html");
-    			add_location(a, file, 118, 4, 3392);
+    			add_location(a, file, 118, 4, 3409);
     			attr_dev(p2, "class", "epilogue");
-    			add_location(p2, file, 117, 2, 3367);
-    			add_location(section1, file, 115, 0, 3328);
-    			add_location(footer, file, 121, 0, 3478);
+    			add_location(p2, file, 117, 2, 3384);
+    			add_location(section1, file, 115, 0, 3345);
+    			add_location(footer, file, 121, 0, 3495);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");

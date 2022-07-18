@@ -1698,14 +1698,14 @@ var schedule = (function () {
 
     const name$4 = "@firebase/storage";
 
-    const name$3 = "@firebase/storage-compat";
+    const name$3$1 = "@firebase/storage-compat";
 
     const name$2$1 = "@firebase/firestore";
 
     const name$1$1 = "@firebase/firestore-compat";
 
     const name$p = "firebase";
-    const version$3 = "9.9.0";
+    const version$4 = "9.9.0";
 
     /**
      * @license
@@ -1751,7 +1751,7 @@ var schedule = (function () {
         [name$6]: 'fire-rc',
         [name$5]: 'fire-rc-compat',
         [name$4]: 'fire-gcs',
-        [name$3]: 'fire-gcs-compat',
+        [name$3$1]: 'fire-gcs-compat',
         [name$2$1]: 'fire-fst',
         [name$1$1]: 'fire-fst-compat',
         'fire-js': 'fire-js',
@@ -1957,7 +1957,7 @@ var schedule = (function () {
      *
      * @public
      */
-    const SDK_VERSION = version$3;
+    const SDK_VERSION = version$4;
     function initializeApp(options, rawConfig = {}) {
         if (typeof rawConfig !== 'object') {
             const name = rawConfig;
@@ -2405,8 +2405,8 @@ var schedule = (function () {
      */
     registerCoreComponents('');
 
-    const name$2 = "@firebase/installations";
-    const version$2 = "0.5.12";
+    const name$3 = "@firebase/installations";
+    const version$3 = "0.5.12";
 
     /**
      * @license
@@ -2425,7 +2425,7 @@ var schedule = (function () {
      * limitations under the License.
      */
     const PENDING_TIMEOUT_MS = 10000;
-    const PACKAGE_VERSION = `w:${version$2}`;
+    const PACKAGE_VERSION = `w:${version$3}`;
     const INTERNAL_AUTH_VERSION = 'FIS_v2';
     const INSTALLATIONS_API_URL = 'https://firebaseinstallations.googleapis.com/v1';
     const TOKEN_EXPIRATION_BUFFER = 60 * 60 * 1000; // One hour
@@ -2664,7 +2664,7 @@ var schedule = (function () {
             crypto.getRandomValues(fidByteArray);
             // Replace the first 4 random bits with the constant FID header of 0b0111.
             fidByteArray[0] = 0b01110000 + (fidByteArray[0] % 0b00010000);
-            const fid = encode(fidByteArray);
+            const fid = encode$1(fidByteArray);
             return VALID_FID_PATTERN.test(fid) ? fid : INVALID_FID;
         }
         catch (_a) {
@@ -2673,7 +2673,7 @@ var schedule = (function () {
         }
     }
     /** Converts a FID Uint8Array to a base64 string representation. */
-    function encode(fidByteArray) {
+    function encode$1(fidByteArray) {
         const b64String = bufferToBase64UrlSafe(fidByteArray);
         // Remove the 23rd character that was added because of the extra 4 bits at the
         // end of our 17 byte array, and the '=' padding.
@@ -3382,9 +3382,9 @@ var schedule = (function () {
      * @packageDocumentation
      */
     registerInstallations();
-    registerVersion(name$2, version$2);
+    registerVersion(name$3, version$3);
     // BUILD_TARGET will be replaced by values like esm5, esm2017, cjs5, etc during the compilation
-    registerVersion(name$2, version$2, 'esm2017');
+    registerVersion(name$3, version$3, 'esm2017');
 
     /**
      * @license
@@ -4268,8 +4268,8 @@ var schedule = (function () {
         logEvent$1(wrappedGtagFunction, initializationPromisesMap[analyticsInstance.app.options.appId], eventName, eventParams, options).catch(e => logger.error(e));
     }
 
-    const name$1 = "@firebase/analytics";
-    const version$1 = "0.8.0";
+    const name$2 = "@firebase/analytics";
+    const version$2 = "0.8.0";
 
     /**
      * Firebase Analytics
@@ -4286,9 +4286,9 @@ var schedule = (function () {
             return factory(app, installations, analyticsOptions);
         }, "PUBLIC" /* PUBLIC */));
         _registerComponent(new Component('analytics-internal', internalFactory, "PRIVATE" /* PRIVATE */));
-        registerVersion(name$1, version$1);
+        registerVersion(name$2, version$2);
         // BUILD_TARGET will be replaced by values like esm5, esm2017, cjs5, etc during the compilation
-        registerVersion(name$1, version$1, 'esm2017');
+        registerVersion(name$2, version$2, 'esm2017');
         function internalFactory(container) {
             try {
                 const analytics = container.getProvider(ANALYTICS_TYPE).getImmediate();
@@ -4305,8 +4305,8 @@ var schedule = (function () {
     }
     registerAnalytics();
 
-    var name = "firebase";
-    var version = "9.9.0";
+    var name$1 = "firebase";
+    var version$1 = "9.9.0";
 
     /**
      * @license
@@ -4324,7 +4324,7 @@ var schedule = (function () {
      * See the License for the specific language governing permissions and
      * limitations under the License.
      */
-    registerVersion(name, version, 'app');
+    registerVersion(name$1, version$1, 'app');
 
     var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -4335,7 +4335,7 @@ var schedule = (function () {
     */
     var k$1,goog=goog||{},l=commonjsGlobal||self;function aa(){}function ba$1(a){var b=typeof a;b="object"!=b?b:a?Array.isArray(a)?"array":b:"null";return "array"==b||"object"==b&&"number"==typeof a.length}function p(a){var b=typeof a;return "object"==b&&null!=a||"function"==b}function da(a){return Object.prototype.hasOwnProperty.call(a,ea)&&a[ea]||(a[ea]=++fa)}var ea="closure_uid_"+(1E9*Math.random()>>>0),fa=0;function ha(a,b,c){return a.call.apply(a.bind,arguments)}
     function ia(a,b,c){if(!a)throw Error();if(2<arguments.length){var d=Array.prototype.slice.call(arguments,2);return function(){var e=Array.prototype.slice.call(arguments);Array.prototype.unshift.apply(e,d);return a.apply(b,e)}}return function(){return a.apply(b,arguments)}}function q(a,b,c){Function.prototype.bind&&-1!=Function.prototype.bind.toString().indexOf("native code")?q=ha:q=ia;return q.apply(null,arguments)}
-    function ja(a,b){var c=Array.prototype.slice.call(arguments,1);return function(){var d=c.slice();d.push.apply(d,arguments);return a.apply(this,d)}}function t(a,b){function c(){}c.prototype=b.prototype;a.Z=b.prototype;a.prototype=new c;a.prototype.constructor=a;a.Vb=function(d,e,f){for(var h=Array(arguments.length-2),n=2;n<arguments.length;n++)h[n-2]=arguments[n];return b.prototype[e].apply(d,h)};}function v(){this.s=this.s;this.o=this.o;}var ka=0,la={};v.prototype.s=!1;v.prototype.na=function(){if(!this.s&&(this.s=!0,this.M(),0!=ka)){var a=da(this);delete la[a];}};v.prototype.M=function(){if(this.o)for(;this.o.length;)this.o.shift()();};const ma$1=Array.prototype.indexOf?function(a,b){return Array.prototype.indexOf.call(a,b,void 0)}:function(a,b){if("string"===typeof a)return "string"!==typeof b||1!=b.length?-1:a.indexOf(b,0);for(let c=0;c<a.length;c++)if(c in a&&a[c]===b)return c;return -1},na$1=Array.prototype.forEach?function(a,b,c){Array.prototype.forEach.call(a,b,c);}:function(a,b,c){const d=a.length,e="string"===typeof a?a.split(""):a;for(let f=0;f<d;f++)f in e&&b.call(c,e[f],f,a);};
+    function ja(a,b){var c=Array.prototype.slice.call(arguments,1);return function(){var d=c.slice();d.push.apply(d,arguments);return a.apply(this,d)}}function t(a,b){function c(){}c.prototype=b.prototype;a.Z=b.prototype;a.prototype=new c;a.prototype.constructor=a;a.Vb=function(d,e,f){for(var h=Array(arguments.length-2),n=2;n<arguments.length;n++)h[n-2]=arguments[n];return b.prototype[e].apply(d,h)};}function v(){this.s=this.s;this.o=this.o;}var ka=0,la={};v.prototype.s=!1;v.prototype.na=function(){if(!this.s&&(this.s=!0,this.M(),0!=ka)){var a=da(this);delete la[a];}};v.prototype.M=function(){if(this.o)for(;this.o.length;)this.o.shift()();};const ma$1=Array.prototype.indexOf?function(a,b){return Array.prototype.indexOf.call(a,b,void 0)}:function(a,b){if("string"===typeof a)return "string"!==typeof b||1!=b.length?-1:a.indexOf(b,0);for(let c=0;c<a.length;c++)if(c in a&&a[c]===b)return c;return -1},na=Array.prototype.forEach?function(a,b,c){Array.prototype.forEach.call(a,b,c);}:function(a,b,c){const d=a.length,e="string"===typeof a?a.split(""):a;for(let f=0;f<d;f++)f in e&&b.call(c,e[f],f,a);};
     function oa(a){a:{var b=pa$1;const c=a.length,d="string"===typeof a?a.split(""):a;for(let e=0;e<c;e++)if(e in d&&b.call(void 0,d[e],e,a)){b=e;break a}b=-1;}return 0>b?null:"string"===typeof a?a.charAt(b):a[b]}function qa(a){return Array.prototype.concat.apply([],arguments)}function ra(a){const b=a.length;if(0<b){const c=Array(b);for(let d=0;d<b;d++)c[d]=a[d];return c}return []}function sa$1(a){return /^[\s\xa0]*$/.test(a)}var ta=String.prototype.trim?function(a){return a.trim()}:function(a){return /^[\s\xa0]*([\s\S]*?)[\s\xa0]*$/.exec(a)[1]};function w(a,b){return -1!=a.indexOf(b)}function ua$1(a,b){return a<b?-1:a>b?1:0}var x$1;a:{var va$1=l.navigator;if(va$1){var wa$1=va$1.userAgent;if(wa$1){x$1=wa$1;break a}}x$1="";}function xa(a,b,c){for(const d in a)b.call(c,a[d],d,a);}function ya(a){const b={};for(const c in a)b[c]=a[c];return b}var za="constructor hasOwnProperty isPrototypeOf propertyIsEnumerable toLocaleString toString valueOf".split(" ");function Aa$1(a,b){let c,d;for(let e=1;e<arguments.length;e++){d=arguments[e];for(c in d)a[c]=d[c];for(let f=0;f<za.length;f++)c=za[f],Object.prototype.hasOwnProperty.call(d,c)&&(a[c]=d[c]);}}function Ca(a){Ca[" "](a);return a}Ca[" "]=aa;function Fa$1(a){var b=Ga;return Object.prototype.hasOwnProperty.call(b,9)?b[9]:b[9]=a(9)}var Ha=w(x$1,"Opera"),y=w(x$1,"Trident")||w(x$1,"MSIE"),Ia$1=w(x$1,"Edge"),Ja=Ia$1||y,Ka=w(x$1,"Gecko")&&!(w(x$1.toLowerCase(),"webkit")&&!w(x$1,"Edge"))&&!(w(x$1,"Trident")||w(x$1,"MSIE"))&&!w(x$1,"Edge"),La$1=w(x$1.toLowerCase(),"webkit")&&!w(x$1,"Edge");function Ma(){var a=l.document;return a?a.documentMode:void 0}var Na$1;
     a:{var Oa="",Pa$1=function(){var a=x$1;if(Ka)return /rv:([^\);]+)(\)|;)/.exec(a);if(Ia$1)return /Edge\/([\d\.]+)/.exec(a);if(y)return /\b(?:MSIE|rv)[: ]([^\);]+)(\)|;)/.exec(a);if(La$1)return /WebKit\/(\S+)/.exec(a);if(Ha)return /(?:Version)[ \/]?(\S+)/.exec(a)}();Pa$1&&(Oa=Pa$1?Pa$1[1]:"");if(y){var Qa=Ma();if(null!=Qa&&Qa>parseFloat(Oa)){Na$1=String(Qa);break a}}Na$1=Oa;}var Ga={};
     function Ra$1(){return Fa$1(function(){let a=0;const b=ta(String(Na$1)).split("."),c=ta("9").split("."),d=Math.max(b.length,c.length);for(let h=0;0==a&&h<d;h++){var e=b[h]||"",f=c[h]||"";do{e=/(\d*)(\D*)(.*)/.exec(e)||["","","",""];f=/(\d*)(\D*)(.*)/.exec(f)||["","","",""];if(0==e[0].length&&0==f[0].length)break;a=ua$1(0==e[1].length?0:parseInt(e[1],10),0==f[1].length?0:parseInt(f[1],10))||ua$1(0==e[2].length,0==f[2].length)||ua$1(e[2],f[2]);e=e[3];f=f[3];}while(0==a)}return 0<=a})}var Sa;
@@ -4355,29 +4355,29 @@ var schedule = (function () {
     function Fb(a){a.da=!1;a.S&&(a.g.clearTimeout(a.S),a.S=null);}k$1.M=function(){Eb.Z.M.call(this);Fb(this);delete this.g;};function Gb(a,b,c){if("function"===typeof a)c&&(a=q(a,c));else if(a&&"function"==typeof a.handleEvent)a=q(a.handleEvent,a);else throw Error("Invalid listener argument");return 2147483647<Number(b)?-1:l.setTimeout(a,b||0)}function Hb(a){a.g=Gb(()=>{a.g=null;a.i&&(a.i=!1,Hb(a));},a.j);const b=a.h;a.h=null;a.m.apply(null,b);}class Ib extends v{constructor(a,b){super();this.m=a;this.j=b;this.h=null;this.i=!1;this.g=null;}l(a){this.h=arguments;this.g?this.i=!0:Hb(this);}M(){super.M();this.g&&(l.clearTimeout(this.g),this.g=null,this.i=!1,this.h=null);}}function E(a){v.call(this);this.h=a;this.g={};}t(E,v);var Jb=[];function Kb(a,b,c,d){Array.isArray(c)||(c&&(Jb[0]=c.toString()),c=Jb);for(var e=0;e<c.length;e++){var f=fb(b,c[e],d||a.handleEvent,!1,a.h||a);if(!f)break;a.g[f.key]=f;}}function Lb(a){xa(a.g,function(b,c){this.g.hasOwnProperty(c)&&ob(b);},a);a.g={};}E.prototype.M=function(){E.Z.M.call(this);Lb(this);};E.prototype.handleEvent=function(){throw Error("EventHandler.handleEvent not implemented");};function Mb(){this.g=!0;}Mb.prototype.Aa=function(){this.g=!1;};function Nb(a,b,c,d,e,f){a.info(function(){if(a.g)if(f){var h="";for(var n=f.split("&"),u=0;u<n.length;u++){var m=n[u].split("=");if(1<m.length){var r=m[0];m=m[1];var G=r.split("_");h=2<=G.length&&"type"==G[1]?h+(r+"="+m+"&"):h+(r+"=redacted&");}}}else h=null;else h=f;return "XMLHTTP REQ ("+d+") [attempt "+e+"]: "+b+"\n"+c+"\n"+h});}
     function Ob(a,b,c,d,e,f,h){a.info(function(){return "XMLHTTP RESP ("+d+") [ attempt "+e+"]: "+b+"\n"+c+"\n"+f+" "+h});}function F$1(a,b,c,d){a.info(function(){return "XMLHTTP TEXT ("+b+"): "+Pb(a,c)+(d?" "+d:"")});}function Qb(a,b){a.info(function(){return "TIMEOUT: "+b});}Mb.prototype.info=function(){};
     function Pb(a,b){if(!a.g)return b;if(!b)return null;try{var c=JSON.parse(b);if(c)for(a=0;a<c.length;a++)if(Array.isArray(c[a])){var d=c[a];if(!(2>d.length)){var e=d[1];if(Array.isArray(e)&&!(1>e.length)){var f=e[0];if("noop"!=f&&"stop"!=f&&"close"!=f)for(var h=1;h<e.length;h++)e[h]="";}}}return rb(c)}catch(n){return b}}var H$1={},Rb=null;function Sb(){return Rb=Rb||new C$1}H$1.Ma="serverreachability";function Tb(a){z$1.call(this,H$1.Ma,a);}t(Tb,z$1);function I(a){const b=Sb();D$1(b,new Tb(b,a));}H$1.STAT_EVENT="statevent";function Ub(a,b){z$1.call(this,H$1.STAT_EVENT,a);this.stat=b;}t(Ub,z$1);function J$1(a){const b=Sb();D$1(b,new Ub(b,a));}H$1.Na="timingevent";function Vb(a,b){z$1.call(this,H$1.Na,a);this.size=b;}t(Vb,z$1);
-    function K$1(a,b){if("function"!==typeof a)throw Error("Fn must not be null and must be a function");return l.setTimeout(function(){a();},b)}var Wb={NO_ERROR:0,lb:1,yb:2,xb:3,sb:4,wb:5,zb:6,Ja:7,TIMEOUT:8,Cb:9};var Xb={qb:"complete",Mb:"success",Ka:"error",Ja:"abort",Eb:"ready",Fb:"readystatechange",TIMEOUT:"timeout",Ab:"incrementaldata",Db:"progress",tb:"downloadprogress",Ub:"uploadprogress"};function Yb(){}Yb.prototype.h=null;function Zb(a){return a.h||(a.h=a.i())}function $b(){}var L$1={OPEN:"a",pb:"b",Ka:"c",Bb:"d"};function ac$1(){z$1.call(this,"d");}t(ac$1,z$1);function bc$1(){z$1.call(this,"c");}t(bc$1,z$1);var cc$1;function dc$1(){}t(dc$1,Yb);dc$1.prototype.g=function(){return new XMLHttpRequest};dc$1.prototype.i=function(){return {}};cc$1=new dc$1;function M$1(a,b,c,d){this.l=a;this.j=b;this.m=c;this.X=d||1;this.V=new E(this);this.P=ec$1;a=Ja?125:void 0;this.W=new Eb(a);this.H=null;this.i=!1;this.s=this.A=this.v=this.K=this.F=this.Y=this.B=null;this.D=[];this.g=null;this.C=0;this.o=this.u=null;this.N=-1;this.I=!1;this.O=0;this.L=null;this.aa=this.J=this.$=this.U=!1;this.h=new fc$1;}function fc$1(){this.i=null;this.g="";this.h=!1;}var ec$1=45E3,gc$1={},hc$1={};k$1=M$1.prototype;k$1.setTimeout=function(a){this.P=a;};
+    function K$1(a,b){if("function"!==typeof a)throw Error("Fn must not be null and must be a function");return l.setTimeout(function(){a();},b)}var Wb={NO_ERROR:0,lb:1,yb:2,xb:3,sb:4,wb:5,zb:6,Ja:7,TIMEOUT:8,Cb:9};var Xb={qb:"complete",Mb:"success",Ka:"error",Ja:"abort",Eb:"ready",Fb:"readystatechange",TIMEOUT:"timeout",Ab:"incrementaldata",Db:"progress",tb:"downloadprogress",Ub:"uploadprogress"};function Yb(){}Yb.prototype.h=null;function Zb(a){return a.h||(a.h=a.i())}function $b(){}var L$1={OPEN:"a",pb:"b",Ka:"c",Bb:"d"};function ac$1(){z$1.call(this,"d");}t(ac$1,z$1);function bc$1(){z$1.call(this,"c");}t(bc$1,z$1);var cc$1;function dc$1(){}t(dc$1,Yb);dc$1.prototype.g=function(){return new XMLHttpRequest};dc$1.prototype.i=function(){return {}};cc$1=new dc$1;function M$1(a,b,c,d){this.l=a;this.j=b;this.m=c;this.X=d||1;this.V=new E(this);this.P=ec$1;a=Ja?125:void 0;this.W=new Eb(a);this.H=null;this.i=!1;this.s=this.A=this.v=this.K=this.F=this.Y=this.B=null;this.D=[];this.g=null;this.C=0;this.o=this.u=null;this.N=-1;this.I=!1;this.O=0;this.L=null;this.aa=this.J=this.$=this.U=!1;this.h=new fc$1;}function fc$1(){this.i=null;this.g="";this.h=!1;}var ec$1=45E3,gc={},hc={};k$1=M$1.prototype;k$1.setTimeout=function(a){this.P=a;};
     function ic$1(a,b,c){a.K=1;a.v=jc(N$1(b));a.s=c;a.U=!0;kc(a,null);}function kc(a,b){a.F=Date.now();lc$1(a);a.A=N$1(a.v);var c=a.A,d=a.X;Array.isArray(d)||(d=[String(d)]);mc(c.h,"t",d);a.C=0;c=a.l.H;a.h=new fc$1;a.g=nc$1(a.l,c?b:null,!a.s);0<a.O&&(a.L=new Ib(q(a.Ia,a,a.g),a.O));Kb(a.V,a.g,"readystatechange",a.gb);b=a.H?ya(a.H):{};a.s?(a.u||(a.u="POST"),b["Content-Type"]="application/x-www-form-urlencoded",a.g.ea(a.A,a.u,a.s,b)):(a.u="GET",a.g.ea(a.A,a.u,null,b));I(1);Nb(a.j,a.u,a.A,a.m,a.X,a.s);}
     k$1.gb=function(a){a=a.target;const b=this.L;b&&3==O(a)?b.l():this.Ia(a);};
     k$1.Ia=function(a){try{if(a==this.g)a:{const r=O(this.g);var b=this.g.Da();const G=this.g.ba();if(!(3>r)&&(3!=r||Ja||this.g&&(this.h.h||this.g.ga()||oc$1(this.g)))){this.I||4!=r||7==b||(8==b||0>=G?I(3):I(2));pc$1(this);var c=this.g.ba();this.N=c;b:if(qc$1(this)){var d=oc$1(this.g);a="";var e=d.length,f=4==O(this.g);if(!this.h.i){if("undefined"===typeof TextDecoder){P(this);rc$1(this);var h="";break b}this.h.i=new l.TextDecoder;}for(b=0;b<e;b++)this.h.h=!0,a+=this.h.i.decode(d[b],{stream:f&&b==e-1});d.splice(0,
     e);this.h.g+=a;this.C=0;h=this.h.g;}else h=this.g.ga();this.i=200==c;Ob(this.j,this.u,this.A,this.m,this.X,r,c);if(this.i){if(this.$&&!this.J){b:{if(this.g){var n,u=this.g;if((n=u.g?u.g.getResponseHeader("X-HTTP-Initial-Response"):null)&&!sa$1(n)){var m=n;break b}}m=null;}if(c=m)F$1(this.j,this.m,c,"Initial handshake response via X-HTTP-Initial-Response"),this.J=!0,sc$1(this,c);else {this.i=!1;this.o=3;J$1(12);P(this);rc$1(this);break a}}this.U?(tc(this,r,h),Ja&&this.i&&3==r&&(Kb(this.V,this.W,"tick",this.fb),
     this.W.start())):(F$1(this.j,this.m,h,null),sc$1(this,h));4==r&&P(this);this.i&&!this.I&&(4==r?uc$1(this.l,this):(this.i=!1,lc$1(this)));}else 400==c&&0<h.indexOf("Unknown SID")?(this.o=3,J$1(12)):(this.o=0,J$1(13)),P(this),rc$1(this);}}}catch(r){}finally{}};function qc$1(a){return a.g?"GET"==a.u&&2!=a.K&&a.l.Ba:!1}
-    function tc(a,b,c){let d=!0,e;for(;!a.I&&a.C<c.length;)if(e=vc(a,c),e==hc$1){4==b&&(a.o=4,J$1(14),d=!1);F$1(a.j,a.m,null,"[Incomplete Response]");break}else if(e==gc$1){a.o=4;J$1(15);F$1(a.j,a.m,c,"[Invalid Chunk]");d=!1;break}else F$1(a.j,a.m,e,null),sc$1(a,e);qc$1(a)&&e!=hc$1&&e!=gc$1&&(a.h.g="",a.C=0);4!=b||0!=c.length||a.h.h||(a.o=1,J$1(16),d=!1);a.i=a.i&&d;d?0<c.length&&!a.aa&&(a.aa=!0,b=a.l,b.g==a&&b.$&&!b.L&&(b.h.info("Great, no buffering proxy detected. Bytes received: "+c.length),wc$1(b),b.L=!0,J$1(11))):(F$1(a.j,a.m,
-    c,"[Invalid Chunked Response]"),P(a),rc$1(a));}k$1.fb=function(){if(this.g){var a=O(this.g),b=this.g.ga();this.C<b.length&&(pc$1(this),tc(this,a,b),this.i&&4!=a&&lc$1(this));}};function vc(a,b){var c=a.C,d=b.indexOf("\n",c);if(-1==d)return hc$1;c=Number(b.substring(c,d));if(isNaN(c))return gc$1;d+=1;if(d+c>b.length)return hc$1;b=b.substr(d,c);a.C=d+c;return b}k$1.cancel=function(){this.I=!0;P(this);};function lc$1(a){a.Y=Date.now()+a.P;xc(a,a.P);}
+    function tc(a,b,c){let d=!0,e;for(;!a.I&&a.C<c.length;)if(e=vc(a,c),e==hc){4==b&&(a.o=4,J$1(14),d=!1);F$1(a.j,a.m,null,"[Incomplete Response]");break}else if(e==gc){a.o=4;J$1(15);F$1(a.j,a.m,c,"[Invalid Chunk]");d=!1;break}else F$1(a.j,a.m,e,null),sc$1(a,e);qc$1(a)&&e!=hc&&e!=gc&&(a.h.g="",a.C=0);4!=b||0!=c.length||a.h.h||(a.o=1,J$1(16),d=!1);a.i=a.i&&d;d?0<c.length&&!a.aa&&(a.aa=!0,b=a.l,b.g==a&&b.$&&!b.L&&(b.h.info("Great, no buffering proxy detected. Bytes received: "+c.length),wc(b),b.L=!0,J$1(11))):(F$1(a.j,a.m,
+    c,"[Invalid Chunked Response]"),P(a),rc$1(a));}k$1.fb=function(){if(this.g){var a=O(this.g),b=this.g.ga();this.C<b.length&&(pc$1(this),tc(this,a,b),this.i&&4!=a&&lc$1(this));}};function vc(a,b){var c=a.C,d=b.indexOf("\n",c);if(-1==d)return hc;c=Number(b.substring(c,d));if(isNaN(c))return gc;d+=1;if(d+c>b.length)return hc;b=b.substr(d,c);a.C=d+c;return b}k$1.cancel=function(){this.I=!0;P(this);};function lc$1(a){a.Y=Date.now()+a.P;xc(a,a.P);}
     function xc(a,b){if(null!=a.B)throw Error("WatchDog timer not null");a.B=K$1(q(a.eb,a),b);}function pc$1(a){a.B&&(l.clearTimeout(a.B),a.B=null);}k$1.eb=function(){this.B=null;const a=Date.now();0<=a-this.Y?(Qb(this.j,this.A),2!=this.K&&(I(3),J$1(17)),P(this),this.o=2,rc$1(this)):xc(this,this.Y-a);};function rc$1(a){0==a.l.G||a.I||uc$1(a.l,a);}function P(a){pc$1(a);var b=a.L;b&&"function"==typeof b.na&&b.na();a.L=null;Fb(a.W);Lb(a.V);a.g&&(b=a.g,a.g=null,b.abort(),b.na());}
-    function sc$1(a,b){try{var c=a.l;if(0!=c.G&&(c.g==a||yc$1(c.i,a)))if(c.I=a.N,!a.J&&yc$1(c.i,a)&&3==c.G){try{var d=c.Ca.g.parse(b);}catch(m){d=null;}if(Array.isArray(d)&&3==d.length){var e=d;if(0==e[0])a:{if(!c.u){if(c.g)if(c.g.F+3E3<a.F)zc$1(c),Ac$1(c);else break a;Bc$1(c);J$1(18);}}else c.ta=e[1],0<c.ta-c.U&&37500>e[2]&&c.N&&0==c.A&&!c.v&&(c.v=K$1(q(c.ab,c),6E3));if(1>=Cc(c.i)&&c.ka){try{c.ka();}catch(m){}c.ka=void 0;}}else Q$1(c,11);}else if((a.J||c.g==a)&&zc$1(c),!sa$1(b))for(e=c.Ca.g.parse(b),b=0;b<e.length;b++){let m=e[b];
+    function sc$1(a,b){try{var c=a.l;if(0!=c.G&&(c.g==a||yc(c.i,a)))if(c.I=a.N,!a.J&&yc(c.i,a)&&3==c.G){try{var d=c.Ca.g.parse(b);}catch(m){d=null;}if(Array.isArray(d)&&3==d.length){var e=d;if(0==e[0])a:{if(!c.u){if(c.g)if(c.g.F+3E3<a.F)zc$1(c),Ac$1(c);else break a;Bc$1(c);J$1(18);}}else c.ta=e[1],0<c.ta-c.U&&37500>e[2]&&c.N&&0==c.A&&!c.v&&(c.v=K$1(q(c.ab,c),6E3));if(1>=Cc(c.i)&&c.ka){try{c.ka();}catch(m){}c.ka=void 0;}}else Q$1(c,11);}else if((a.J||c.g==a)&&zc$1(c),!sa$1(b))for(e=c.Ca.g.parse(b),b=0;b<e.length;b++){let m=e[b];
     c.U=m[0];m=m[1];if(2==c.G)if("c"==m[0]){c.J=m[1];c.la=m[2];const r=m[3];null!=r&&(c.ma=r,c.h.info("VER="+c.ma));const G=m[4];null!=G&&(c.za=G,c.h.info("SVER="+c.za));const Da=m[5];null!=Da&&"number"===typeof Da&&0<Da&&(d=1.5*Da,c.K=d,c.h.info("backChannelRequestTimeoutMs_="+d));d=c;const ca=a.g;if(ca){const Ea=ca.g?ca.g.getResponseHeader("X-Client-Wire-Protocol"):null;if(Ea){var f=d.i;!f.g&&(w(Ea,"spdy")||w(Ea,"quic")||w(Ea,"h2"))&&(f.j=f.l,f.g=new Set,f.h&&(Dc(f,f.h),f.h=null));}if(d.D){const xb=
-    ca.g?ca.g.getResponseHeader("X-HTTP-Session-Id"):null;xb&&(d.sa=xb,R(d.F,d.D,xb));}}c.G=3;c.j&&c.j.xa();c.$&&(c.O=Date.now()-a.F,c.h.info("Handshake RTT: "+c.O+"ms"));d=c;var h=a;d.oa=Ec$1(d,d.H?d.la:null,d.W);if(h.J){Fc$1(d.i,h);var n=h,u=d.K;u&&n.setTimeout(u);n.B&&(pc$1(n),lc$1(n));d.g=h;}else Gc$1(d);0<c.l.length&&Hc$1(c);}else "stop"!=m[0]&&"close"!=m[0]||Q$1(c,7);else 3==c.G&&("stop"==m[0]||"close"==m[0]?"stop"==m[0]?Q$1(c,7):Ic$1(c):"noop"!=m[0]&&c.j&&c.j.wa(m),c.A=0);}I(4);}catch(m){}}function Jc$1(a){if(a.R&&"function"==typeof a.R)return a.R();if("string"===typeof a)return a.split("");if(ba$1(a)){for(var b=[],c=a.length,d=0;d<c;d++)b.push(a[d]);return b}b=[];c=0;for(d in a)b[c++]=a[d];return b}
-    function Kc(a,b){if(a.forEach&&"function"==typeof a.forEach)a.forEach(b,void 0);else if(ba$1(a)||"string"===typeof a)na$1(a,b,void 0);else {if(a.T&&"function"==typeof a.T)var c=a.T();else if(a.R&&"function"==typeof a.R)c=void 0;else if(ba$1(a)||"string"===typeof a){c=[];for(var d=a.length,e=0;e<d;e++)c.push(e);}else for(e in c=[],d=0,a)c[d++]=e;d=Jc$1(a);e=d.length;for(var f=0;f<e;f++)b.call(void 0,d[f],c&&c[f],a);}}function S(a,b){this.h={};this.g=[];this.i=0;var c=arguments.length;if(1<c){if(c%2)throw Error("Uneven number of arguments");for(var d=0;d<c;d+=2)this.set(arguments[d],arguments[d+1]);}else if(a)if(a instanceof S)for(c=a.T(),d=0;d<c.length;d++)this.set(c[d],a.get(c[d]));else for(d in a)this.set(d,a[d]);}k$1=S.prototype;k$1.R=function(){Lc(this);for(var a=[],b=0;b<this.g.length;b++)a.push(this.h[this.g[b]]);return a};k$1.T=function(){Lc(this);return this.g.concat()};
+    ca.g?ca.g.getResponseHeader("X-HTTP-Session-Id"):null;xb&&(d.sa=xb,R(d.F,d.D,xb));}}c.G=3;c.j&&c.j.xa();c.$&&(c.O=Date.now()-a.F,c.h.info("Handshake RTT: "+c.O+"ms"));d=c;var h=a;d.oa=Ec$1(d,d.H?d.la:null,d.W);if(h.J){Fc(d.i,h);var n=h,u=d.K;u&&n.setTimeout(u);n.B&&(pc$1(n),lc$1(n));d.g=h;}else Gc$1(d);0<c.l.length&&Hc$1(c);}else "stop"!=m[0]&&"close"!=m[0]||Q$1(c,7);else 3==c.G&&("stop"==m[0]||"close"==m[0]?"stop"==m[0]?Q$1(c,7):Ic$1(c):"noop"!=m[0]&&c.j&&c.j.wa(m),c.A=0);}I(4);}catch(m){}}function Jc$1(a){if(a.R&&"function"==typeof a.R)return a.R();if("string"===typeof a)return a.split("");if(ba$1(a)){for(var b=[],c=a.length,d=0;d<c;d++)b.push(a[d]);return b}b=[];c=0;for(d in a)b[c++]=a[d];return b}
+    function Kc(a,b){if(a.forEach&&"function"==typeof a.forEach)a.forEach(b,void 0);else if(ba$1(a)||"string"===typeof a)na(a,b,void 0);else {if(a.T&&"function"==typeof a.T)var c=a.T();else if(a.R&&"function"==typeof a.R)c=void 0;else if(ba$1(a)||"string"===typeof a){c=[];for(var d=a.length,e=0;e<d;e++)c.push(e);}else for(e in c=[],d=0,a)c[d++]=e;d=Jc$1(a);e=d.length;for(var f=0;f<e;f++)b.call(void 0,d[f],c&&c[f],a);}}function S(a,b){this.h={};this.g=[];this.i=0;var c=arguments.length;if(1<c){if(c%2)throw Error("Uneven number of arguments");for(var d=0;d<c;d+=2)this.set(arguments[d],arguments[d+1]);}else if(a)if(a instanceof S)for(c=a.T(),d=0;d<c.length;d++)this.set(c[d],a.get(c[d]));else for(d in a)this.set(d,a[d]);}k$1=S.prototype;k$1.R=function(){Lc(this);for(var a=[],b=0;b<this.g.length;b++)a.push(this.h[this.g[b]]);return a};k$1.T=function(){Lc(this);return this.g.concat()};
     function Lc(a){if(a.i!=a.g.length){for(var b=0,c=0;b<a.g.length;){var d=a.g[b];T(a.h,d)&&(a.g[c++]=d);b++;}a.g.length=c;}if(a.i!=a.g.length){var e={};for(c=b=0;b<a.g.length;)d=a.g[b],T(e,d)||(a.g[c++]=d,e[d]=1),b++;a.g.length=c;}}k$1.get=function(a,b){return T(this.h,a)?this.h[a]:b};k$1.set=function(a,b){T(this.h,a)||(this.i++,this.g.push(a));this.h[a]=b;};k$1.forEach=function(a,b){for(var c=this.T(),d=0;d<c.length;d++){var e=c[d],f=this.get(e);a.call(b,f,e,this);}};
     function T(a,b){return Object.prototype.hasOwnProperty.call(a,b)}var Mc$1=/^(?:([^:/?#.]+):)?(?:\/\/(?:([^\\/?#]*)@)?([^\\/?#]*?)(?::([0-9]+))?(?=[\\/?#]|$))?([^?#]+)?(?:\?([^#]*))?(?:#([\s\S]*))?$/;function Nc(a,b){if(a){a=a.split("&");for(var c=0;c<a.length;c++){var d=a[c].indexOf("="),e=null;if(0<=d){var f=a[c].substring(0,d);e=a[c].substring(d+1);}else f=a[c];b(f,e?decodeURIComponent(e.replace(/\+/g," ")):"");}}}function U$1(a,b){this.i=this.s=this.j="";this.m=null;this.o=this.l="";this.g=!1;if(a instanceof U$1){this.g=void 0!==b?b:a.g;Oc(this,a.j);this.s=a.s;Pc$1(this,a.i);Qc(this,a.m);this.l=a.l;b=a.h;var c=new Rc$1;c.i=b.i;b.g&&(c.g=new S(b.g),c.h=b.h);Sc(this,c);this.o=a.o;}else a&&(c=String(a).match(Mc$1))?(this.g=!!b,Oc(this,c[1]||"",!0),this.s=Tc$1(c[2]||""),Pc$1(this,c[3]||"",!0),Qc(this,c[4]),this.l=Tc$1(c[5]||"",!0),Sc(this,c[6]||"",!0),this.o=Tc$1(c[7]||"")):(this.g=!!b,this.h=new Rc$1(null,this.g));}
     U$1.prototype.toString=function(){var a=[],b=this.j;b&&a.push(Uc(b,Vc,!0),":");var c=this.i;if(c||"file"==b)a.push("//"),(b=this.s)&&a.push(Uc(b,Vc,!0),"@"),a.push(encodeURIComponent(String(c)).replace(/%25([0-9a-fA-F]{2})/g,"%$1")),c=this.m,null!=c&&a.push(":",String(c));if(c=this.l)this.i&&"/"!=c.charAt(0)&&a.push("/"),a.push(Uc(c,"/"==c.charAt(0)?Wc:Xc$1,!0));(c=this.h.toString())&&a.push("?",c);(c=this.o)&&a.push("#",Uc(c,Yc$1));return a.join("")};function N$1(a){return new U$1(a)}
     function Oc(a,b,c){a.j=c?Tc$1(b,!0):b;a.j&&(a.j=a.j.replace(/:$/,""));}function Pc$1(a,b,c){a.i=c?Tc$1(b,!0):b;}function Qc(a,b){if(b){b=Number(b);if(isNaN(b)||0>b)throw Error("Bad port number "+b);a.m=b;}else a.m=null;}function Sc(a,b,c){b instanceof Rc$1?(a.h=b,Zc(a.h,a.g)):(c||(b=Uc(b,$c)),a.h=new Rc$1(b,a.g));}function R(a,b,c){a.h.set(b,c);}function jc(a){R(a,"zx",Math.floor(2147483648*Math.random()).toString(36)+Math.abs(Math.floor(2147483648*Math.random())^Date.now()).toString(36));return a}
     function ad(a){return a instanceof U$1?N$1(a):new U$1(a,void 0)}function bd(a,b,c,d){var e=new U$1(null,void 0);a&&Oc(e,a);b&&Pc$1(e,b);c&&Qc(e,c);d&&(e.l=d);return e}function Tc$1(a,b){return a?b?decodeURI(a.replace(/%25/g,"%2525")):decodeURIComponent(a):""}function Uc(a,b,c){return "string"===typeof a?(a=encodeURI(a).replace(b,cd),c&&(a=a.replace(/%25([0-9a-fA-F]{2})/g,"%$1")),a):null}function cd(a){a=a.charCodeAt(0);return "%"+(a>>4&15).toString(16)+(a&15).toString(16)}
     var Vc=/[#\/\?@]/g,Xc$1=/[#\?:]/g,Wc=/[#\?]/g,$c=/[#\?@]/g,Yc$1=/#/g;function Rc$1(a,b){this.h=this.g=null;this.i=a||null;this.j=!!b;}function V(a){a.g||(a.g=new S,a.h=0,a.i&&Nc(a.i,function(b,c){a.add(decodeURIComponent(b.replace(/\+/g," ")),c);}));}k$1=Rc$1.prototype;k$1.add=function(a,b){V(this);this.i=null;a=W$1(this,a);var c=this.g.get(a);c||this.g.set(a,c=[]);c.push(b);this.h+=1;return this};
-    function dd(a,b){V(a);b=W$1(a,b);T(a.g.h,b)&&(a.i=null,a.h-=a.g.get(b).length,a=a.g,T(a.h,b)&&(delete a.h[b],a.i--,a.g.length>2*a.i&&Lc(a)));}function ed(a,b){V(a);b=W$1(a,b);return T(a.g.h,b)}k$1.forEach=function(a,b){V(this);this.g.forEach(function(c,d){na$1(c,function(e){a.call(b,e,d,this);},this);},this);};k$1.T=function(){V(this);for(var a=this.g.R(),b=this.g.T(),c=[],d=0;d<b.length;d++)for(var e=a[d],f=0;f<e.length;f++)c.push(b[d]);return c};
+    function dd(a,b){V(a);b=W$1(a,b);T(a.g.h,b)&&(a.i=null,a.h-=a.g.get(b).length,a=a.g,T(a.h,b)&&(delete a.h[b],a.i--,a.g.length>2*a.i&&Lc(a)));}function ed(a,b){V(a);b=W$1(a,b);return T(a.g.h,b)}k$1.forEach=function(a,b){V(this);this.g.forEach(function(c,d){na(c,function(e){a.call(b,e,d,this);},this);},this);};k$1.T=function(){V(this);for(var a=this.g.R(),b=this.g.T(),c=[],d=0;d<b.length;d++)for(var e=a[d],f=0;f<e.length;f++)c.push(b[d]);return c};
     k$1.R=function(a){V(this);var b=[];if("string"===typeof a)ed(this,a)&&(b=qa(b,this.g.get(W$1(this,a))));else {a=this.g.R();for(var c=0;c<a.length;c++)b=qa(b,a[c]);}return b};k$1.set=function(a,b){V(this);this.i=null;a=W$1(this,a);ed(this,a)&&(this.h-=this.g.get(a).length);this.g.set(a,[b]);this.h+=1;return this};k$1.get=function(a,b){if(!a)return b;a=this.R(a);return 0<a.length?String(a[0]):b};function mc(a,b,c){dd(a,b);0<c.length&&(a.i=null,a.g.set(W$1(a,b),ra(c)),a.h+=c.length);}
-    k$1.toString=function(){if(this.i)return this.i;if(!this.g)return "";for(var a=[],b=this.g.T(),c=0;c<b.length;c++){var d=b[c],e=encodeURIComponent(String(d));d=this.R(d);for(var f=0;f<d.length;f++){var h=e;""!==d[f]&&(h+="="+encodeURIComponent(String(d[f])));a.push(h);}}return this.i=a.join("&")};function W$1(a,b){b=String(b);a.j&&(b=b.toLowerCase());return b}function Zc(a,b){b&&!a.j&&(V(a),a.i=null,a.g.forEach(function(c,d){var e=d.toLowerCase();d!=e&&(dd(this,d),mc(this,e,c));},a));a.j=b;}var fd=class{constructor(a,b){this.h=a;this.g=b;}};function gd(a){this.l=a||hd;l.PerformanceNavigationTiming?(a=l.performance.getEntriesByType("navigation"),a=0<a.length&&("hq"==a[0].nextHopProtocol||"h2"==a[0].nextHopProtocol)):a=!!(l.g&&l.g.Ea&&l.g.Ea()&&l.g.Ea().Zb);this.j=a?this.l:1;this.g=null;1<this.j&&(this.g=new Set);this.h=null;this.i=[];}var hd=10;function id(a){return a.h?!0:a.g?a.g.size>=a.j:!1}function Cc(a){return a.h?1:a.g?a.g.size:0}function yc$1(a,b){return a.h?a.h==b:a.g?a.g.has(b):!1}function Dc(a,b){a.g?a.g.add(b):a.h=b;}
-    function Fc$1(a,b){a.h&&a.h==b?a.h=null:a.g&&a.g.has(b)&&a.g.delete(b);}gd.prototype.cancel=function(){this.i=jd(this);if(this.h)this.h.cancel(),this.h=null;else if(this.g&&0!==this.g.size){for(const a of this.g.values())a.cancel();this.g.clear();}};function jd(a){if(null!=a.h)return a.i.concat(a.h.D);if(null!=a.g&&0!==a.g.size){let b=a.i;for(const c of a.g.values())b=b.concat(c.D);return b}return ra(a.i)}function kd(){}kd.prototype.stringify=function(a){return l.JSON.stringify(a,void 0)};kd.prototype.parse=function(a){return l.JSON.parse(a,void 0)};function ld(){this.g=new kd;}function md(a,b,c){const d=c||"";try{Kc(a,function(e,f){let h=e;p(e)&&(h=rb(e));b.push(d+f+"="+encodeURIComponent(h));});}catch(e){throw b.push(d+"type="+encodeURIComponent("_badmap")),e;}}function nd(a,b){const c=new Mb;if(l.Image){const d=new Image;d.onload=ja(od,c,d,"TestLoadImage: loaded",!0,b);d.onerror=ja(od,c,d,"TestLoadImage: error",!1,b);d.onabort=ja(od,c,d,"TestLoadImage: abort",!1,b);d.ontimeout=ja(od,c,d,"TestLoadImage: timeout",!1,b);l.setTimeout(function(){if(d.ontimeout)d.ontimeout();},1E4);d.src=a;}else b(!1);}function od(a,b,c,d,e){try{b.onload=null,b.onerror=null,b.onabort=null,b.ontimeout=null,e(d);}catch(f){}}function pd(a){this.l=a.$b||null;this.j=a.ib||!1;}t(pd,Yb);pd.prototype.g=function(){return new qd(this.l,this.j)};pd.prototype.i=function(a){return function(){return a}}({});function qd(a,b){C$1.call(this);this.D=a;this.u=b;this.m=void 0;this.readyState=rd;this.status=0;this.responseType=this.responseText=this.response=this.statusText="";this.onreadystatechange=null;this.v=new Headers;this.h=null;this.C="GET";this.B="";this.g=!1;this.A=this.j=this.l=null;}t(qd,C$1);var rd=0;k$1=qd.prototype;
+    k$1.toString=function(){if(this.i)return this.i;if(!this.g)return "";for(var a=[],b=this.g.T(),c=0;c<b.length;c++){var d=b[c],e=encodeURIComponent(String(d));d=this.R(d);for(var f=0;f<d.length;f++){var h=e;""!==d[f]&&(h+="="+encodeURIComponent(String(d[f])));a.push(h);}}return this.i=a.join("&")};function W$1(a,b){b=String(b);a.j&&(b=b.toLowerCase());return b}function Zc(a,b){b&&!a.j&&(V(a),a.i=null,a.g.forEach(function(c,d){var e=d.toLowerCase();d!=e&&(dd(this,d),mc(this,e,c));},a));a.j=b;}var fd=class{constructor(a,b){this.h=a;this.g=b;}};function gd(a){this.l=a||hd;l.PerformanceNavigationTiming?(a=l.performance.getEntriesByType("navigation"),a=0<a.length&&("hq"==a[0].nextHopProtocol||"h2"==a[0].nextHopProtocol)):a=!!(l.g&&l.g.Ea&&l.g.Ea()&&l.g.Ea().Zb);this.j=a?this.l:1;this.g=null;1<this.j&&(this.g=new Set);this.h=null;this.i=[];}var hd=10;function id(a){return a.h?!0:a.g?a.g.size>=a.j:!1}function Cc(a){return a.h?1:a.g?a.g.size:0}function yc(a,b){return a.h?a.h==b:a.g?a.g.has(b):!1}function Dc(a,b){a.g?a.g.add(b):a.h=b;}
+    function Fc(a,b){a.h&&a.h==b?a.h=null:a.g&&a.g.has(b)&&a.g.delete(b);}gd.prototype.cancel=function(){this.i=jd(this);if(this.h)this.h.cancel(),this.h=null;else if(this.g&&0!==this.g.size){for(const a of this.g.values())a.cancel();this.g.clear();}};function jd(a){if(null!=a.h)return a.i.concat(a.h.D);if(null!=a.g&&0!==a.g.size){let b=a.i;for(const c of a.g.values())b=b.concat(c.D);return b}return ra(a.i)}function kd(){}kd.prototype.stringify=function(a){return l.JSON.stringify(a,void 0)};kd.prototype.parse=function(a){return l.JSON.parse(a,void 0)};function ld(){this.g=new kd;}function md(a,b,c){const d=c||"";try{Kc(a,function(e,f){let h=e;p(e)&&(h=rb(e));b.push(d+f+"="+encodeURIComponent(h));});}catch(e){throw b.push(d+"type="+encodeURIComponent("_badmap")),e;}}function nd(a,b){const c=new Mb;if(l.Image){const d=new Image;d.onload=ja(od,c,d,"TestLoadImage: loaded",!0,b);d.onerror=ja(od,c,d,"TestLoadImage: error",!1,b);d.onabort=ja(od,c,d,"TestLoadImage: abort",!1,b);d.ontimeout=ja(od,c,d,"TestLoadImage: timeout",!1,b);l.setTimeout(function(){if(d.ontimeout)d.ontimeout();},1E4);d.src=a;}else b(!1);}function od(a,b,c,d,e){try{b.onload=null,b.onerror=null,b.onabort=null,b.ontimeout=null,e(d);}catch(f){}}function pd(a){this.l=a.$b||null;this.j=a.ib||!1;}t(pd,Yb);pd.prototype.g=function(){return new qd(this.l,this.j)};pd.prototype.i=function(a){return function(){return a}}({});function qd(a,b){C$1.call(this);this.D=a;this.u=b;this.m=void 0;this.readyState=rd;this.status=0;this.responseType=this.responseText=this.response=this.statusText="";this.onreadystatechange=null;this.v=new Headers;this.h=null;this.C="GET";this.B="";this.g=!1;this.A=this.j=this.l=null;}t(qd,C$1);var rd=0;k$1=qd.prototype;
     k$1.open=function(a,b){if(this.readyState!=rd)throw this.abort(),Error("Error reopening a connection");this.C=a;this.B=b;this.readyState=1;sd(this);};k$1.send=function(a){if(1!=this.readyState)throw this.abort(),Error("need to call open() first. ");this.g=!0;const b={headers:this.v,method:this.C,credentials:this.m,cache:void 0};a&&(b.body=a);(this.D||l).fetch(new Request(this.B,b)).then(this.Va.bind(this),this.ha.bind(this));};
     k$1.abort=function(){this.response=this.responseText="";this.v=new Headers;this.status=0;this.j&&this.j.cancel("Request was aborted.");1<=this.readyState&&this.g&&4!=this.readyState&&(this.g=!1,td(this));this.readyState=rd;};
     k$1.Va=function(a){if(this.g&&(this.l=a,this.h||(this.status=this.l.status,this.statusText=this.l.statusText,this.h=a.headers,this.readyState=2,sd(this)),this.g&&(this.readyState=3,sd(this),this.g)))if("arraybuffer"===this.responseType)a.arrayBuffer().then(this.Ta.bind(this),this.ha.bind(this));else if("undefined"!==typeof l.ReadableStream&&"body"in a){this.j=a.body.getReader();if(this.u){if(this.responseType)throw Error('responseType must be empty for "streamBinaryChunks" mode responses.');this.response=
@@ -4394,15 +4394,15 @@ var schedule = (function () {
     k$1.La=function(){return "string"===typeof this.j?this.j:String(this.j)};function Fd(a){let b="";xa(a,function(c,d){b+=d;b+=":";b+=c;b+="\r\n";});return b}function Gd(a,b,c){a:{for(d in c){var d=!1;break a}d=!0;}d||(c=Fd(c),"string"===typeof a?(null!=c&&encodeURIComponent(String(c))):R(a,b,c));}function Hd(a,b,c){return c&&c.internalChannelParams?c.internalChannelParams[a]||b:b}
     function Id(a){this.za=0;this.l=[];this.h=new Mb;this.la=this.oa=this.F=this.W=this.g=this.sa=this.D=this.aa=this.o=this.P=this.s=null;this.Za=this.V=0;this.Xa=Hd("failFast",!1,a);this.N=this.v=this.u=this.m=this.j=null;this.X=!0;this.I=this.ta=this.U=-1;this.Y=this.A=this.C=0;this.Pa=Hd("baseRetryDelayMs",5E3,a);this.$a=Hd("retryDelaySeedMs",1E4,a);this.Ya=Hd("forwardChannelMaxRetries",2,a);this.ra=Hd("forwardChannelRequestTimeoutMs",2E4,a);this.qa=a&&a.xmlHttpFactory||void 0;this.Ba=a&&a.Yb||!1;
     this.K=void 0;this.H=a&&a.supportsCrossDomainXhr||!1;this.J="";this.i=new gd(a&&a.concurrentRequestLimit);this.Ca=new ld;this.ja=a&&a.fastHandshake||!1;this.Ra=a&&a.Wb||!1;a&&a.Aa&&this.h.Aa();a&&a.forceLongPolling&&(this.X=!1);this.$=!this.ja&&this.X&&a&&a.detectBufferingProxy||!1;this.ka=void 0;this.O=0;this.L=!1;this.B=null;this.Wa=!a||!1!==a.Xb;}k$1=Id.prototype;k$1.ma=8;k$1.G=1;
-    function Ic$1(a){Jd(a);if(3==a.G){var b=a.V++,c=N$1(a.F);R(c,"SID",a.J);R(c,"RID",b);R(c,"TYPE","terminate");Kd(a,c);b=new M$1(a,a.h,b,void 0);b.K=2;b.v=jc(N$1(c));c=!1;l.navigator&&l.navigator.sendBeacon&&(c=l.navigator.sendBeacon(b.v.toString(),""));!c&&l.Image&&((new Image).src=b.v,c=!0);c||(b.g=nc$1(b.l,null),b.g.ea(b.v));b.F=Date.now();lc$1(b);}Ld(a);}k$1.hb=function(a){try{this.h.info("Origin Trials invoked: "+a);}catch(b){}};function Ac$1(a){a.g&&(wc$1(a),a.g.cancel(),a.g=null);}
+    function Ic$1(a){Jd(a);if(3==a.G){var b=a.V++,c=N$1(a.F);R(c,"SID",a.J);R(c,"RID",b);R(c,"TYPE","terminate");Kd(a,c);b=new M$1(a,a.h,b,void 0);b.K=2;b.v=jc(N$1(c));c=!1;l.navigator&&l.navigator.sendBeacon&&(c=l.navigator.sendBeacon(b.v.toString(),""));!c&&l.Image&&((new Image).src=b.v,c=!0);c||(b.g=nc$1(b.l,null),b.g.ea(b.v));b.F=Date.now();lc$1(b);}Ld(a);}k$1.hb=function(a){try{this.h.info("Origin Trials invoked: "+a);}catch(b){}};function Ac$1(a){a.g&&(wc(a),a.g.cancel(),a.g=null);}
     function Jd(a){Ac$1(a);a.u&&(l.clearTimeout(a.u),a.u=null);zc$1(a);a.i.cancel();a.m&&("number"===typeof a.m&&l.clearTimeout(a.m),a.m=null);}function Md(a,b){a.l.push(new fd(a.Za++,b));3==a.G&&Hc$1(a);}function Hc$1(a){id(a.i)||a.m||(a.m=!0,zb(a.Ha,a),a.C=0);}function Nd(a,b){if(Cc(a.i)>=a.i.j-(a.m?1:0))return !1;if(a.m)return a.l=b.D.concat(a.l),!0;if(1==a.G||2==a.G||a.C>=(a.Xa?0:a.Ya))return !1;a.m=K$1(q(a.Ha,a,b),Od(a,a.C));a.C++;return !0}
     k$1.Ha=function(a){if(this.m)if(this.m=null,1==this.G){if(!a){this.V=Math.floor(1E5*Math.random());a=this.V++;const e=new M$1(this,this.h,a,void 0);let f=this.s;this.P&&(f?(f=ya(f),Aa$1(f,this.P)):f=this.P);null===this.o&&(e.H=f);if(this.ja)a:{var b=0;for(var c=0;c<this.l.length;c++){b:{var d=this.l[c];if("__data__"in d.g&&(d=d.g.__data__,"string"===typeof d)){d=d.length;break b}d=void 0;}if(void 0===d)break;b+=d;if(4096<b){b=c;break a}if(4096===b||c===this.l.length-1){b=c+1;break a}}b=1E3;}else b=1E3;b=
     Pd(this,e,b);c=N$1(this.F);R(c,"RID",a);R(c,"CVER",22);this.D&&R(c,"X-HTTP-Session-Id",this.D);Kd(this,c);this.o&&f&&Gd(c,this.o,f);Dc(this.i,e);this.Ra&&R(c,"TYPE","init");this.ja?(R(c,"$req",b),R(c,"SID","null"),e.$=!0,ic$1(e,c,null)):ic$1(e,c,b);this.G=2;}}else 3==this.G&&(a?Qd(this,a):0==this.l.length||id(this.i)||Qd(this));};
     function Qd(a,b){var c;b?c=b.m:c=a.V++;const d=N$1(a.F);R(d,"SID",a.J);R(d,"RID",c);R(d,"AID",a.U);Kd(a,d);a.o&&a.s&&Gd(d,a.o,a.s);c=new M$1(a,a.h,c,a.C+1);null===a.o&&(c.H=a.s);b&&(a.l=b.D.concat(a.l));b=Pd(a,c,1E3);c.setTimeout(Math.round(.5*a.ra)+Math.round(.5*a.ra*Math.random()));Dc(a.i,c);ic$1(c,d,b);}function Kd(a,b){a.j&&Kc({},function(c,d){R(b,d,c);});}
     function Pd(a,b,c){c=Math.min(a.l.length,c);var d=a.j?q(a.j.Oa,a.j,a):null;a:{var e=a.l;let f=-1;for(;;){const h=["count="+c];-1==f?0<c?(f=e[0].h,h.push("ofs="+f)):f=0:h.push("ofs="+f);let n=!0;for(let u=0;u<c;u++){let m=e[u].h;const r=e[u].g;m-=f;if(0>m)f=Math.max(0,e[u].h-100),n=!1;else try{md(r,h,"req"+m+"_");}catch(G){d&&d(r);}}if(n){d=h.join("&");break a}}}a=a.l.splice(0,c);b.D=a;return d}function Gc$1(a){a.g||a.u||(a.Y=1,zb(a.Ga,a),a.A=0);}
     function Bc$1(a){if(a.g||a.u||3<=a.A)return !1;a.Y++;a.u=K$1(q(a.Ga,a),Od(a,a.A));a.A++;return !0}k$1.Ga=function(){this.u=null;Rd(this);if(this.$&&!(this.L||null==this.g||0>=this.O)){var a=2*this.O;this.h.info("BP detection timer enabled: "+a);this.B=K$1(q(this.bb,this),a);}};k$1.bb=function(){this.B&&(this.B=null,this.h.info("BP detection timeout reached."),this.h.info("Buffering proxy detected and switch to long-polling!"),this.N=!1,this.L=!0,J$1(10),Ac$1(this),Rd(this));};
-    function wc$1(a){null!=a.B&&(l.clearTimeout(a.B),a.B=null);}function Rd(a){a.g=new M$1(a,a.h,"rpc",a.Y);null===a.o&&(a.g.H=a.s);a.g.O=0;var b=N$1(a.oa);R(b,"RID","rpc");R(b,"SID",a.J);R(b,"CI",a.N?"0":"1");R(b,"AID",a.U);Kd(a,b);R(b,"TYPE","xmlhttp");a.o&&a.s&&Gd(b,a.o,a.s);a.K&&a.g.setTimeout(a.K);var c=a.g;a=a.la;c.K=1;c.v=jc(N$1(b));c.s=null;c.U=!0;kc(c,a);}k$1.ab=function(){null!=this.v&&(this.v=null,Ac$1(this),Bc$1(this),J$1(19));};function zc$1(a){null!=a.v&&(l.clearTimeout(a.v),a.v=null);}
-    function uc$1(a,b){var c=null;if(a.g==b){zc$1(a);wc$1(a);a.g=null;var d=2;}else if(yc$1(a.i,b))c=b.D,Fc$1(a.i,b),d=1;else return;a.I=b.N;if(0!=a.G)if(b.i)if(1==d){c=b.s?b.s.length:0;b=Date.now()-b.F;var e=a.C;d=Sb();D$1(d,new Vb(d,c,b,e));Hc$1(a);}else Gc$1(a);else if(e=b.o,3==e||0==e&&0<a.I||!(1==d&&Nd(a,b)||2==d&&Bc$1(a)))switch(c&&0<c.length&&(b=a.i,b.i=b.i.concat(c)),e){case 1:Q$1(a,5);break;case 4:Q$1(a,10);break;case 3:Q$1(a,6);break;default:Q$1(a,2);}}
+    function wc(a){null!=a.B&&(l.clearTimeout(a.B),a.B=null);}function Rd(a){a.g=new M$1(a,a.h,"rpc",a.Y);null===a.o&&(a.g.H=a.s);a.g.O=0;var b=N$1(a.oa);R(b,"RID","rpc");R(b,"SID",a.J);R(b,"CI",a.N?"0":"1");R(b,"AID",a.U);Kd(a,b);R(b,"TYPE","xmlhttp");a.o&&a.s&&Gd(b,a.o,a.s);a.K&&a.g.setTimeout(a.K);var c=a.g;a=a.la;c.K=1;c.v=jc(N$1(b));c.s=null;c.U=!0;kc(c,a);}k$1.ab=function(){null!=this.v&&(this.v=null,Ac$1(this),Bc$1(this),J$1(19));};function zc$1(a){null!=a.v&&(l.clearTimeout(a.v),a.v=null);}
+    function uc$1(a,b){var c=null;if(a.g==b){zc$1(a);wc(a);a.g=null;var d=2;}else if(yc(a.i,b))c=b.D,Fc(a.i,b),d=1;else return;a.I=b.N;if(0!=a.G)if(b.i)if(1==d){c=b.s?b.s.length:0;b=Date.now()-b.F;var e=a.C;d=Sb();D$1(d,new Vb(d,c,b,e));Hc$1(a);}else Gc$1(a);else if(e=b.o,3==e||0==e&&0<a.I||!(1==d&&Nd(a,b)||2==d&&Bc$1(a)))switch(c&&0<c.length&&(b=a.i,b.i=b.i.concat(c)),e){case 1:Q$1(a,5);break;case 4:Q$1(a,10);break;case 3:Q$1(a,6);break;default:Q$1(a,2);}}
     function Od(a,b){let c=a.Pa+Math.floor(Math.random()*a.$a);a.j||(c*=2);return c*b}function Q$1(a,b){a.h.info("Error code "+b);if(2==b){var c=null;a.j&&(c=null);var d=q(a.jb,a);c||(c=new U$1("//www.google.com/images/cleardot.gif"),l.location&&"http"==l.location.protocol||Oc(c,"https"),jc(c));nd(c.toString(),d);}else J$1(2);a.G=0;a.j&&a.j.va(b);Ld(a);Jd(a);}k$1.jb=function(a){a?(this.h.info("Successfully pinged google.com"),J$1(2)):(this.h.info("Failed to ping google.com"),J$1(1));};
     function Ld(a){a.G=0;a.I=-1;if(a.j){if(0!=jd(a.i).length||0!=a.l.length)a.i.i.length=0,ra(a.l),a.l.length=0;a.j.ua();}}function Ec$1(a,b,c){let d=ad(c);if(""!=d.i)b&&Pc$1(d,b+"."+d.i),Qc(d,d.m);else {const e=l.location;d=bd(e.protocol,b?b+"."+e.hostname:e.hostname,+e.port,c);}a.aa&&xa(a.aa,function(e,f){R(d,f,e);});b=a.D;c=a.sa;b&&c&&R(d,b,c);R(d,"VER",a.ma);Kd(a,d);return d}
     function nc$1(a,b,c){if(b&&!a.H)throw Error("Can't create secondary domain capable XhrIo object.");b=c&&a.Ba&&!a.qa?new X$1(new pd({ib:!0})):new X$1(a.qa);b.L=a.H;return b}function Sd(){}k$1=Sd.prototype;k$1.xa=function(){};k$1.wa=function(){};k$1.va=function(){};k$1.ua=function(){};k$1.Oa=function(){};function Td(){if(y&&!(10<=Number(Ua$1)))throw Error("Environmental error: no available transport.");}Td.prototype.g=function(a,b){return new Y$1(a,b)};
@@ -6684,13 +6684,6 @@ var schedule = (function () {
     }
 
     /**
-     * Returns whether a value is an integer and in the safe integer range
-     * @param value - The value to test for being an integer and in the safe range
-     */ function ce(t) {
-        return "number" == typeof t && Number.isInteger(t) && !ue(t) && t <= Number.MAX_SAFE_INTEGER && t >= Number.MIN_SAFE_INTEGER;
-    }
-
-    /**
      * @license
      * Copyright 2020 Google LLC
      *
@@ -7073,27 +7066,6 @@ var schedule = (function () {
         clone() {
             return new De(Re(this.value));
         }
-    }
-
-    /**
-     * Returns a FieldMask built from all fields in a MapValue.
-     */ function Ce(t) {
-        const e = [];
-        return Lt(t.fields, ((t, n) => {
-            const s = new ft([ t ]);
-            if (Ae(n)) {
-                const t = Ce(n.mapValue).fields;
-                if (0 === t.length) 
-                // Preserve the empty map by adding it to the FieldMask.
-                e.push(s); else 
-                // For nested and non-empty ObjectValues, add the FieldPath of the
-                // leaf nodes.
-                for (const n of t) e.push(s.child(n));
-            } else 
-            // For nested and non-empty ObjectValues, add the FieldPath of the leaf
-            // nodes.
-            e.push(s);
-        })), new zt(e);
     }
 
     /**
@@ -7744,14 +7716,6 @@ var schedule = (function () {
     }
 
     /**
-     * Returns a value for a number that's appropriate to put into a proto.
-     * The return value is an IntegerValue if it can safely represent the value,
-     * otherwise a DoubleValue is returned.
-     */ function En(t, e) {
-        return ce(e) ? Tn(e) : In(t, e);
-    }
-
-    /**
      * @license
      * Copyright 2018 Google LLC
      *
@@ -7897,32 +7861,6 @@ var schedule = (function () {
         return t.field.isEqual(e.field) && function(t, e) {
             return t instanceof Vn && e instanceof Vn || t instanceof Dn && e instanceof Dn ? rt(t.elements, e.elements, fe) : t instanceof xn && e instanceof xn ? fe(t._t, e._t) : t instanceof vn && e instanceof vn;
         }(t.transform, e.transform);
-    }
-
-    /** The result of successfully applying a mutation to the backend. */
-    class Fn {
-        constructor(
-        /**
-         * The version at which the mutation was committed:
-         *
-         * - For most operations, this is the updateTime in the WriteResult.
-         * - For deletes, the commitTime of the WriteResponse (because deletes are
-         *   not stored and have no updateTime).
-         *
-         * Note that these versions can be different: No-op writes will not change
-         * the updateTime even though the commitTime advances.
-         */
-        t, 
-        /**
-         * The resulting fields returned from the backend after a mutation
-         * containing field transforms has been committed. Contains one FieldValue
-         * for each FieldTransform that was in the mutation.
-         *
-         * Will be empty if the mutation did not contain any field transforms.
-         */
-        e) {
-            this.version = t, this.transformResults = e;
-        }
     }
 
     /**
@@ -8122,30 +8060,6 @@ var schedule = (function () {
      */ (t, e, n);
     }
 
-    /**
-     * If this mutation is not idempotent, returns the base value to persist with
-     * this mutation. If a base value is returned, the mutation is always applied
-     * to this base value, even if document has already been updated.
-     *
-     * The base value is a sparse object that consists of only the document
-     * fields for which this mutation contains a non-idempotent transformation
-     * (e.g. a numeric increment). The provided value guarantees consistent
-     * behavior for non-idempotent transforms and allow us to return the same
-     * latency-compensated value even if the backend has already applied the
-     * mutation. The base value is null for idempotent mutations, as they can be
-     * re-played even if the backend has already applied them.
-     *
-     * @returns a base value to store along with the mutation, or null for
-     * idempotent mutations.
-     */ function Gn(t, e) {
-        let n = null;
-        for (const s of t.fieldTransforms) {
-            const t = e.data.field(s.field), i = Pn(s.transform, t || null);
-            null != i && (null === n && (n = De.empty()), n.set(s.field, i));
-        }
-        return n || null;
-    }
-
     function Qn(t, e) {
         return t.type === e.type && (!!t.key.isEqual(e.key) && (!!t.precondition.isEqual(e.precondition) && (!!function(t, e) {
             return void 0 === t && void 0 === e || !(!t || !e) && rt(t, e, ((t, e) => Mn(t, e)));
@@ -8233,15 +8147,6 @@ var schedule = (function () {
         }
     }
 
-    class Xn extends Ln {
-        constructor(t, e) {
-            super(), this.key = t, this.precondition = e, this.type = 3 /* Verify */ , this.fieldTransforms = [];
-        }
-        getFieldMask() {
-            return null;
-        }
-    }
-
     /**
      * @license
      * Copyright 2017 Google LLC
@@ -8290,44 +8195,6 @@ var schedule = (function () {
      * are used for reverse lookups from the webchannel stream. Do NOT change the
      * names of these identifiers or change this into a const enum.
      */ var ts, es;
-
-    /**
-     * Determines whether an error code represents a permanent error when received
-     * in response to a non-write operation.
-     *
-     * See isPermanentWriteError for classifying write errors.
-     */
-    function ns(t) {
-        switch (t) {
-          default:
-            return L();
-
-          case G.CANCELLED:
-          case G.UNKNOWN:
-          case G.DEADLINE_EXCEEDED:
-          case G.RESOURCE_EXHAUSTED:
-          case G.INTERNAL:
-          case G.UNAVAILABLE:
-     // Unauthenticated means something went wrong with our token and we need
-            // to retry with new credentials which will happen automatically.
-                  case G.UNAUTHENTICATED:
-            return !1;
-
-          case G.INVALID_ARGUMENT:
-          case G.NOT_FOUND:
-          case G.ALREADY_EXISTS:
-          case G.PERMISSION_DENIED:
-          case G.FAILED_PRECONDITION:
-     // Aborted might be retried in some scenarios, but that is dependant on
-            // the context and should handled individually by the calling code.
-            // See https://cloud.google.com/apis/design/errors.
-                  case G.ABORTED:
-          case G.OUT_OF_RANGE:
-          case G.UNIMPLEMENTED:
-          case G.DATA_LOSS:
-            return !0;
-        }
-    }
 
     /**
      * Determines whether an error code represents a permanent error when received
@@ -8544,7 +8411,7 @@ var schedule = (function () {
         return new is((t => t.toString()), ((t, e) => t.isEqual(e)));
     }
 
-    const ds = new qt(dt.comparator);
+    new qt(dt.comparator);
 
     const _s = new Qt(dt.comparator);
 
@@ -9139,12 +9006,6 @@ var schedule = (function () {
         return t.dt ? e.toBase64() : e.toUint8Array();
     }
 
-    /**
-     * Returns a ByteString based on the proto string value.
-     */ function xs(t, e) {
-        return Ds(t, e.toTimestamp());
-    }
-
     function Ns(t) {
         return U(!!t), ct.fromTimestamp(function(t) {
             const e = Xt(t);
@@ -9161,10 +9022,6 @@ var schedule = (function () {
     function Os(t) {
         const e = ht.fromString(t);
         return U(ui(e)), e;
-    }
-
-    function Ms(t, e) {
-        return ks(t.databaseId, e.path);
     }
 
     function Fs(t, e) {
@@ -9193,13 +9050,6 @@ var schedule = (function () {
 
     function Us(t) {
         return U(t.length > 4 && "documents" === t.get(4)), t.popFirst(5);
-    }
-
-    /** Creates a Document proto from key and fields (but no create/update time) */ function qs(t, e, n) {
-        return {
-            name: Ms(t, e),
-            fields: n.value.mapValue.fields
-        };
     }
 
     function Qs(t, e) {
@@ -9259,67 +9109,6 @@ var schedule = (function () {
             }
         }
         return n;
-    }
-
-    function js(t, e) {
-        let n;
-        if (e instanceof jn) n = {
-            update: qs(t, e.key, e.value)
-        }; else if (e instanceof Yn) n = {
-            delete: Ms(t, e.key)
-        }; else if (e instanceof Wn) n = {
-            update: qs(t, e.key, e.data),
-            updateMask: oi(e.fieldMask)
-        }; else {
-            if (!(e instanceof Xn)) return L();
-            n = {
-                verify: Ms(t, e.key)
-            };
-        }
-        return e.fieldTransforms.length > 0 && (n.updateTransforms = e.fieldTransforms.map((t => function(t, e) {
-            const n = e.transform;
-            if (n instanceof vn) return {
-                fieldPath: e.field.canonicalString(),
-                setToServerValue: "REQUEST_TIME"
-            };
-            if (n instanceof Vn) return {
-                fieldPath: e.field.canonicalString(),
-                appendMissingElements: {
-                    values: n.elements
-                }
-            };
-            if (n instanceof Dn) return {
-                fieldPath: e.field.canonicalString(),
-                removeAllFromArray: {
-                    values: n.elements
-                }
-            };
-            if (n instanceof xn) return {
-                fieldPath: e.field.canonicalString(),
-                increment: n._t
-            };
-            throw L();
-        }(0, t)))), e.precondition.isNone || (n.currentDocument = function(t, e) {
-            return void 0 !== e.updateTime ? {
-                updateTime: xs(t, e.updateTime)
-            } : void 0 !== e.exists ? {
-                exists: e.exists
-            } : L();
-        }(t, e.precondition)), n;
-    }
-
-    function zs(t, e) {
-        return t && t.length > 0 ? (U(void 0 !== e), t.map((t => function(t, e) {
-            // NOTE: Deletes don't have an updateTime.
-            let n = t.updateTime ? Ns(t.updateTime) : Ns(e);
-            return n.isEqual(ct.min()) && (
-            // The Firestore Emulator currently returns an update time of 0 for
-            // deletes of non-existing documents (rather than null). This breaks the
-            // test "get deleted doc while offline with source=cache" as NoDocuments
-            // with version 0 are filtered by IndexedDb's RemoteDocumentCache.
-            // TODO(#2149): Remove this when Emulator is fixed
-            n = Ns(e)), new Fn(n, t.transformResults || []);
-        }(t, e)))) : [];
     }
 
     function Hs(t, e) {
@@ -9582,13 +9371,6 @@ var schedule = (function () {
         }
     }
 
-    function oi(t) {
-        const e = [];
-        return t.fields.forEach((t => e.push(t.canonicalString()))), {
-            fieldPaths: e
-        };
-    }
-
     function ui(t) {
         // Resource names have at least 4 components (project ID, database ID)
         return t.length >= 4 && "projects" === t.get(0) && "databases" === t.get(2);
@@ -9685,28 +9467,6 @@ var schedule = (function () {
         }
         isEqual(t) {
             return this.batchId === t.batchId && rt(this.mutations, t.mutations, ((t, e) => Qn(t, e))) && rt(this.baseMutations, t.baseMutations, ((t, e) => Qn(t, e)));
-        }
-    }
-
-    /** The result of applying a mutation batch to the backend. */ class $i {
-        constructor(t, e, n, 
-        /**
-         * A pre-computed mapping from each mutated document to the resulting
-         * version.
-         */
-        s) {
-            this.batch = t, this.commitVersion = e, this.mutationResults = n, this.docVersions = s;
-        }
-        /**
-         * Creates a new MutationBatchResult for the given batch and results. There
-         * must be one result for each mutation in the batch. This static factory
-         * caches a document=&gt;version mapping (docVersions).
-         */    static from(t, e, n) {
-            U(t.mutations.length === n.length);
-            let s = ds;
-            const i = t.mutations;
-            for (let t = 0; t < i.length; t++) s = s.insert(i[t].key, n[t].version);
-            return new $i(t, e, n, s);
         }
     }
 
@@ -11395,59 +11155,6 @@ var schedule = (function () {
         }));
     }
 
-    /* Accepts locally generated Mutations and commit them to storage. */
-    /**
-     * Acknowledges the given batch.
-     *
-     * On the happy path when a batch is acknowledged, the local store will
-     *
-     *  + remove the batch from the mutation queue;
-     *  + apply the changes to the remote document cache;
-     *  + recalculate the latency compensated view implied by those changes (there
-     *    may be mutations in the queue that affect the documents but haven't been
-     *    acknowledged yet); and
-     *  + give the changed documents back the sync engine
-     *
-     * @returns The resulting (modified) documents.
-     */
-    function Po(t, e) {
-        const n = K(t);
-        return n.persistence.runTransaction("Acknowledge batch", "readwrite-primary", (t => {
-            const s = e.batch.keys(), i = n.Ui.newChangeBuffer({
-                trackRemovals: !0
-            });
-            return function(t, e, n, s) {
-                const i = n.batch, r = i.keys();
-                let o = Pt.resolve();
-                return r.forEach((t => {
-                    o = o.next((() => s.getEntry(e, t))).next((e => {
-                        const r = n.docVersions.get(t);
-                        U(null !== r), e.version.compareTo(r) < 0 && (i.applyToRemoteDocument(e, n), e.isValidDocument() && (
-                        // We use the commitVersion as the readTime rather than the
-                        // document's updateTime since the updateTime is not advanced
-                        // for updates that do not modify the underlying document.
-                        e.setReadTime(n.commitVersion), s.addEntry(e)));
-                    }));
-                })), o.next((() => t.mutationQueue.removeMutationBatch(e, i)));
-            }
-            /** Returns the local view of the documents affected by a mutation batch. */
-            // PORTING NOTE: Multi-Tab only.
-            (n, t, e, i).next((() => i.apply(t))).next((() => n.mutationQueue.performConsistencyCheck(t))).next((() => n.documentOverlayCache.removeOverlaysForBatchId(t, s, e.batch.batchId))).next((() => n.localDocuments.recalculateAndSaveOverlaysForDocumentKeys(t, function(t) {
-                let e = ws();
-                for (let n = 0; n < t.mutationResults.length; ++n) {
-                    t.mutationResults[n].transformResults.length > 0 && (e = e.add(t.batch.mutations[n].key));
-                }
-                return e;
-            }
-            /**
-     * Removes mutations from the MutationQueue for the specified batch;
-     * LocalDocuments will be recalculated.
-     *
-     * @returns The resulting modified documents.
-     */ (e)))).next((() => n.localDocuments.getDocuments(t, s)));
-        }));
-    }
-
     /**
      * Returns the last consistent snapshot processed (used by the RemoteStore to
      * determine whether to buffer incoming snapshots from the backend).
@@ -11569,18 +11276,6 @@ var schedule = (function () {
                 Qi: i
             };
         }));
-    }
-
-    /**
-     * Gets the mutation batch after the passed in batchId in the mutation queue
-     * or null if empty.
-     * @param afterBatchId - If provided, the batch to search after.
-     * @returns The next mutation or null if there wasn't one.
-     */
-    function Do(t, e) {
-        const n = K(t);
-        return n.persistence.runTransaction("Get next mutation batch", "readonly", (t => (void 0 === e && (e = -1), 
-        n.mutationQueue.getNextMutationBatchAfterBatchId(t, e))));
     }
 
     /**
@@ -12542,76 +12237,6 @@ var schedule = (function () {
     }
 
     /**
-     * A Stream that implements the Write RPC.
-     *
-     * The Write RPC requires the caller to maintain special streamToken
-     * state in between calls, to help the server understand which responses the
-     * client has processed by the time the next request is made. Every response
-     * will contain a streamToken; this value must be passed to the next
-     * request.
-     *
-     * After calling start() on this stream, the next request must be a handshake,
-     * containing whatever streamToken is on hand. Once a response to this
-     * request is received, all pending mutations may be submitted. When
-     * submitting multiple batches of mutations at the same time, it's
-     * okay to use the same streamToken for the calls to writeMutations.
-     *
-     * TODO(b/33271235): Use proto types
-     */ class ou extends iu {
-        constructor(t, e, n, s, i, r) {
-            super(t, "write_stream_connection_backoff" /* WriteStreamConnectionBackoff */ , "write_stream_idle" /* WriteStreamIdle */ , "health_check_timeout" /* HealthCheckTimeout */ , e, n, s, r), 
-            this.wt = i, this.Wo = !1;
-        }
-        /**
-         * Tracks whether or not a handshake has been successfully exchanged and
-         * the stream is ready to accept mutations.
-         */    get zo() {
-            return this.Wo;
-        }
-        // Override of PersistentStream.start
-        start() {
-            this.Wo = !1, this.lastStreamToken = void 0, super.start();
-        }
-        Bo() {
-            this.Wo && this.Ho([]);
-        }
-        Ko(t, e) {
-            return this.bo.ho("Write", t, e);
-        }
-        onMessage(t) {
-            if (
-            // Always capture the last stream token.
-            U(!!t.streamToken), this.lastStreamToken = t.streamToken, this.Wo) {
-                // A successful first write response means the stream is healthy,
-                // Note, that we could consider a successful handshake healthy, however,
-                // the write itself might be causing an error we want to back off from.
-                this.So.reset();
-                const e = zs(t.writeResults, t.commitTime), n = Ns(t.commitTime);
-                return this.listener.Jo(n, e);
-            }
-            // The first response is always the handshake response
-            return U(!t.writeResults || 0 === t.writeResults.length), this.Wo = !0, this.listener.Yo();
-        }
-        /**
-         * Sends an initial streamToken to the server, performing the handshake
-         * required to make the StreamingWrite RPC work. Subsequent
-         * calls should wait until onHandshakeComplete was called.
-         */    Xo() {
-            // TODO(dimond): Support stream resumption. We intentionally do not set the
-            // stream token on the handshake, ignoring any stream token we might have.
-            const t = {};
-            t.database = Ls(this.wt), this.Mo(t);
-        }
-        /** Sends a group of mutations to the Firestore backend to apply. */    Ho(t) {
-            const e = {
-                streamToken: this.lastStreamToken,
-                writes: t.map((t => js(this.wt, t)))
-            };
-            this.Mo(e);
-        }
-    }
-
-    /**
      * @license
      * Copyright 2017 Google LLC
      *
@@ -13011,98 +12636,6 @@ var schedule = (function () {
         }));
     }
 
-    /**
-     * Executes `op`. If `op` fails, takes the network offline until `op`
-     * succeeds. Returns after the first attempt.
-     */ function Ru(t, e) {
-        return e().catch((n => Au(t, n, e)));
-    }
-
-    async function bu(t) {
-        const e = K(t), n = Fu(e);
-        let s = e.au.length > 0 ? e.au[e.au.length - 1].batchId : -1;
-        for (;Pu(e); ) try {
-            const t = await Do(e.localStore, s);
-            if (null === t) {
-                0 === e.au.length && n.ko();
-                break;
-            }
-            s = t.batchId, vu(e, t);
-        } catch (t) {
-            await Au(e, t);
-        }
-        Vu(e) && Su(e);
-    }
-
-    /**
-     * Returns true if we can add to the write pipeline (i.e. the network is
-     * enabled and the write pipeline is not full).
-     */ function Pu(t) {
-        return yu(t) && t.au.length < 10;
-    }
-
-    /**
-     * Queues additional writes to be sent to the write stream, sending them
-     * immediately if the write stream is established.
-     */ function vu(t, e) {
-        t.au.push(e);
-        const n = Fu(t);
-        n.Co() && n.zo && n.Ho(e.mutations);
-    }
-
-    function Vu(t) {
-        return yu(t) && !Fu(t).Do() && t.au.length > 0;
-    }
-
-    function Su(t) {
-        Fu(t).start();
-    }
-
-    async function Du(t) {
-        Fu(t).Xo();
-    }
-
-    async function Cu(t) {
-        const e = Fu(t);
-        // Send the write pipeline now that the stream is established.
-            for (const n of t.au) e.Ho(n.mutations);
-    }
-
-    async function xu(t, e, n) {
-        const s = t.au.shift(), i = $i.from(s, e, n);
-        await Ru(t, (() => t.remoteSyncer.applySuccessfulWrite(i))), 
-        // It's possible that with the completion of this mutation another
-        // slot has freed up.
-        await bu(t);
-    }
-
-    async function Nu(t, e) {
-        // If the write stream closed after the write handshake completes, a write
-        // operation failed and we fail the pending operation.
-        e && Fu(t).zo && 
-        // This error affects the actual write.
-        await async function(t, e) {
-            // Only handle permanent errors here. If it's transient, just let the retry
-            // logic kick in.
-            if (n = e.code, ns(n) && n !== G.ABORTED) {
-                // This was a permanent error, the request itself was the problem
-                // so it's not going to succeed if we resend it.
-                const n = t.au.shift();
-                // In this case it's also unlikely that the server itself is melting
-                // down -- this was just a bad request so inhibit backoff on the next
-                // restart.
-                            Fu(t).No(), await Ru(t, (() => t.remoteSyncer.rejectFailedWrite(n.batchId, e))), 
-                // It's possible that with the completion of this mutation
-                // another slot has freed up.
-                await bu(t);
-            }
-            var n;
-        }(t, e), 
-        // The write stream might have been started by refilling the write
-        // pipeline for failed writes
-        Vu(t) && Su(t);
-    }
-
     async function ku(t, e) {
         const n = K(t);
         n.asyncQueue.verifyOperationInProgress(), M("RemoteStore", "RemoteStore received new credentials");
@@ -13161,32 +12694,6 @@ var schedule = (function () {
             e ? (t.mu.No(), gu(t) ? mu(t) : t._u.set("Unknown" /* Unknown */)) : (await t.mu.stop(), 
             pu(t));
         }))), t.mu;
-    }
-
-    /**
-     * If not yet initialized, registers the WriteStream and its network state
-     * callback with `remoteStoreImpl`. Returns the existing stream if one is
-     * already available.
-     *
-     * PORTING NOTE: On iOS and Android, the WriteStream gets registered on startup.
-     * This is not done on Web to allow it to be tree-shaken.
-     */ function Fu(t) {
-        return t.gu || (
-        // Create stream (but note that it is not started yet).
-        t.gu = function(t, e, n) {
-            const s = K(t);
-            return s.tu(), new ou(e, s.bo, s.authCredentials, s.appCheckCredentials, s.wt, n);
-        }(t.datastore, t.asyncQueue, {
-            zr: Du.bind(null, t),
-            Jr: Nu.bind(null, t),
-            Yo: Cu.bind(null, t),
-            Jo: xu.bind(null, t)
-        }), t.fu.push((async e => {
-            e ? (t.gu.No(), 
-            // This will start the write stream if necessary.
-            await bu(t)) : (await t.gu.stop(), t.au.length > 0 && (M("RemoteStore", `Stopping write stream with ${t.au.length} pending writes`), 
-            t.au = []));
-        }))), t.gu;
     }
 
     /**
@@ -14071,77 +13578,6 @@ var schedule = (function () {
     }
 
     /**
-     * Initiates the write of local mutation batch which involves adding the
-     * writes to the mutation queue, notifying the remote store about new
-     * mutations and raising events for any changes this write caused.
-     *
-     * The promise returned by this call is resolved when the above steps
-     * have completed, *not* when the write was acked by the backend. The
-     * userCallback is resolved once the write was acked/rejected by the
-     * backend (or failed locally for any other reason).
-     */ async function hc(t, e, n) {
-        const s = Fc(t);
-        try {
-            const t = await function(t, e) {
-                const n = K(t), s = ut.now(), i = e.reduce(((t, e) => t.add(e.key)), ws());
-                let r, o;
-                return n.persistence.runTransaction("Locally write mutations", "readwrite", (t => {
-                    // Figure out which keys do not have a remote version in the cache, this
-                    // is needed to create the right overlay mutation: if no remote version
-                    // presents, we do not need to create overlays as patch mutations.
-                    // TODO(Overlay): Is there a better way to determine this? Using the
-                    //  document version does not work because local mutations set them back
-                    //  to 0.
-                    let u = os(), c = ws();
-                    return n.Ui.getEntries(t, i).next((t => {
-                        u = t, u.forEach(((t, e) => {
-                            e.isValidDocument() || (c = c.add(t));
-                        }));
-                    })).next((() => n.localDocuments.getOverlayedDocuments(t, u))).next((i => {
-                        r = i;
-                        // For non-idempotent mutations (such as `FieldValue.increment()`),
-                        // we record the base state in a separate patch mutation. This is
-                        // later used to guarantee consistent values and prevents flicker
-                        // even if the backend sends us an update that already includes our
-                        // transform.
-                        const o = [];
-                        for (const t of e) {
-                            const e = Gn(t, r.get(t.key).overlayedDocument);
-                            null != e && 
-                            // NOTE: The base state should only be applied if there's some
-                            // existing document to override, so use a Precondition of
-                            // exists=true
-                            o.push(new Wn(t.key, e, Ce(e.value.mapValue), $n.exists(!0)));
-                        }
-                        return n.mutationQueue.addMutationBatch(t, s, o, e);
-                    })).next((e => {
-                        o = e;
-                        const s = e.applyToLocalDocumentSet(r, c);
-                        return n.documentOverlayCache.saveOverlays(t, e.batchId, s);
-                    }));
-                })).then((() => ({
-                    batchId: o.batchId,
-                    changes: as(r)
-                })));
-            }(s.localStore, e);
-            s.sharedClientState.addPendingMutation(t.batchId), function(t, e, n) {
-                let s = t.oc[t.currentUser.toKey()];
-                s || (s = new qt(it));
-                s = s.insert(e, n), t.oc[t.currentUser.toKey()] = s;
-            }
-            /**
-     * Resolves or rejects the user callback for the given batch and then discards
-     * it.
-     */ (s, t.batchId, n), await Rc(s, t.changes), await bu(s.remoteStore);
-        } catch (t) {
-            // If we can't persist the mutation, we reject the user callback and
-            // don't send the mutation. The user can then retry the write.
-            const e = Bu(t, "Failed to persist write");
-            n.reject(e);
-        }
-    }
-
-    /**
      * Applies one remote event to the sync engine, notifying any views of the
      * changes, and releasing any pending mutation batches that would become
      * visible because of the snapshot version the remote event contains.
@@ -14230,69 +13666,6 @@ var schedule = (function () {
             s.sc = s.sc.remove(r), s.ic.delete(e), Ac(s);
         } else await xo(s.localStore, e, 
         /* keepPersistedTargetData */ !1).then((() => pc(s, e, n))).catch(bt);
-    }
-
-    async function _c(t, e) {
-        const n = K(t), s = e.batch.batchId;
-        try {
-            const t = await Po(n.localStore, e);
-            // The local store may or may not be able to apply the write result and
-            // raise events immediately (depending on whether the watcher is caught
-            // up), so we raise user callbacks first so that they consistently happen
-            // before listen events.
-                    yc(n, s, /*error=*/ null), gc(n, s), n.sharedClientState.updateMutationState(s, "acknowledged"), 
-            await Rc(n, t);
-        } catch (t) {
-            await bt(t);
-        }
-    }
-
-    async function wc(t, e, n) {
-        const s = K(t);
-        try {
-            const t = await function(t, e) {
-                const n = K(t);
-                return n.persistence.runTransaction("Reject batch", "readwrite-primary", (t => {
-                    let s;
-                    return n.mutationQueue.lookupMutationBatch(t, e).next((e => (U(null !== e), s = e.keys(), 
-                    n.mutationQueue.removeMutationBatch(t, e)))).next((() => n.mutationQueue.performConsistencyCheck(t))).next((() => n.documentOverlayCache.removeOverlaysForBatchId(t, s, e))).next((() => n.localDocuments.recalculateAndSaveOverlaysForDocumentKeys(t, s))).next((() => n.localDocuments.getDocuments(t, s)));
-                }));
-            }
-            /**
-     * Returns the largest (latest) batch id in mutation queue that is pending
-     * server response.
-     *
-     * Returns `BATCHID_UNKNOWN` if the queue is empty.
-     */ (s.localStore, e);
-            // The local store may or may not be able to apply the write result and
-            // raise events immediately (depending on whether the watcher is caught up),
-            // so we raise user callbacks first so that they consistently happen before
-            // listen events.
-                    yc(s, e, n), gc(s, e), s.sharedClientState.updateMutationState(e, "rejected", n), 
-            await Rc(s, t);
-        } catch (n) {
-            await bt(n);
-        }
-    }
-
-    /**
-     * Triggers the callbacks that are waiting for this batch id to get acknowledged by server,
-     * if there are any.
-     */ function gc(t, e) {
-        (t.uc.get(e) || []).forEach((t => {
-            t.resolve();
-        })), t.uc.delete(e);
-    }
-
-    /** Reject all outstanding callbacks waiting for pending writes to complete. */ function yc(t, e, n) {
-        const s = K(t);
-        let i = s.oc[s.currentUser.toKey()];
-        // NOTE: Mutations restored from persistence won't have callbacks, so it's
-        // okay for there to be no callback for this ID.
-            if (i) {
-            const t = i.get(e);
-            t && (n ? t.reject(n) : t.resolve(), i = i.remove(e)), s.oc[s.currentUser.toKey()] = i;
-        }
     }
 
     function pc(t, e, n = null) {
@@ -14419,12 +13792,6 @@ var schedule = (function () {
         return e.remoteStore.remoteSyncer.applyRemoteEvent = lc.bind(null, e), e.remoteStore.remoteSyncer.getRemoteKeysForTarget = Pc.bind(null, e), 
         e.remoteStore.remoteSyncer.rejectListen = dc.bind(null, e), e.Zu.Go = Wu.bind(null, e.eventManager), 
         e.Zu.lc = zu.bind(null, e.eventManager), e;
-    }
-
-    function Fc(t) {
-        const e = K(t);
-        return e.remoteStore.remoteSyncer.applySuccessfulWrite = _c.bind(null, e), e.remoteStore.remoteSyncer.rejectFailedWrite = wc.bind(null, e), 
-        e;
     }
 
     class Bc {
@@ -14683,10 +14050,6 @@ var schedule = (function () {
     async function Xc(t) {
         return t.onlineComponents || (M("FirestoreClient", "Using default OnlineComponentProvider"), 
         await Jc(t, new qc)), t.onlineComponents;
-    }
-
-    function na(t) {
-        return Xc(t).then((t => t.syncEngine));
     }
 
     async function sa(t) {
@@ -15502,35 +14865,6 @@ var schedule = (function () {
 
     /**
      * @license
-     * Copyright 2020 Google LLC
-     *
-     * Licensed under the Apache License, Version 2.0 (the "License");
-     * you may not use this file except in compliance with the License.
-     * You may obtain a copy of the License at
-     *
-     *   http://www.apache.org/licenses/LICENSE-2.0
-     *
-     * Unless required by applicable law or agreed to in writing, software
-     * distributed under the License is distributed on an "AS IS" BASIS,
-     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     * See the License for the specific language governing permissions and
-     * limitations under the License.
-     */
-    /**
-     * Sentinel values that can be used when writing document fields with `set()`
-     * or `update()`.
-     */ class nh {
-        /**
-         * @param _methodName - The public API endpoint that returns this class.
-         * @hideconstructor
-         */
-        constructor(t) {
-            this._methodName = t;
-        }
-    }
-
-    /**
-     * @license
      * Copyright 2017 Google LLC
      *
      * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15596,330 +14930,6 @@ var schedule = (function () {
     }
 
     /**
-     * @license
-     * Copyright 2017 Google LLC
-     *
-     * Licensed under the Apache License, Version 2.0 (the "License");
-     * you may not use this file except in compliance with the License.
-     * You may obtain a copy of the License at
-     *
-     *   http://www.apache.org/licenses/LICENSE-2.0
-     *
-     * Unless required by applicable law or agreed to in writing, software
-     * distributed under the License is distributed on an "AS IS" BASIS,
-     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     * See the License for the specific language governing permissions and
-     * limitations under the License.
-     */ const ih = /^__.*__$/;
-
-    /** The result of parsing document data (e.g. for a setData call). */ class rh {
-        constructor(t, e, n) {
-            this.data = t, this.fieldMask = e, this.fieldTransforms = n;
-        }
-        toMutation(t, e) {
-            return null !== this.fieldMask ? new Wn(t, this.data, this.fieldMask, e, this.fieldTransforms) : new jn(t, this.data, e, this.fieldTransforms);
-        }
-    }
-
-    function uh(t) {
-        switch (t) {
-          case 0 /* Set */ :
-     // fall through
-                  case 2 /* MergeSet */ :
-     // fall through
-                  case 1 /* Update */ :
-            return !0;
-
-          case 3 /* Argument */ :
-          case 4 /* ArrayArgument */ :
-            return !1;
-
-          default:
-            throw L();
-        }
-    }
-
-    /** A "context" object passed around while parsing user data. */ class ch {
-        /**
-         * Initializes a ParseContext with the given source and path.
-         *
-         * @param settings - The settings for the parser.
-         * @param databaseId - The database ID of the Firestore instance.
-         * @param serializer - The serializer to use to generate the Value proto.
-         * @param ignoreUndefinedProperties - Whether to ignore undefined properties
-         * rather than throw.
-         * @param fieldTransforms - A mutable list of field transforms encountered
-         * while parsing the data.
-         * @param fieldMask - A mutable list of field paths encountered while parsing
-         * the data.
-         *
-         * TODO(b/34871131): We don't support array paths right now, so path can be
-         * null to indicate the context represents any location within an array (in
-         * which case certain features will not work and errors will be somewhat
-         * compromised).
-         */
-        constructor(t, e, n, s, i, r) {
-            this.settings = t, this.databaseId = e, this.wt = n, this.ignoreUndefinedProperties = s, 
-            // Minor hack: If fieldTransforms is undefined, we assume this is an
-            // external call and we need to validate the entire path.
-            void 0 === i && this.Xc(), this.fieldTransforms = i || [], this.fieldMask = r || [];
-        }
-        get path() {
-            return this.settings.path;
-        }
-        get Zc() {
-            return this.settings.Zc;
-        }
-        /** Returns a new context with the specified settings overwritten. */    ta(t) {
-            return new ch(Object.assign(Object.assign({}, this.settings), t), this.databaseId, this.wt, this.ignoreUndefinedProperties, this.fieldTransforms, this.fieldMask);
-        }
-        ea(t) {
-            var e;
-            const n = null === (e = this.path) || void 0 === e ? void 0 : e.child(t), s = this.ta({
-                path: n,
-                na: !1
-            });
-            return s.sa(t), s;
-        }
-        ia(t) {
-            var e;
-            const n = null === (e = this.path) || void 0 === e ? void 0 : e.child(t), s = this.ta({
-                path: n,
-                na: !1
-            });
-            return s.Xc(), s;
-        }
-        ra(t) {
-            // TODO(b/34871131): We don't support array paths right now; so make path
-            // undefined.
-            return this.ta({
-                path: void 0,
-                na: !0
-            });
-        }
-        oa(t) {
-            return Vh(t, this.settings.methodName, this.settings.ua || !1, this.path, this.settings.ca);
-        }
-        /** Returns 'true' if 'fieldPath' was traversed when creating this context. */    contains(t) {
-            return void 0 !== this.fieldMask.find((e => t.isPrefixOf(e))) || void 0 !== this.fieldTransforms.find((e => t.isPrefixOf(e.field)));
-        }
-        Xc() {
-            // TODO(b/34871131): Remove null check once we have proper paths for fields
-            // within arrays.
-            if (this.path) for (let t = 0; t < this.path.length; t++) this.sa(this.path.get(t));
-        }
-        sa(t) {
-            if (0 === t.length) throw this.oa("Document fields must not be empty");
-            if (uh(this.Zc) && ih.test(t)) throw this.oa('Document fields cannot begin and end with "__"');
-        }
-    }
-
-    /**
-     * Helper for parsing raw user input (provided via the API) into internal model
-     * classes.
-     */ class ah {
-        constructor(t, e, n) {
-            this.databaseId = t, this.ignoreUndefinedProperties = e, this.wt = n || nu(t);
-        }
-        /** Creates a new top-level parse context. */    aa(t, e, n, s = !1) {
-            return new ch({
-                Zc: t,
-                methodName: e,
-                ca: n,
-                path: ft.emptyPath(),
-                na: !1,
-                ua: s
-            }, this.databaseId, this.wt, this.ignoreUndefinedProperties);
-        }
-    }
-
-    function hh(t) {
-        const e = t._freezeSettings(), n = nu(t._databaseId);
-        return new ah(t._databaseId, !!e.ignoreUndefinedProperties, n);
-    }
-
-    /** Parse document data from a set() call. */ function lh(t, e, n, s, i, r = {}) {
-        const o = t.aa(r.merge || r.mergeFields ? 2 /* MergeSet */ : 0 /* Set */ , e, n, i);
-        Rh("Data must be an object, but it was:", o, s);
-        const u = Eh(s, o);
-        let c, a;
-        if (r.merge) c = new zt(o.fieldMask), a = o.fieldTransforms; else if (r.mergeFields) {
-            const t = [];
-            for (const s of r.mergeFields) {
-                const i = bh(e, s, n);
-                if (!o.contains(i)) throw new Q(G.INVALID_ARGUMENT, `Field '${i}' is specified in your field mask but missing from your input data.`);
-                Sh(t, i) || t.push(i);
-            }
-            c = new zt(t), a = o.fieldTransforms.filter((t => c.covers(t.field)));
-        } else c = null, a = o.fieldTransforms;
-        return new rh(new De(u), c, a);
-    }
-
-    /**
-     * Parses user data to Protobuf Values.
-     *
-     * @param input - Data to be parsed.
-     * @param context - A context object representing the current path being parsed,
-     * the source of the data being parsed, etc.
-     * @returns The parsed value, or null if the value was a FieldValue sentinel
-     * that should not be included in the resulting parsed data.
-     */ function Th(t, e) {
-        if (Ah(
-        // Unwrap the API type from the Compat SDK. This will return the API type
-        // from firestore-exp.
-        t = getModularInstance(t))) return Rh("Unsupported field value:", e, t), Eh(t, e);
-        if (t instanceof nh) 
-        // FieldValues usually parse into transforms (except deleteField())
-        // in which case we do not want to include this field in our parsed data
-        // (as doing so will overwrite the field directly prior to the transform
-        // trying to transform it). So we don't add this location to
-        // context.fieldMask and we return null as our parsing result.
-        /**
-     * "Parses" the provided FieldValueImpl, adding any necessary transforms to
-     * context.fieldTransforms.
-     */
-        return function(t, e) {
-            // Sentinels are only supported with writes, and not within arrays.
-            if (!uh(e.Zc)) throw e.oa(`${t._methodName}() can only be used with update() and set()`);
-            if (!e.path) throw e.oa(`${t._methodName}() is not currently supported inside arrays`);
-            const n = t._toFieldTransform(e);
-            n && e.fieldTransforms.push(n);
-        }
-        /**
-     * Helper to parse a scalar value (i.e. not an Object, Array, or FieldValue)
-     *
-     * @returns The parsed value
-     */ (t, e), null;
-        if (void 0 === t && e.ignoreUndefinedProperties) 
-        // If the input is undefined it can never participate in the fieldMask, so
-        // don't handle this below. If `ignoreUndefinedProperties` is false,
-        // `parseScalarValue` will reject an undefined value.
-        return null;
-        if (
-        // If context.path is null we are inside an array and we don't support
-        // field mask paths more granular than the top-level array.
-        e.path && e.fieldMask.push(e.path), t instanceof Array) {
-            // TODO(b/34871131): Include the path containing the array in the error
-            // message.
-            // In the case of IN queries, the parsed data is an array (representing
-            // the set of values to be included for the IN query) that may directly
-            // contain additional arrays (each representing an individual field
-            // value), so we disable this validation.
-            if (e.settings.na && 4 /* ArrayArgument */ !== e.Zc) throw e.oa("Nested arrays are not supported");
-            return function(t, e) {
-                const n = [];
-                let s = 0;
-                for (const i of t) {
-                    let t = Th(i, e.ra(s));
-                    null == t && (
-                    // Just include nulls in the array for fields being replaced with a
-                    // sentinel.
-                    t = {
-                        nullValue: "NULL_VALUE"
-                    }), n.push(t), s++;
-                }
-                return {
-                    arrayValue: {
-                        values: n
-                    }
-                };
-            }(t, e);
-        }
-        return function(t, e) {
-            if (null === (t = getModularInstance(t))) return {
-                nullValue: "NULL_VALUE"
-            };
-            if ("number" == typeof t) return En(e.wt, t);
-            if ("boolean" == typeof t) return {
-                booleanValue: t
-            };
-            if ("string" == typeof t) return {
-                stringValue: t
-            };
-            if (t instanceof Date) {
-                const n = ut.fromDate(t);
-                return {
-                    timestampValue: Ds(e.wt, n)
-                };
-            }
-            if (t instanceof ut) {
-                // Firestore backend truncates precision down to microseconds. To ensure
-                // offline mode works the same with regards to truncation, perform the
-                // truncation immediately without waiting for the backend to do that.
-                const n = new ut(t.seconds, 1e3 * Math.floor(t.nanoseconds / 1e3));
-                return {
-                    timestampValue: Ds(e.wt, n)
-                };
-            }
-            if (t instanceof sh) return {
-                geoPointValue: {
-                    latitude: t.latitude,
-                    longitude: t.longitude
-                }
-            };
-            if (t instanceof eh) return {
-                bytesValue: Cs(e.wt, t._byteString)
-            };
-            if (t instanceof ba) {
-                const n = e.databaseId, s = t.firestore._databaseId;
-                if (!s.isEqual(n)) throw e.oa(`Document reference is for database ${s.projectId}/${s.database} but should be for database ${n.projectId}/${n.database}`);
-                return {
-                    referenceValue: ks(t.firestore._databaseId || e.databaseId, t._key.path)
-                };
-            }
-            throw e.oa(`Unsupported field value: ${pa(t)}`);
-        }
-        /**
-     * Checks whether an object looks like a JSON object that should be converted
-     * into a struct. Normal class/prototype instances are considered to look like
-     * JSON objects since they should be converted to a struct value. Arrays, Dates,
-     * GeoPoints, etc. are not considered to look like JSON objects since they map
-     * to specific FieldValue types other than ObjectValue.
-     */ (t, e);
-    }
-
-    function Eh(t, e) {
-        const n = {};
-        return Ut(t) ? 
-        // If we encounter an empty object, we explicitly add it to the update
-        // mask to ensure that the server creates a map entry.
-        e.path && e.path.length > 0 && e.fieldMask.push(e.path) : Lt(t, ((t, s) => {
-            const i = Th(s, e.ea(t));
-            null != i && (n[t] = i);
-        })), {
-            mapValue: {
-                fields: n
-            }
-        };
-    }
-
-    function Ah(t) {
-        return !("object" != typeof t || null === t || t instanceof Array || t instanceof Date || t instanceof ut || t instanceof sh || t instanceof eh || t instanceof ba || t instanceof nh);
-    }
-
-    function Rh(t, e, n) {
-        if (!Ah(n) || !function(t) {
-            return "object" == typeof t && null !== t && (Object.getPrototypeOf(t) === Object.prototype || null === Object.getPrototypeOf(t));
-        }(n)) {
-            const s = pa(n);
-            throw "an object" === s ? e.oa(t + " a custom object") : e.oa(t + " " + s);
-        }
-    }
-
-    /**
-     * Helper that calls fromDotSeparatedString() but wraps any error thrown.
-     */ function bh(t, e, n) {
-        if ((
-        // If required, replace the FieldPath Compat class with with the firestore-exp
-        // FieldPath.
-        e = getModularInstance(e)) instanceof Za) return e._internalPath;
-        if ("string" == typeof e) return vh(t, e);
-        throw Vh("Field path arguments must be of type string or ", t, 
-        /* hasConverter= */ !1, 
-        /* path= */ void 0, n);
-    }
-
-    /**
      * Matches any characters in a field path string that are reserved.
      */ const Ph = new RegExp("[~\\*/\\[\\]]");
 
@@ -15951,10 +14961,6 @@ var schedule = (function () {
         let c = "";
         return (r || o) && (c += " (found", r && (c += ` in field ${s}`), o && (c += ` in document ${i}`), 
         c += ")"), new Q(G.INVALID_ARGUMENT, u + t + c);
-    }
-
-    /** Checks `haystack` if FieldPath `needle` is present. Runs in O(n). */ function Sh(t, e) {
-        return t.some((t => t.isEqual(e)));
     }
 
     /**
@@ -16320,39 +15326,6 @@ var schedule = (function () {
      * See the License for the specific language governing permissions and
      * limitations under the License.
      */
-    /**
-     * Converts custom model object of type T into `DocumentData` by applying the
-     * converter if it exists.
-     *
-     * This function is used when converting user objects to `DocumentData`
-     * because we want to provide the user with a more specific error message if
-     * their `set()` or fails due to invalid data originating from a `toFirestore()`
-     * call.
-     */ function ul(t, e, n) {
-        let s;
-        // Cast to `any` in order to satisfy the union type constraint on
-        // toFirestore().
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return s = t ? n && (n.merge || n.mergeFields) ? t.toFirestore(e, n) : t.toFirestore(e) : e, 
-        s;
-    }
-
-    /**
-     * @license
-     * Copyright 2020 Google LLC
-     *
-     * Licensed under the Apache License, Version 2.0 (the "License");
-     * you may not use this file except in compliance with the License.
-     * You may obtain a copy of the License at
-     *
-     *   http://www.apache.org/licenses/LICENSE-2.0
-     *
-     * Unless required by applicable law or agreed to in writing, software
-     * distributed under the License is distributed on an "AS IS" BASIS,
-     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     * See the License for the specific language governing permissions and
-     * limitations under the License.
-     */
     // TODO(mrschmidt) Consider using `BaseTransaction` as the base class in the
     // legacy SDK.
     /**
@@ -16409,22 +15382,6 @@ var schedule = (function () {
         }
     }
 
-    function yl(t, e, n) {
-        t = Ia(t, ba);
-        const s = Ia(t.firestore, Fa), i = ul(t.converter, e, n);
-        return Rl(s, [ lh(hh(s), "setDoc", t._key, i, null !== t.converter, n).toMutation(t._key, $n.none()) ]);
-    }
-
-    /**
-     * Locally writes `mutations` on the async queue.
-     * @internal
-     */ function Rl(t, e) {
-        return function(t, e) {
-            const n = new j;
-            return t.asyncQueue.enqueueAndForget((async () => hc(await na(t), e, n))), n.promise;
-        }(La(t), e);
-    }
-
     /**
      * Converts a {@link ViewSnapshot} that contains the single document specified by `ref`
      * to a {@link DocumentSnapshot}.
@@ -16450,6 +15407,693 @@ var schedule = (function () {
         registerVersion(D, "3.4.12", "esm2017");
     }();
 
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    const LONG_TYPE = 'type.googleapis.com/google.protobuf.Int64Value';
+    const UNSIGNED_LONG_TYPE = 'type.googleapis.com/google.protobuf.UInt64Value';
+    function mapValues(
+    // { [k: string]: unknown } is no longer a wildcard assignment target after typescript 3.5
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    o, f) {
+        const result = {};
+        for (const key in o) {
+            if (o.hasOwnProperty(key)) {
+                result[key] = f(o[key]);
+            }
+        }
+        return result;
+    }
+    /**
+     * Takes data and encodes it in a JSON-friendly way, such that types such as
+     * Date are preserved.
+     * @internal
+     * @param data - Data to encode.
+     */
+    function encode(data) {
+        if (data == null) {
+            return null;
+        }
+        if (data instanceof Number) {
+            data = data.valueOf();
+        }
+        if (typeof data === 'number' && isFinite(data)) {
+            // Any number in JS is safe to put directly in JSON and parse as a double
+            // without any loss of precision.
+            return data;
+        }
+        if (data === true || data === false) {
+            return data;
+        }
+        if (Object.prototype.toString.call(data) === '[object String]') {
+            return data;
+        }
+        if (data instanceof Date) {
+            return data.toISOString();
+        }
+        if (Array.isArray(data)) {
+            return data.map(x => encode(x));
+        }
+        if (typeof data === 'function' || typeof data === 'object') {
+            return mapValues(data, x => encode(x));
+        }
+        // If we got this far, the data is not encodable.
+        throw new Error('Data cannot be encoded in JSON: ' + data);
+    }
+    /**
+     * Takes data that's been encoded in a JSON-friendly form and returns a form
+     * with richer datatypes, such as Dates, etc.
+     * @internal
+     * @param json - JSON to convert.
+     */
+    function decode(json) {
+        if (json == null) {
+            return json;
+        }
+        if (json['@type']) {
+            switch (json['@type']) {
+                case LONG_TYPE:
+                // Fall through and handle this the same as unsigned.
+                case UNSIGNED_LONG_TYPE: {
+                    // Technically, this could work return a valid number for malformed
+                    // data if there was a number followed by garbage. But it's just not
+                    // worth all the extra code to detect that case.
+                    const value = Number(json['value']);
+                    if (isNaN(value)) {
+                        throw new Error('Data cannot be decoded from JSON: ' + json);
+                    }
+                    return value;
+                }
+                default: {
+                    throw new Error('Data cannot be decoded from JSON: ' + json);
+                }
+            }
+        }
+        if (Array.isArray(json)) {
+            return json.map(x => decode(x));
+        }
+        if (typeof json === 'function' || typeof json === 'object') {
+            return mapValues(json, x => decode(x));
+        }
+        // Anything else is safe to return.
+        return json;
+    }
+
+    /**
+     * @license
+     * Copyright 2020 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * Type constant for Firebase Functions.
+     */
+    const FUNCTIONS_TYPE = 'functions';
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * Standard error codes for different ways a request can fail, as defined by:
+     * https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
+     *
+     * This map is used primarily to convert from a backend error code string to
+     * a client SDK error code string, and make sure it's in the supported set.
+     */
+    const errorCodeMap = {
+        OK: 'ok',
+        CANCELLED: 'cancelled',
+        UNKNOWN: 'unknown',
+        INVALID_ARGUMENT: 'invalid-argument',
+        DEADLINE_EXCEEDED: 'deadline-exceeded',
+        NOT_FOUND: 'not-found',
+        ALREADY_EXISTS: 'already-exists',
+        PERMISSION_DENIED: 'permission-denied',
+        UNAUTHENTICATED: 'unauthenticated',
+        RESOURCE_EXHAUSTED: 'resource-exhausted',
+        FAILED_PRECONDITION: 'failed-precondition',
+        ABORTED: 'aborted',
+        OUT_OF_RANGE: 'out-of-range',
+        UNIMPLEMENTED: 'unimplemented',
+        INTERNAL: 'internal',
+        UNAVAILABLE: 'unavailable',
+        DATA_LOSS: 'data-loss'
+    };
+    /**
+     * An explicit error that can be thrown from a handler to send an error to the
+     * client that called the function.
+     */
+    class FunctionsError extends FirebaseError {
+        constructor(
+        /**
+         * A standard error code that will be returned to the client. This also
+         * determines the HTTP status code of the response, as defined in code.proto.
+         */
+        code, message, 
+        /**
+         * Extra data to be converted to JSON and included in the error response.
+         */
+        details) {
+            super(`${FUNCTIONS_TYPE}/${code}`, message || '');
+            this.details = details;
+        }
+    }
+    /**
+     * Takes an HTTP status code and returns the corresponding ErrorCode.
+     * This is the standard HTTP status code -> error mapping defined in:
+     * https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
+     *
+     * @param status An HTTP status code.
+     * @return The corresponding ErrorCode, or ErrorCode.UNKNOWN if none.
+     */
+    function codeForHTTPStatus(status) {
+        // Make sure any successful status is OK.
+        if (status >= 200 && status < 300) {
+            return 'ok';
+        }
+        switch (status) {
+            case 0:
+                // This can happen if the server returns 500.
+                return 'internal';
+            case 400:
+                return 'invalid-argument';
+            case 401:
+                return 'unauthenticated';
+            case 403:
+                return 'permission-denied';
+            case 404:
+                return 'not-found';
+            case 409:
+                return 'aborted';
+            case 429:
+                return 'resource-exhausted';
+            case 499:
+                return 'cancelled';
+            case 500:
+                return 'internal';
+            case 501:
+                return 'unimplemented';
+            case 503:
+                return 'unavailable';
+            case 504:
+                return 'deadline-exceeded';
+        }
+        return 'unknown';
+    }
+    /**
+     * Takes an HTTP response and returns the corresponding Error, if any.
+     */
+    function _errorForResponse(status, bodyJSON) {
+        let code = codeForHTTPStatus(status);
+        // Start with reasonable defaults from the status code.
+        let description = code;
+        let details = undefined;
+        // Then look through the body for explicit details.
+        try {
+            const errorJSON = bodyJSON && bodyJSON.error;
+            if (errorJSON) {
+                const status = errorJSON.status;
+                if (typeof status === 'string') {
+                    if (!errorCodeMap[status]) {
+                        // They must've included an unknown error code in the body.
+                        return new FunctionsError('internal', 'internal');
+                    }
+                    code = errorCodeMap[status];
+                    // TODO(klimt): Add better default descriptions for error enums.
+                    // The default description needs to be updated for the new code.
+                    description = status;
+                }
+                const message = errorJSON.message;
+                if (typeof message === 'string') {
+                    description = message;
+                }
+                details = errorJSON.details;
+                if (details !== undefined) {
+                    details = decode(details);
+                }
+            }
+        }
+        catch (e) {
+            // If we couldn't parse explicit error data, that's fine.
+        }
+        if (code === 'ok') {
+            // Technically, there's an edge case where a developer could explicitly
+            // return an error code of OK, and we will treat it as success, but that
+            // seems reasonable.
+            return null;
+        }
+        return new FunctionsError(code, description, details);
+    }
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * Helper class to get metadata that should be included with a function call.
+     * @internal
+     */
+    class ContextProvider {
+        constructor(authProvider, messagingProvider, appCheckProvider) {
+            this.auth = null;
+            this.messaging = null;
+            this.appCheck = null;
+            this.auth = authProvider.getImmediate({ optional: true });
+            this.messaging = messagingProvider.getImmediate({
+                optional: true
+            });
+            if (!this.auth) {
+                authProvider.get().then(auth => (this.auth = auth), () => {
+                    /* get() never rejects */
+                });
+            }
+            if (!this.messaging) {
+                messagingProvider.get().then(messaging => (this.messaging = messaging), () => {
+                    /* get() never rejects */
+                });
+            }
+            if (!this.appCheck) {
+                appCheckProvider.get().then(appCheck => (this.appCheck = appCheck), () => {
+                    /* get() never rejects */
+                });
+            }
+        }
+        async getAuthToken() {
+            if (!this.auth) {
+                return undefined;
+            }
+            try {
+                const token = await this.auth.getToken();
+                return token === null || token === void 0 ? void 0 : token.accessToken;
+            }
+            catch (e) {
+                // If there's any error when trying to get the auth token, leave it off.
+                return undefined;
+            }
+        }
+        async getMessagingToken() {
+            if (!this.messaging ||
+                !('Notification' in self) ||
+                Notification.permission !== 'granted') {
+                return undefined;
+            }
+            try {
+                return await this.messaging.getToken();
+            }
+            catch (e) {
+                // We don't warn on this, because it usually means messaging isn't set up.
+                // console.warn('Failed to retrieve instance id token.', e);
+                // If there's any error when trying to get the token, leave it off.
+                return undefined;
+            }
+        }
+        async getAppCheckToken() {
+            if (this.appCheck) {
+                const result = await this.appCheck.getToken();
+                if (result.error) {
+                    // Do not send the App Check header to the functions endpoint if
+                    // there was an error from the App Check exchange endpoint. The App
+                    // Check SDK will already have logged the error to console.
+                    return null;
+                }
+                return result.token;
+            }
+            return null;
+        }
+        async getContext() {
+            const authToken = await this.getAuthToken();
+            const messagingToken = await this.getMessagingToken();
+            const appCheckToken = await this.getAppCheckToken();
+            return { authToken, messagingToken, appCheckToken };
+        }
+    }
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    const DEFAULT_REGION = 'us-central1';
+    /**
+     * Returns a Promise that will be rejected after the given duration.
+     * The error will be of type FunctionsError.
+     *
+     * @param millis Number of milliseconds to wait before rejecting.
+     */
+    function failAfter(millis) {
+        // Node timers and browser timers are fundamentally incompatible, but we
+        // don't care about the value here
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let timer = null;
+        return {
+            promise: new Promise((_, reject) => {
+                timer = setTimeout(() => {
+                    reject(new FunctionsError('deadline-exceeded', 'deadline-exceeded'));
+                }, millis);
+            }),
+            cancel: () => {
+                if (timer) {
+                    clearTimeout(timer);
+                }
+            }
+        };
+    }
+    /**
+     * The main class for the Firebase Functions SDK.
+     * @internal
+     */
+    class FunctionsService {
+        /**
+         * Creates a new Functions service for the given app.
+         * @param app - The FirebaseApp to use.
+         */
+        constructor(app, authProvider, messagingProvider, appCheckProvider, regionOrCustomDomain = DEFAULT_REGION, fetchImpl) {
+            this.app = app;
+            this.fetchImpl = fetchImpl;
+            this.emulatorOrigin = null;
+            this.contextProvider = new ContextProvider(authProvider, messagingProvider, appCheckProvider);
+            // Cancels all ongoing requests when resolved.
+            this.cancelAllRequests = new Promise(resolve => {
+                this.deleteService = () => {
+                    return Promise.resolve(resolve());
+                };
+            });
+            // Resolve the region or custom domain overload by attempting to parse it.
+            try {
+                const url = new URL(regionOrCustomDomain);
+                this.customDomain = url.origin;
+                this.region = DEFAULT_REGION;
+            }
+            catch (e) {
+                this.customDomain = null;
+                this.region = regionOrCustomDomain;
+            }
+        }
+        _delete() {
+            return this.deleteService();
+        }
+        /**
+         * Returns the URL for a callable with the given name.
+         * @param name - The name of the callable.
+         * @internal
+         */
+        _url(name) {
+            const projectId = this.app.options.projectId;
+            if (this.emulatorOrigin !== null) {
+                const origin = this.emulatorOrigin;
+                return `${origin}/${projectId}/${this.region}/${name}`;
+            }
+            if (this.customDomain !== null) {
+                return `${this.customDomain}/${name}`;
+            }
+            return `https://${this.region}-${projectId}.cloudfunctions.net/${name}`;
+        }
+    }
+    /**
+     * Modify this instance to communicate with the Cloud Functions emulator.
+     *
+     * Note: this must be called before this instance has been used to do any operations.
+     *
+     * @param host The emulator host (ex: localhost)
+     * @param port The emulator port (ex: 5001)
+     * @public
+     */
+    function connectFunctionsEmulator$1(functionsInstance, host, port) {
+        functionsInstance.emulatorOrigin = `http://${host}:${port}`;
+    }
+    /**
+     * Returns a reference to the callable https trigger with the given name.
+     * @param name - The name of the trigger.
+     * @public
+     */
+    function httpsCallable$1(functionsInstance, name, options) {
+        return (data => {
+            return call(functionsInstance, name, data, options || {});
+        });
+    }
+    /**
+     * Does an HTTP POST and returns the completed response.
+     * @param url The url to post to.
+     * @param body The JSON body of the post.
+     * @param headers The HTTP headers to include in the request.
+     * @return A Promise that will succeed when the request finishes.
+     */
+    async function postJSON(url, body, headers, fetchImpl) {
+        headers['Content-Type'] = 'application/json';
+        let response;
+        try {
+            response = await fetchImpl(url, {
+                method: 'POST',
+                body: JSON.stringify(body),
+                headers
+            });
+        }
+        catch (e) {
+            // This could be an unhandled error on the backend, or it could be a
+            // network error. There's no way to know, since an unhandled error on the
+            // backend will fail to set the proper CORS header, and thus will be
+            // treated as a network error by fetch.
+            return {
+                status: 0,
+                json: null
+            };
+        }
+        let json = null;
+        try {
+            json = await response.json();
+        }
+        catch (e) {
+            // If we fail to parse JSON, it will fail the same as an empty body.
+        }
+        return {
+            status: response.status,
+            json
+        };
+    }
+    /**
+     * Calls a callable function asynchronously and returns the result.
+     * @param name The name of the callable trigger.
+     * @param data The data to pass as params to the function.s
+     */
+    function call(functionsInstance, name, data, options) {
+        const url = functionsInstance._url(name);
+        return callAtURL(functionsInstance, url, data, options);
+    }
+    /**
+     * Calls a callable function asynchronously and returns the result.
+     * @param url The url of the callable trigger.
+     * @param data The data to pass as params to the function.s
+     */
+    async function callAtURL(functionsInstance, url, data, options) {
+        // Encode any special types, such as dates, in the input data.
+        data = encode(data);
+        const body = { data };
+        // Add a header for the authToken.
+        const headers = {};
+        const context = await functionsInstance.contextProvider.getContext();
+        if (context.authToken) {
+            headers['Authorization'] = 'Bearer ' + context.authToken;
+        }
+        if (context.messagingToken) {
+            headers['Firebase-Instance-ID-Token'] = context.messagingToken;
+        }
+        if (context.appCheckToken !== null) {
+            headers['X-Firebase-AppCheck'] = context.appCheckToken;
+        }
+        // Default timeout to 70s, but let the options override it.
+        const timeout = options.timeout || 70000;
+        const failAfterHandle = failAfter(timeout);
+        const response = await Promise.race([
+            postJSON(url, body, headers, functionsInstance.fetchImpl),
+            failAfterHandle.promise,
+            functionsInstance.cancelAllRequests
+        ]);
+        // Always clear the failAfter timeout
+        failAfterHandle.cancel();
+        // If service was deleted, interrupted response throws an error.
+        if (!response) {
+            throw new FunctionsError('cancelled', 'Firebase Functions instance was deleted.');
+        }
+        // Check for an error status, regardless of http status.
+        const error = _errorForResponse(response.status, response.json);
+        if (error) {
+            throw error;
+        }
+        if (!response.json) {
+            throw new FunctionsError('internal', 'Response is not valid JSON object.');
+        }
+        let responseData = response.json.data;
+        // TODO(klimt): For right now, allow "result" instead of "data", for
+        // backwards compatibility.
+        if (typeof responseData === 'undefined') {
+            responseData = response.json.result;
+        }
+        if (typeof responseData === 'undefined') {
+            // Consider the response malformed.
+            throw new FunctionsError('internal', 'Response is missing data field.');
+        }
+        // Decode any special types, such as dates, in the returned data.
+        const decodedData = decode(responseData);
+        return { data: decodedData };
+    }
+
+    const name = "@firebase/functions";
+    const version = "0.8.4";
+
+    /**
+     * @license
+     * Copyright 2019 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    const AUTH_INTERNAL_NAME = 'auth-internal';
+    const APP_CHECK_INTERNAL_NAME = 'app-check-internal';
+    const MESSAGING_INTERNAL_NAME = 'messaging-internal';
+    function registerFunctions(fetchImpl, variant) {
+        const factory = (container, { instanceIdentifier: regionOrCustomDomain }) => {
+            // Dependencies
+            const app = container.getProvider('app').getImmediate();
+            const authProvider = container.getProvider(AUTH_INTERNAL_NAME);
+            const messagingProvider = container.getProvider(MESSAGING_INTERNAL_NAME);
+            const appCheckProvider = container.getProvider(APP_CHECK_INTERNAL_NAME);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return new FunctionsService(app, authProvider, messagingProvider, appCheckProvider, regionOrCustomDomain, fetchImpl);
+        };
+        _registerComponent(new Component(FUNCTIONS_TYPE, factory, "PUBLIC" /* PUBLIC */).setMultipleInstances(true));
+        registerVersion(name, version, variant);
+        // BUILD_TARGET will be replaced by values like esm5, esm2017, cjs5, etc during the compilation
+        registerVersion(name, version, 'esm2017');
+    }
+
+    /**
+     * @license
+     * Copyright 2020 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * Returns a {@link Functions} instance for the given app.
+     * @param app - The {@link @firebase/app#FirebaseApp} to use.
+     * @param regionOrCustomDomain - one of:
+     *   a) The region the callable functions are located in (ex: us-central1)
+     *   b) A custom domain hosting the callable functions (ex: https://mydomain.com)
+     * @public
+     */
+    function getFunctions(app = getApp(), regionOrCustomDomain = DEFAULT_REGION) {
+        // Dependencies
+        const functionsProvider = _getProvider(getModularInstance(app), FUNCTIONS_TYPE);
+        const functionsInstance = functionsProvider.getImmediate({
+            identifier: regionOrCustomDomain
+        });
+        return functionsInstance;
+    }
+    /**
+     * Modify this instance to communicate with the Cloud Functions emulator.
+     *
+     * Note: this must be called before this instance has been used to do any operations.
+     *
+     * @param host - The emulator host (ex: localhost)
+     * @param port - The emulator port (ex: 5001)
+     * @public
+     */
+    function connectFunctionsEmulator(functionsInstance, host, port) {
+        connectFunctionsEmulator$1(getModularInstance(functionsInstance), host, port);
+    }
+    /**
+     * Returns a reference to the callable HTTPS trigger with the given name.
+     * @param name - The name of the trigger.
+     * @public
+     */
+    function httpsCallable(functionsInstance, name, options) {
+        return httpsCallable$1(getModularInstance(functionsInstance), name, options);
+    }
+
+    /**
+     * Cloud Functions for Firebase
+     *
+     * @packageDocumentation
+     */
+    registerFunctions(fetch.bind(self));
+
     const firebaseConfig = {
         apiKey: "AIzaSyDfGaweLVDXcfxJDZ4ztoMoilhU9fv4uXU",
         authDomain: "pmpirate.firebaseapp.com",
@@ -16462,8 +16106,12 @@ var schedule = (function () {
     const app = initializeApp(firebaseConfig);
     getAnalytics(app);
     const db = Ba(app);
+    const functions = getFunctions(app, 'europe-west2');
     const isEmulation = location.href.includes("localhost") || location.href.includes("127.0.0.1");
-    isEmulation && Ra(db, "localhost", 8080);
+    if (isEmulation) {
+        Ra(db, "localhost", 8080);
+        connectFunctionsEmulator(functions, "localhost", 5001);
+    }
 
     function noop() { }
     function is_promise(value) {
@@ -16781,6 +16429,12 @@ var schedule = (function () {
         }
         info.block.p(child_ctx, dirty);
     }
+
+    const globals = (typeof window !== 'undefined'
+        ? window
+        : typeof globalThis !== 'undefined'
+            ? globalThis
+            : global);
     function create_component(block) {
         block && block.c();
     }
@@ -16981,6 +16635,29 @@ var schedule = (function () {
         $inject_state() { }
     }
 
+    const toInt = (x) => {
+        const intX = parseInt(x);
+        if (!isNaN(intX))
+            return intX;
+        const numerals = [
+            "I",
+            "II",
+            "III",
+            "IV",
+            "V",
+            "VI",
+            "VII",
+            "VIII",
+            "IX",
+            "X",
+            "XI",
+            "XII",
+        ];
+        const index = numerals.indexOf(x);
+        if (index === -1)
+            return index + 1;
+        return NaN;
+    };
     const separateDate = (date) => [
         date.getDate(),
         date.getMonth() + 1,
@@ -16993,27 +16670,44 @@ var schedule = (function () {
         const ordered = reverse ? ogOrder.reverse() : ogOrder;
         return ordered.join(splitter);
     };
+    const fixYear = (y) => {
+        const year = `${y}`;
+        if (year.length <= 2)
+            return fixYear("20" + year.padStart(2, "0"));
+        if (year.length === 3)
+            return NaN;
+        return parseInt(year);
+    };
+    const stringToDate = (d) => {
+        const splitters = ["/", "-", "."];
+        for (const splitter of splitters) {
+            const [date, month, year] = d.split(splitter).map(toInt);
+            const result = compoundDate(date !== null && date !== void 0 ? date : NaN, month !== null && month !== void 0 ? month : NaN, fixYear(year !== null && year !== void 0 ? year : NaN));
+            if (![date, month, year].some(x => !x) && `${result}` !== "Invalid Date")
+                return result;
+        }
+        for (const splitter of splitters) {
+            const [year, month, date] = d.split(splitter).map(toInt);
+            const result = compoundDate(date !== null && date !== void 0 ? date : NaN, month !== null && month !== void 0 ? month : NaN, fixYear(year !== null && year !== void 0 ? year : NaN));
+            if (![date, month, year].some(x => !x) && `${result}` !== "Invalid Date")
+                return result;
+        }
+        const result = new Date(d);
+        if (`${result}` !== "Invalid Date")
+            return result;
+        return undefined;
+    };
 
     const cache = {};
     const queue = new Set();
     const firstMonth = compoundDate(1, 9, 2021);
     const delay = (time) => new Promise(resolve => setTimeout(resolve, time * 10 ** 3));
-    async function getFromDb(db, collection, docId) {
+    async function getFromDb(db, collectionId, docId) {
         try {
             console.count("DB reads");
             console.count(docId);
-            const theDoc = await ll(Da(db, collection, docId));
+            const theDoc = await ll(Da(db, collectionId, docId));
             return theDoc.data();
-        }
-        catch (err) {
-            console.warn("Your DB emulations are likely not running correctly");
-            console.error(err);
-        }
-    }
-    async function setToDb(db, collection, docId, data) {
-        try {
-            console.count("DB writes");
-            await yl(Da(db, collection, docId), data);
         }
         catch (err) {
             console.warn("Your DB emulations are likely not running correctly");
@@ -17077,21 +16771,15 @@ var schedule = (function () {
         await getMemesOfMonth(year, month, db);
         return getMemeOtd(d, db, n + 1);
     };
-    const setsAreEqual = (setA, setB) => [...setA].length === [...setB].length &&
-        [...setA].length === [...new Set([...setA, ...setB])].length;
-    const scheduleMemeToDb = async (d, meme, db) => {
-        const [date, month, year] = separateDate(d);
-        const docId = getDocId(year, month);
-        const oldData = await getFromDb(db, "memes", docId);
-        const data = Object.assign({ [date]: meme }, oldData);
-        if (setsAreEqual(new Set(Object.keys(oldData)), new Set(Object.keys(data)))) {
-            console.log("Cancelled a redundant write");
-            return;
-        }
-        await setToDb(db, "memes", docId, data);
-    };
-    const scheduleMeme = async (date, meme, db) => {
-        await scheduleMemeToDb(date, meme, db);
+    async function callCloudFunction(func, data) {
+        return httpsCallable(functions, func)(data);
+    }
+    const submitMeme = async (date, meme) => {
+        const response = await callCloudFunction("submitMeme", {
+            date: dateToString(date),
+            meme,
+        });
+        return response;
     };
 
     /* src/components/Header.svelte generated by Svelte v3.49.0 */
@@ -17246,6 +16934,8 @@ var schedule = (function () {
     }
 
     /* src/components/Schedule.svelte generated by Svelte v3.49.0 */
+
+    const { console: console_1 } = globals;
     const file = "src/components/Schedule.svelte";
 
     function get_each_context(ctx, list, i) {
@@ -17276,7 +16966,7 @@ var schedule = (function () {
     	return block;
     }
 
-    // (53:2) {:then options}
+    // (69:2) {:then options}
     function create_then_block(ctx) {
     	let form;
     	let select;
@@ -17325,23 +17015,23 @@ var schedule = (function () {
     			button.textContent = "Schedule";
     			attr_dev(select, "class", "font-mono");
     			if (/*chosenDate*/ ctx[0] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[7].call(select));
-    			add_location(select, file, 54, 6, 2352);
+    			add_location(select, file, 70, 6, 2861);
     			attr_dev(input0, "type", "text");
     			attr_dev(input0, "placeholder", "URL");
-    			add_location(input0, file, 61, 6, 2590);
+    			add_location(input0, file, 77, 6, 3099);
     			attr_dev(input1, "type", "email");
     			attr_dev(input1, "placeholder", "Email");
-    			add_location(input1, file, 62, 6, 2653);
+    			add_location(input1, file, 78, 6, 3162);
     			attr_dev(label, "for", "found-box");
-    			add_location(label, file, 64, 8, 2735);
+    			add_location(label, file, 80, 8, 3244);
     			attr_dev(input2, "type", "checkbox");
     			attr_dev(input2, "id", "found-box");
-    			add_location(input2, file, 65, 8, 2781);
-    			add_location(div, file, 63, 6, 2721);
+    			add_location(input2, file, 81, 8, 3290);
+    			add_location(div, file, 79, 6, 3230);
     			attr_dev(button, "class", "btn px-4 py-2");
-    			add_location(button, file, 67, 6, 2860);
+    			add_location(button, file, 83, 6, 3369);
     			attr_dev(form, "class", "flex flex-col justify-between max-w-sm h-60");
-    			add_location(form, file, 53, 4, 2287);
+    			add_location(form, file, 69, 4, 2796);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, form, anchor);
@@ -17434,14 +17124,14 @@ var schedule = (function () {
     		block,
     		id: create_then_block.name,
     		type: "then",
-    		source: "(53:2) {:then options}",
+    		source: "(69:2) {:then options}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (56:8) {#each options as option}
+    // (72:8) {#each options as option}
     function create_each_block(ctx) {
     	let option;
     	let t_value = /*option*/ ctx[17].text + "";
@@ -17454,7 +17144,7 @@ var schedule = (function () {
     			option.__value = /*option*/ ctx[17].value;
     			option.value = option.__value;
     			option.disabled = !/*option*/ ctx[17].available;
-    			add_location(option, file, 56, 10, 2447);
+    			add_location(option, file, 72, 10, 2956);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -17470,14 +17160,14 @@ var schedule = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(56:8) {#each options as option}",
+    		source: "(72:8) {#each options as option}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (51:27)      <Loader />   {:then options}
+    // (67:27)      <Loader />   {:then options}
     function create_pending_block(ctx) {
     	let loader;
     	let current;
@@ -17510,7 +17200,7 @@ var schedule = (function () {
     		block,
     		id: create_pending_block.name,
     		type: "pending",
-    		source: "(51:27)      <Loader />   {:then options}",
+    		source: "(67:27)      <Loader />   {:then options}",
     		ctx
     	});
 
@@ -17553,9 +17243,9 @@ var schedule = (function () {
     			info.block.c();
     			t3 = space();
     			footer = element("footer");
-    			add_location(h2, file, 49, 2, 2197);
-    			add_location(main, file, 48, 0, 2188);
-    			add_location(footer, file, 71, 0, 2959);
+    			add_location(h2, file, 65, 2, 2706);
+    			add_location(main, file, 64, 0, 2697);
+    			add_location(footer, file, 87, 0, 3468);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -17688,7 +17378,7 @@ var schedule = (function () {
     			: option;
     		})))).flat();
 
-    		$$invalidate(0, chosenDate = (_b = (_a = options.filter(option => option.value >= today && option.available)[0]) === null || _a === void 0
+    		$$invalidate(0, chosenDate = (_b = (_a = options.filter(option => option.value >= stringToDate(dateToString(today)) && option.available)[0]) === null || _a === void 0
     		? void 0
     		: _a.value) !== null && _b !== void 0
     		? _b
@@ -17701,14 +17391,25 @@ var schedule = (function () {
     		e.preventDefault();
     		const author = email.split("@spgs.org")[0];
 
-    		// TODO: Verify email
-    		scheduleMeme(chosenDate, { author, found, url }, db);
-    	};
+    		// submitMeme(chosenDate, { url, author, found });
+    		submitMeme(chosenDate, { url, author, found }).then(response => {
+    			// TODO: Show success
+    			console.log({ response });
+    		}).catch(err => {
+    			if (err.code === "functions/invalid-argument" || err.code === "functions/out-of-range") {
+    				// TODO: Show bad date error
+    				console.warn(err);
+    			} else {
+    				// TODO: Show error
+    				throw err;
+    			}
+    		});
+    	}; // TODO: Show loading
 
     	const writable_props = ['db'];
 
     	Object.keys($$props).forEach(key => {
-    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Schedule> was created with unknown prop '${key}'`);
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<Schedule> was created with unknown prop '${key}'`);
     	});
 
     	function select_change_handler() {
@@ -17741,8 +17442,9 @@ var schedule = (function () {
     		compoundDate,
     		dateToString,
     		separateDate,
+    		stringToDate,
     		getMemeOtd,
-    		scheduleMeme,
+    		submitMeme,
     		Header,
     		Loader,
     		db,
@@ -17802,7 +17504,7 @@ var schedule = (function () {
     		const props = options.props || {};
 
     		if (/*db*/ ctx[6] === undefined && !('db' in props)) {
-    			console.warn("<Schedule> was created without expected prop 'db'");
+    			console_1.warn("<Schedule> was created without expected prop 'db'");
     		}
     	}
 

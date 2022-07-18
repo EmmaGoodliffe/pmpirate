@@ -1698,14 +1698,14 @@ var index = (function () {
 
     const name$4 = "@firebase/storage";
 
-    const name$3 = "@firebase/storage-compat";
+    const name$3$1 = "@firebase/storage-compat";
 
     const name$2$1 = "@firebase/firestore";
 
     const name$1$1 = "@firebase/firestore-compat";
 
     const name$p = "firebase";
-    const version$3 = "9.9.0";
+    const version$4 = "9.9.0";
 
     /**
      * @license
@@ -1751,7 +1751,7 @@ var index = (function () {
         [name$6]: 'fire-rc',
         [name$5]: 'fire-rc-compat',
         [name$4]: 'fire-gcs',
-        [name$3]: 'fire-gcs-compat',
+        [name$3$1]: 'fire-gcs-compat',
         [name$2$1]: 'fire-fst',
         [name$1$1]: 'fire-fst-compat',
         'fire-js': 'fire-js',
@@ -1957,7 +1957,7 @@ var index = (function () {
      *
      * @public
      */
-    const SDK_VERSION = version$3;
+    const SDK_VERSION = version$4;
     function initializeApp(options, rawConfig = {}) {
         if (typeof rawConfig !== 'object') {
             const name = rawConfig;
@@ -2405,8 +2405,8 @@ var index = (function () {
      */
     registerCoreComponents('');
 
-    const name$2 = "@firebase/installations";
-    const version$2 = "0.5.12";
+    const name$3 = "@firebase/installations";
+    const version$3 = "0.5.12";
 
     /**
      * @license
@@ -2425,7 +2425,7 @@ var index = (function () {
      * limitations under the License.
      */
     const PENDING_TIMEOUT_MS = 10000;
-    const PACKAGE_VERSION = `w:${version$2}`;
+    const PACKAGE_VERSION = `w:${version$3}`;
     const INTERNAL_AUTH_VERSION = 'FIS_v2';
     const INSTALLATIONS_API_URL = 'https://firebaseinstallations.googleapis.com/v1';
     const TOKEN_EXPIRATION_BUFFER = 60 * 60 * 1000; // One hour
@@ -3382,9 +3382,9 @@ var index = (function () {
      * @packageDocumentation
      */
     registerInstallations();
-    registerVersion(name$2, version$2);
+    registerVersion(name$3, version$3);
     // BUILD_TARGET will be replaced by values like esm5, esm2017, cjs5, etc during the compilation
-    registerVersion(name$2, version$2, 'esm2017');
+    registerVersion(name$3, version$3, 'esm2017');
 
     /**
      * @license
@@ -4268,8 +4268,8 @@ var index = (function () {
         logEvent$1(wrappedGtagFunction, initializationPromisesMap[analyticsInstance.app.options.appId], eventName, eventParams, options).catch(e => logger.error(e));
     }
 
-    const name$1 = "@firebase/analytics";
-    const version$1 = "0.8.0";
+    const name$2 = "@firebase/analytics";
+    const version$2 = "0.8.0";
 
     /**
      * Firebase Analytics
@@ -4286,9 +4286,9 @@ var index = (function () {
             return factory(app, installations, analyticsOptions);
         }, "PUBLIC" /* PUBLIC */));
         _registerComponent(new Component('analytics-internal', internalFactory, "PRIVATE" /* PRIVATE */));
-        registerVersion(name$1, version$1);
+        registerVersion(name$2, version$2);
         // BUILD_TARGET will be replaced by values like esm5, esm2017, cjs5, etc during the compilation
-        registerVersion(name$1, version$1, 'esm2017');
+        registerVersion(name$2, version$2, 'esm2017');
         function internalFactory(container) {
             try {
                 const analytics = container.getProvider(ANALYTICS_TYPE).getImmediate();
@@ -4305,8 +4305,8 @@ var index = (function () {
     }
     registerAnalytics();
 
-    var name = "firebase";
-    var version = "9.9.0";
+    var name$1 = "firebase";
+    var version$1 = "9.9.0";
 
     /**
      * @license
@@ -4324,7 +4324,7 @@ var index = (function () {
      * See the License for the specific language governing permissions and
      * limitations under the License.
      */
-    registerVersion(name, version, 'app');
+    registerVersion(name$1, version$1, 'app');
 
     var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -15407,6 +15407,293 @@ var index = (function () {
         registerVersion(D, "3.4.12", "esm2017");
     }();
 
+    /**
+     * @license
+     * Copyright 2020 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * Type constant for Firebase Functions.
+     */
+    const FUNCTIONS_TYPE = 'functions';
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * Helper class to get metadata that should be included with a function call.
+     * @internal
+     */
+    class ContextProvider {
+        constructor(authProvider, messagingProvider, appCheckProvider) {
+            this.auth = null;
+            this.messaging = null;
+            this.appCheck = null;
+            this.auth = authProvider.getImmediate({ optional: true });
+            this.messaging = messagingProvider.getImmediate({
+                optional: true
+            });
+            if (!this.auth) {
+                authProvider.get().then(auth => (this.auth = auth), () => {
+                    /* get() never rejects */
+                });
+            }
+            if (!this.messaging) {
+                messagingProvider.get().then(messaging => (this.messaging = messaging), () => {
+                    /* get() never rejects */
+                });
+            }
+            if (!this.appCheck) {
+                appCheckProvider.get().then(appCheck => (this.appCheck = appCheck), () => {
+                    /* get() never rejects */
+                });
+            }
+        }
+        async getAuthToken() {
+            if (!this.auth) {
+                return undefined;
+            }
+            try {
+                const token = await this.auth.getToken();
+                return token === null || token === void 0 ? void 0 : token.accessToken;
+            }
+            catch (e) {
+                // If there's any error when trying to get the auth token, leave it off.
+                return undefined;
+            }
+        }
+        async getMessagingToken() {
+            if (!this.messaging ||
+                !('Notification' in self) ||
+                Notification.permission !== 'granted') {
+                return undefined;
+            }
+            try {
+                return await this.messaging.getToken();
+            }
+            catch (e) {
+                // We don't warn on this, because it usually means messaging isn't set up.
+                // console.warn('Failed to retrieve instance id token.', e);
+                // If there's any error when trying to get the token, leave it off.
+                return undefined;
+            }
+        }
+        async getAppCheckToken() {
+            if (this.appCheck) {
+                const result = await this.appCheck.getToken();
+                if (result.error) {
+                    // Do not send the App Check header to the functions endpoint if
+                    // there was an error from the App Check exchange endpoint. The App
+                    // Check SDK will already have logged the error to console.
+                    return null;
+                }
+                return result.token;
+            }
+            return null;
+        }
+        async getContext() {
+            const authToken = await this.getAuthToken();
+            const messagingToken = await this.getMessagingToken();
+            const appCheckToken = await this.getAppCheckToken();
+            return { authToken, messagingToken, appCheckToken };
+        }
+    }
+
+    /**
+     * @license
+     * Copyright 2017 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    const DEFAULT_REGION = 'us-central1';
+    /**
+     * The main class for the Firebase Functions SDK.
+     * @internal
+     */
+    class FunctionsService {
+        /**
+         * Creates a new Functions service for the given app.
+         * @param app - The FirebaseApp to use.
+         */
+        constructor(app, authProvider, messagingProvider, appCheckProvider, regionOrCustomDomain = DEFAULT_REGION, fetchImpl) {
+            this.app = app;
+            this.fetchImpl = fetchImpl;
+            this.emulatorOrigin = null;
+            this.contextProvider = new ContextProvider(authProvider, messagingProvider, appCheckProvider);
+            // Cancels all ongoing requests when resolved.
+            this.cancelAllRequests = new Promise(resolve => {
+                this.deleteService = () => {
+                    return Promise.resolve(resolve());
+                };
+            });
+            // Resolve the region or custom domain overload by attempting to parse it.
+            try {
+                const url = new URL(regionOrCustomDomain);
+                this.customDomain = url.origin;
+                this.region = DEFAULT_REGION;
+            }
+            catch (e) {
+                this.customDomain = null;
+                this.region = regionOrCustomDomain;
+            }
+        }
+        _delete() {
+            return this.deleteService();
+        }
+        /**
+         * Returns the URL for a callable with the given name.
+         * @param name - The name of the callable.
+         * @internal
+         */
+        _url(name) {
+            const projectId = this.app.options.projectId;
+            if (this.emulatorOrigin !== null) {
+                const origin = this.emulatorOrigin;
+                return `${origin}/${projectId}/${this.region}/${name}`;
+            }
+            if (this.customDomain !== null) {
+                return `${this.customDomain}/${name}`;
+            }
+            return `https://${this.region}-${projectId}.cloudfunctions.net/${name}`;
+        }
+    }
+    /**
+     * Modify this instance to communicate with the Cloud Functions emulator.
+     *
+     * Note: this must be called before this instance has been used to do any operations.
+     *
+     * @param host The emulator host (ex: localhost)
+     * @param port The emulator port (ex: 5001)
+     * @public
+     */
+    function connectFunctionsEmulator$1(functionsInstance, host, port) {
+        functionsInstance.emulatorOrigin = `http://${host}:${port}`;
+    }
+
+    const name = "@firebase/functions";
+    const version = "0.8.4";
+
+    /**
+     * @license
+     * Copyright 2019 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    const AUTH_INTERNAL_NAME = 'auth-internal';
+    const APP_CHECK_INTERNAL_NAME = 'app-check-internal';
+    const MESSAGING_INTERNAL_NAME = 'messaging-internal';
+    function registerFunctions(fetchImpl, variant) {
+        const factory = (container, { instanceIdentifier: regionOrCustomDomain }) => {
+            // Dependencies
+            const app = container.getProvider('app').getImmediate();
+            const authProvider = container.getProvider(AUTH_INTERNAL_NAME);
+            const messagingProvider = container.getProvider(MESSAGING_INTERNAL_NAME);
+            const appCheckProvider = container.getProvider(APP_CHECK_INTERNAL_NAME);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return new FunctionsService(app, authProvider, messagingProvider, appCheckProvider, regionOrCustomDomain, fetchImpl);
+        };
+        _registerComponent(new Component(FUNCTIONS_TYPE, factory, "PUBLIC" /* PUBLIC */).setMultipleInstances(true));
+        registerVersion(name, version, variant);
+        // BUILD_TARGET will be replaced by values like esm5, esm2017, cjs5, etc during the compilation
+        registerVersion(name, version, 'esm2017');
+    }
+
+    /**
+     * @license
+     * Copyright 2020 Google LLC
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     *   http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     */
+    /**
+     * Returns a {@link Functions} instance for the given app.
+     * @param app - The {@link @firebase/app#FirebaseApp} to use.
+     * @param regionOrCustomDomain - one of:
+     *   a) The region the callable functions are located in (ex: us-central1)
+     *   b) A custom domain hosting the callable functions (ex: https://mydomain.com)
+     * @public
+     */
+    function getFunctions(app = getApp(), regionOrCustomDomain = DEFAULT_REGION) {
+        // Dependencies
+        const functionsProvider = _getProvider(getModularInstance(app), FUNCTIONS_TYPE);
+        const functionsInstance = functionsProvider.getImmediate({
+            identifier: regionOrCustomDomain
+        });
+        return functionsInstance;
+    }
+    /**
+     * Modify this instance to communicate with the Cloud Functions emulator.
+     *
+     * Note: this must be called before this instance has been used to do any operations.
+     *
+     * @param host - The emulator host (ex: localhost)
+     * @param port - The emulator port (ex: 5001)
+     * @public
+     */
+    function connectFunctionsEmulator(functionsInstance, host, port) {
+        connectFunctionsEmulator$1(getModularInstance(functionsInstance), host, port);
+    }
+
+    /**
+     * Cloud Functions for Firebase
+     *
+     * @packageDocumentation
+     */
+    registerFunctions(fetch.bind(self));
+
     const firebaseConfig = {
         apiKey: "AIzaSyDfGaweLVDXcfxJDZ4ztoMoilhU9fv4uXU",
         authDomain: "pmpirate.firebaseapp.com",
@@ -15419,8 +15706,12 @@ var index = (function () {
     const app$1 = initializeApp(firebaseConfig);
     getAnalytics(app$1);
     const db = Ba(app$1);
+    const functions = getFunctions(app$1, 'europe-west2');
     const isEmulation = location.href.includes("localhost") || location.href.includes("127.0.0.1");
-    isEmulation && Ra(db, "localhost", 8080);
+    if (isEmulation) {
+        Ra(db, "localhost", 8080);
+        connectFunctionsEmulator(functions, "localhost", 5001);
+    }
 
     function noop() { }
     function is_promise(value) {
@@ -15925,11 +16216,11 @@ var index = (function () {
     const queue = new Set();
     const firstMonth = compoundDate(1, 9, 2021);
     const delay = (time) => new Promise(resolve => setTimeout(resolve, time * 10 ** 3));
-    async function getFromDb(db, collection, docId) {
+    async function getFromDb(db, collectionId, docId) {
         try {
             console.count("DB reads");
             console.count(docId);
-            const theDoc = await ll(Da(db, collection, docId));
+            const theDoc = await ll(Da(db, collectionId, docId));
             return theDoc.data();
         }
         catch (err) {
