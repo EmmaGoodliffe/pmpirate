@@ -7,14 +7,12 @@
   export let isTomorrow = false;
 
   $: credit = meme.found ? "Found by" : "By";
-
-  $: badge = meme.author === "emma.goodliffe" ? " 🏴‍☠️" : "";
 </script>
 
 <tr>
   <td class="text-center">
     <p>{dateToString(date, "/")}</p>
-    <p>{credit} <span class="font-bold italic">{meme.author + badge}</span></p>
+    <p>{credit} <span class="font-bold italic">{meme.author}</span></p>
     {#if isTomorrow}
       <p>(Sneak peek)</p>
     {/if}

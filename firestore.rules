@@ -5,6 +5,9 @@ service cloud.firestore {
       allow read;
       allow write: if false;
     }
+    match /submissions/{submission} {
+      allow read, write: if false;
+    }
     match /{document=**} {
       allow read, write: if false;
     }
