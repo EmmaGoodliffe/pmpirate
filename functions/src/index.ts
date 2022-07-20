@@ -63,6 +63,18 @@ export const submitMeme = functions
     },
   );
 
+const areNumberKeysTheSame = <T extends Record<number, unknown>>(
+  oldData: T,
+  newData: T,
+) => {
+  const oldKeys = new Set(Object.keys(oldData).map(x => parseInt(x)));
+  const newKeys = new Set(Object.keys(newData).map(x => parseInt(x)));
+  return (
+    oldKeys.size === newKeys.size &&
+    Array.from(newKeys).every(key => oldKeys.has(key))
+  );
+};
+
 export const confirmMeme = functions
   .region("europe-west2")
   .https.onRequest(async (req, res) => {
@@ -76,8 +88,8 @@ export const confirmMeme = functions
     }
     const submission = await getFromDb(db, "submissions", submissionId);
     if (submission === undefined) {
-      res.status(400).send({
-        status: 400,
+      res.status(404).send({
+        status: 404,
         message: `Submission ${submissionId} does not exist`,
       });
       return;
@@ -103,7 +115,7 @@ export const confirmMeme = functions
       return;
     }
     const memeId = getDocId(year, month);
-    const oldData = await getFromDb(db, "memes", memeId);
+    const oldData = (await getFromDb(db, "memes", memeId)) ?? {};
     const data = {
       [date]: {
         url: submission.meme.url,
@@ -112,15 +124,20 @@ export const confirmMeme = functions
       },
       ...oldData,
     };
-    // TODO: Abort redundant writes
-    await Promise.all([
-      setToDb(db, "memes", memeId, data),
-      deleteFromDb(db, "submissions", submissionId),
-    ]);
+    const deletionPromise = deleteFromDb(db, "submissions", submissionId);
+    if (areNumberKeysTheSame(oldData, data)) {
+      await deletionPromise;
+      res.status(409).send({
+        status: 409,
+        message: `There was already a meme scheduled for ${submission.date}`,
+      });
+    }
+    await Promise.all([deletionPromise, setToDb(db, "memes", memeId, data)]);
     res.send({
       status: 200,
       message: `Confirmed meme by ${author}`,
     });
+    return;
   });
 
 // TODO: Delete old submissions
