@@ -112,6 +112,7 @@ export const confirmMeme = functions
       },
       ...oldData,
     };
+    // TODO: Abort redundant writes
     await Promise.all([
       setToDb(db, "memes", memeId, data),
       deleteFromDb(db, "submissions", submissionId),

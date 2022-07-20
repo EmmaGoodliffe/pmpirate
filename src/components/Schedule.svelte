@@ -4,7 +4,6 @@
     dateToString,
     normaliseDate,
     separateDate,
-    stringToDate,
   } from "../../functions/src/date";
   import type { Db } from "../../functions/src/types";
   import { getMemeOtd, submitMeme } from "../db";
@@ -20,8 +19,10 @@
   let url = "";
   let email = "";
   let found = false;
+  let isLoading = false;
+  let message = "";
 
-  const optionsPromise = (async () => {
+  const getOptions = async () => {
     const options = (
       await Promise.all(
         new Array(11).fill(0).map(async (x, i) => {
@@ -49,53 +50,65 @@
         option => option.value >= normaliseDate(today) && option.available,
       )[0]?.value ?? null;
     return options;
-  })();
+  };
+
+  const optionsPromise = getOptions();
 
   const schedule = (e: Event) => {
     e.preventDefault();
+    isLoading = true;
     submitMeme(chosenDate, { email, url, found })
       .then(response => {
-        // TODO: Show success
-        console.log({ response });
+        message = response.data.message;
+        isLoading = false;
       })
       .catch(err => {
         if (
           err.code === "functions/invalid-argument" ||
           err.code === "functions/out-of-range"
         ) {
-          // TODO: Show bad date error
+          isLoading = false;
+          message = "That date is unavailable";
           console.warn(err);
         } else {
-          // TODO: Show error
+          isLoading = false;
+          message = "Something went wrong";
           throw err;
         }
       });
-    // TODO: Show loading
+    isLoading = true;
   };
 </script>
 
 <Header />
 <main>
   <h2>Schedule a Meme</h2>
-  {#await optionsPromise}
+  {#if isLoading}
     <Loader />
-  {:then options}
-    <form class="flex flex-col justify-between max-w-sm h-60">
-      <select class="font-mono" bind:value={chosenDate}>
-        {#each options as option}
-          <option value={option.value} disabled={!option.available}
-            >{option.text}</option
-          >
-        {/each}
-      </select>
-      <input type="text" placeholder="URL" bind:value={url} />
-      <input type="email" placeholder="Email" bind:value={email} />
-      <div>
-        <label for="found-box">Found:</label>
-        <input type="checkbox" id="found-box" bind:value={found} />
+  {:else}
+    {#await optionsPromise}
+      <Loader />
+    {:then options}
+      <div class="max-w-sm">
+        <form class="flex flex-col justify-between h-60">
+          <select class="font-mono" bind:value={chosenDate}>
+            {#each options as option}
+              <option value={option.value} disabled={!option.available}
+                >{option.text}</option
+              >
+            {/each}
+          </select>
+          <input type="text" placeholder="URL" bind:value={url} />
+          <input type="email" placeholder="Email" bind:value={email} />
+          <div>
+            <label for="found-box">Found:</label>
+            <input type="checkbox" id="found-box" bind:value={found} />
+          </div>
+          <button class="btn px-4 py-2" on:click={schedule}>Schedule</button>
+        </form>
+        <p class="epilogue">{message}</p>
       </div>
-      <button class="btn px-4 py-2" on:click={schedule}>Schedule</button>
-    </form>
-  {/await}
+    {/await}
+  {/if}
 </main>
 <footer />
