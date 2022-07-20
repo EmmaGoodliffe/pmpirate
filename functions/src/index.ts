@@ -92,7 +92,10 @@ export const confirmMeme = functions
       return;
     }
     const [date, month, year] = separateDate(d);
-    const author = submission.meme.email.split("@spgs.org")[0]; // TODO: Badges
+    let author = submission.meme.email.split("@spgs.org")[0];
+    if (author === "emma.goodliffe") {
+      author += " 🏴‍☠️";
+    }
     if (parseInt(code) !== submission.code) {
       res.status(400).send({
         status: 400,
