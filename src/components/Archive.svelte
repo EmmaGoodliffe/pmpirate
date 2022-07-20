@@ -14,10 +14,9 @@
 
   export let db: Db;
 
-  const today = new Date();
+  const today = normaliseDate(new Date());
   const tomorrow = new Date(Number(today) + 24 * 60 ** 2 * 10 ** 3);
 
-  // TODO: Use date helpers
   let [, month, year] = separateDate(today);
   let dateQuery = dateToString(today);
   let forwardsEnabled = true;
@@ -88,7 +87,7 @@
         {#each Object.keys(archivedMemes)
           .map(x => parseInt(x))
           .sort((a, b) => a - b) as date}
-          {#if compoundDate(date, month, year) <= normaliseDate(today)}
+          {#if compoundDate(date, month, year) <= today}
             <Shelf
               date={compoundDate(date, month, year)}
               meme={archivedMemes[date]}

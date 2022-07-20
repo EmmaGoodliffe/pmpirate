@@ -21,8 +21,7 @@
   let email = "";
   let found = false;
 
-  // TODO: Have this function run itself
-  const optionsPromise = async () => {
+  const optionsPromise = (async () => {
     const options = (
       await Promise.all(
         new Array(11).fill(0).map(async (x, i) => {
@@ -50,7 +49,7 @@
         option => option.value >= normaliseDate(today) && option.available,
       )[0]?.value ?? null;
     return options;
-  };
+  })();
 
   const schedule = (e: Event) => {
     e.preventDefault();
@@ -78,7 +77,7 @@
 <Header />
 <main>
   <h2>Schedule a Meme</h2>
-  {#await optionsPromise()}
+  {#await optionsPromise}
     <Loader />
   {:then options}
     <form class="flex flex-col justify-between max-w-sm h-60">
