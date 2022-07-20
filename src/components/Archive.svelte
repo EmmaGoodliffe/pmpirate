@@ -15,6 +15,7 @@
   const today = new Date();
   const tomorrow = new Date(Number(today) + 24 * 60 ** 2 * 10 ** 3);
 
+  // TODO: Use date helpers
   let month = today.getMonth() + 1;
   let year = today.getFullYear();
   let dateQuery = dateToString(today);
