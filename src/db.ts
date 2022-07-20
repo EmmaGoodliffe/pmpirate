@@ -5,7 +5,13 @@ import {
   dateToString,
   separateDate,
 } from "../functions/src/date";
-import type { Db, Meme, MemeRequest } from "../functions/src/types";
+import type {
+  Db,
+  Meme,
+  MemeRequest,
+  MemeSubmission,
+  SubmitMemeCloudFunction,
+} from "../functions/src/types";
 import { functions } from "./common";
 
 type MemesOfMonth = Record<number | string, Meme>;
@@ -97,10 +103,10 @@ export const getMemeOtd = async (d: Date, db: Db, n = 0): Promise<Meme> => {
   return getMemeOtd(d, db, n + 1);
 };
 
-async function callCloudFunction<T>(
+async function callCloudFunction(
   func: "submitMeme",
-  data: { date: string; meme: MemeRequest },
-): Promise<T>;
+  data: SubmitMemeCloudFunction["request"],
+): Promise<{ data: SubmitMemeCloudFunction }>;
 async function callCloudFunction(func: string, data: unknown) {
   return httpsCallable(functions, func)(data);
 }
