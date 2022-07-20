@@ -16,7 +16,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 getAnalytics(app);
 const db = getFirestore(app);
-const functions = getFunctions(app, 'europe-west2');
+const functions = getFunctions(app, "europe-west2");
 const isEmulation =
   location.href.includes("localhost") || location.href.includes("127.0.0.1");
 if (isEmulation) {

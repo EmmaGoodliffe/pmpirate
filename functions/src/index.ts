@@ -19,12 +19,6 @@ const difference = (a: Date, b: Date) => {
   return diffInDays;
 };
 
-const badDateError = (date: string) =>
-  new functions.https.HttpsError(
-    "invalid-argument",
-    `Could not convert ${date} to date`,
-  );
-
 export const submitMeme = functions
   .region("europe-west2")
   .https.onCall(
@@ -34,7 +28,10 @@ export const submitMeme = functions
     ): Promise<SubmitMemeCloudFunction> => {
       const date = stringToDate(data.date);
       if (date === undefined) {
-        throw badDateError(data.date);
+        throw new functions.https.HttpsError(
+          "invalid-argument",
+          `Could not convert ${date} to date`,
+        );
       }
       const diffInDays = difference(date, Timestamp.now().toDate());
       if (!(-3 < diffInDays && diffInDays <= 8)) {
@@ -70,19 +67,38 @@ export const submitMeme = functions
 export const confirmMeme = functions
   .region("europe-west2")
   .https.onRequest(async (req, res) => {
-    const [, submissionId, code] = req.params[0].split("/");
+    const [submissionId, code] = req.params[0].split("/");
+    if (!submissionId || !code) {
+      res.status(400).send({
+        status: 400,
+        message: "Expected URL to be of form /confirmMeme/:id/:code",
+      });
+      return;
+    }
     const submission = await getFromDb(db, "submissions", submissionId);
+    if (submission === undefined) {
+      res.status(400).send({
+        status: 400,
+        message: `Submission ${submissionId} does not exist`,
+      });
+      return;
+    }
     const d = stringToDate(submission.date);
     if (d === undefined) {
-      throw badDateError(submission.date);
+      res.status(400).send({
+        status: 400,
+        message: `Could not convert ${submission.date} to date`,
+      });
+      return;
     }
     const [date, month, year] = separateDate(d);
     const author = submission.meme.email.split("@spgs.org")[0]; // TODO: Badges
     if (parseInt(code) !== submission.code) {
-      throw new functions.https.HttpsError(
-        "permission-denied",
-        "Incorrect code",
-      );
+      res.status(400).send({
+        status: 400,
+        message: "Incorrect code",
+      });
+      return;
     }
     const memeId = getDocId(year, month);
     const oldData = await getFromDb(db, "memes", memeId);
@@ -103,3 +119,5 @@ export const confirmMeme = functions
       message: `Confirmed meme by ${author}`,
     });
   });
+
+// TODO: Delete old submissions

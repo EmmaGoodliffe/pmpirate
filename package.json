@@ -13,7 +13,7 @@
     "dev": "concurrently \"npm:dev:*\" -c \"bold\"",
     "e2e": "cypress open",
     "lint": "tsc --noEmit && eslint \".\" --fix && prettier \".\" --write && svelte-check",
-    "start": "firebase emulators:start",
+    "start": "echo \"firebase emulators:start\"",
     "test": "cypress run"
   },
   "author": "Emma Goodliffe",

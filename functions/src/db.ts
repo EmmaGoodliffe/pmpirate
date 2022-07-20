@@ -4,12 +4,12 @@ export async function getFromDb(
   db: AdminDb,
   collection: "memes",
   docId: string,
-): Promise<MemesOfMonth>;
+): Promise<MemesOfMonth | undefined>;
 export async function getFromDb(
   db: AdminDb,
   collection: "submissions",
   docId: string,
-): Promise<MemeSubmission>;
+): Promise<MemeSubmission | undefined>;
 export async function getFromDb(
   db: AdminDb,
   collection: string,
