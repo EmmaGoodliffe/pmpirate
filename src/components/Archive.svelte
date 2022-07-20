@@ -2,6 +2,8 @@
   import {
     compoundDate,
     dateToString,
+    normaliseDate,
+    separateDate,
     stringToDate,
   } from "../../functions/src/date";
   import type { Db } from "../../functions/src/types";
@@ -16,8 +18,7 @@
   const tomorrow = new Date(Number(today) + 24 * 60 ** 2 * 10 ** 3);
 
   // TODO: Use date helpers
-  let month = today.getMonth() + 1;
-  let year = today.getFullYear();
+  let [, month, year] = separateDate(today);
   let dateQuery = dateToString(today);
   let forwardsEnabled = true;
   let backwardsEnabled = true;
@@ -33,7 +34,7 @@
   }
 
   $: forwardsEnabled = !(
-    today.getMonth() + 1 === month && today.getFullYear() === year
+    separateDate(today)[1] === month && separateDate(today)[2] === year
   );
 
   $: backwardsEnabled = firstMonth < compoundDate(1, month, year);
@@ -87,7 +88,7 @@
         {#each Object.keys(archivedMemes)
           .map(x => parseInt(x))
           .sort((a, b) => a - b) as date}
-          {#if compoundDate(date, month, year) <= stringToDate(dateToString(today))}
+          {#if compoundDate(date, month, year) <= normaliseDate(today)}
             <Shelf
               date={compoundDate(date, month, year)}
               meme={archivedMemes[date]}

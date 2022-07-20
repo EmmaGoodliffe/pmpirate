@@ -2,6 +2,7 @@
   import {
     compoundDate,
     dateToString,
+    normaliseDate,
     separateDate,
     stringToDate,
   } from "../../functions/src/date";
@@ -46,8 +47,7 @@
     ).flat();
     chosenDate =
       options.filter(
-        option =>
-          option.value >= stringToDate(dateToString(today)) && option.available,
+        option => option.value >= normaliseDate(today) && option.available,
       )[0]?.value ?? null;
     return options;
   };

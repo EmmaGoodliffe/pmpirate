@@ -24,7 +24,6 @@ export const submitMeme = functions
   .https.onCall(
     async (
       data: SubmitMemeCloudFunction["request"],
-      context,
     ): Promise<SubmitMemeCloudFunction> => {
       const date = stringToDate(data.date);
       if (date === undefined) {

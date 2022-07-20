@@ -1,3 +1,5 @@
+// TODO: Stop other files using vanilla dates
+
 const toInt = (x: string) => {
   const intX = parseInt(x);
   if (!isNaN(intX)) return intX;
@@ -74,3 +76,5 @@ export const getDocId = (year: number, month: number) => {
   const mm = `${month}`.padStart(2, "0");
   return `${year}-${mm}`;
 };
+
+export const normaliseDate = (date: Date) => stringToDate(dateToString(date));
