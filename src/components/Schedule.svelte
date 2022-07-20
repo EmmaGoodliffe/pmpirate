@@ -20,6 +20,7 @@
   let email = "";
   let found = false;
 
+  // TODO: Have this function run itself
   const optionsPromise = async () => {
     const options = (
       await Promise.all(
