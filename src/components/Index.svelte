@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Db, getMemeOtd } from "./db";
+  import type { Db } from "../../functions/src/types";
+  import { getMemeOtd } from "../db";
   import Doc from "./Doc.svelte";
   import Header from "./Header.svelte";
   import Loader from "./Loader.svelte";
@@ -8,7 +9,7 @@
   export let db: Db;
 
   const today = new Date();
-  const otdSrcPromise = getMemeOtd(today, db);
+  const memeOtdPromise = getMemeOtd(today, db);
 
   const mathsBooks = [
     "Pure Year 1",
@@ -74,11 +75,15 @@
 <hr />
 <section id="otd">
   <h2>Meme of the Day</h2>
-  {#await otdSrcPromise}
+  {#await memeOtdPromise}
     <Loader />
-  {:then otdSrc}
-    <Otd src={otdSrc} />
+  {:then memeOtd}
+    <Otd meme={memeOtd} />
   {/await}
+</section>
+<hr />
+<section>
+  <h2>Meme Archive</h2>
   <p class="epilogue">
     <a class="hover:underline" href="archive.html">Meme Archive</a>
   </p>

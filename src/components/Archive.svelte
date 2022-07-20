@@ -1,6 +1,11 @@
 <script lang="ts">
-  import { compoundDate, dateToString, stringToDate } from "./date";
-  import { Db, firstMonth, getMemeOtd, getMemesOfMonth } from "./db";
+  import {
+    compoundDate,
+    dateToString,
+    stringToDate,
+  } from "../../functions/src/date";
+  import type { Db } from "../../functions/src/types";
+  import { firstMonth, getMemeOtd, getMemesOfMonth } from "../db";
   import Header from "./Header.svelte";
   import Loader from "./Loader.svelte";
   import Shelf from "./Shelf.svelte";
@@ -10,6 +15,7 @@
   const today = new Date();
   const tomorrow = new Date(Number(today) + 24 * 60 ** 2 * 10 ** 3);
 
+  // TODO: Use date helpers
   let month = today.getMonth() + 1;
   let year = today.getFullYear();
   let dateQuery = dateToString(today);
@@ -41,11 +47,11 @@
 
 <Header />
 <main>
-  <h2>Meme archive</h2>
+  <h2>Meme Archive</h2>
   <div class="flex sm:w-1/4 mx-auto my-4">
     <div class="w-1/4">
       <div
-        class="flex-1 btn"
+        class="flex-1 btn max-w-[5rem] h-full font-mono text-3xl"
         on:click={() => backwardsEnabled && month--}
         disabled={!backwardsEnabled}
       >
@@ -57,7 +63,7 @@
     </p>
     <div class="w-1/4">
       <div
-        class="flex-1 btn"
+        class="flex-1 btn max-w-[5rem] h-full font-mono text-3xl"
         on:click={() => forwardsEnabled && month++}
         disabled={!forwardsEnabled}
       >
@@ -84,7 +90,7 @@
           {#if compoundDate(date, month, year) <= stringToDate(dateToString(today))}
             <Shelf
               date={compoundDate(date, month, year)}
-              src={archivedMemes[date]}
+              meme={archivedMemes[date]}
             />
           {/if}
         {/each}
@@ -92,7 +98,7 @@
           <Loader />
         {:then tomorrowMeme}
           {#if tomorrowMeme}
-            <Shelf date={tomorrow} src={tomorrowMeme} isTomorrow={true} />
+            <Shelf date={tomorrow} meme={tomorrowMeme} isTomorrow={true} />
           {/if}
         {/await}
       </tbody>
@@ -102,16 +108,18 @@
     {/await}
   </table>
 </main>
-<section class="mt-48">
-  <h2>Specify a date</h2>
+<hr />
+<section>
+  <h2>Specify a Date</h2>
   <input type="text" bind:value={dateQuery} />
+  <p class="my-4">DVS-style dates accepted</p>
   {#await queriedMemePromise}
     <Loader />
   {:then queriedMeme}
     {#if queriedMeme}
       <img
         class="max-w-sm mx-auto w-1/2 sm:w-auto"
-        src={`memes/${queriedMeme}`}
+        src={`memes/${queriedMeme.url}`}
         alt="Meme"
       />
     {:else}
@@ -120,6 +128,12 @@
       </p>
     {/if}
   {/await}
-  <p class="mt-4">DVS-style dates accepted</p>
+</section>
+<hr />
+<section>
+  <h2>Schedule a Meme</h2>
+  <p class="epilogue">
+    <a class="hover:underline" href="schedule.html">Schedule a Meme</a>
+  </p>
 </section>
 <footer />

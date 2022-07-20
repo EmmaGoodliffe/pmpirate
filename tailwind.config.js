@@ -5,7 +5,7 @@ const colors = require("tailwindcss/colors");
 module.exports = {
   mode: "jit",
   // TODO: change to src html
-  content: ["./public/*.html", "./src/*.svelte"],
+  content: ["./public/*.html", "./src/components/*.svelte"],
   theme: {
     extend: {
       // TODO: check if colours actually get used

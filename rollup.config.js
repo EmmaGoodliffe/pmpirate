@@ -77,25 +77,15 @@ const options = {
   },
 };
 
-export default [
-  {
-    ...options,
-    input: "src/index.ts",
-    output: {
-      sourcemap: true,
-      format: "iife",
-      name: "app",
-      file: "public/build/index.js",
-    },
+const bundles = ["index", "archive", "schedule"].map(bundle => ({
+  ...options,
+  input: `src/routes/${bundle}.ts`,
+  output: {
+    sourcemap: true,
+    format: "iife",
+    name: bundle,
+    file: `public/build/${bundle}.js`,
   },
-  {
-    ...options,
-    input: "src/archive.ts",
-    output: {
-      sourcemap: true,
-      format: "iife",
-      name: "archive",
-      file: "public/build/archive.js",
-    },
-  },
-];
+}));
+
+export default bundles;
