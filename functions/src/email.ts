@@ -2,7 +2,8 @@
 import sgMail from "@sendgrid/mail";
 import { Timestamp } from "firebase-admin/firestore";
 import { dateToString } from "./date";
-import { AdminDb, MemeRequest, MemeSubmission } from "./types";
+import { addToDb } from "./db";
+import { AdminDb, MemeRequest } from "./types";
 
 const sgKey = process.env.SENDGRID_API_KEY;
 if (sgKey) {
@@ -39,22 +40,11 @@ const getRandomSignature = () => {
   return signatures[Math.floor(Math.random() * signatures.length)];
 };
 
-async function addToDb(
-  db: AdminDb,
-  collection: "submissions",
-  data: MemeSubmission,
-): Promise<string>;
-async function addToDb(db: AdminDb, collection: string, data: Record<string, unknown>) {
-  const { id } = await db.collection(collection).add(data);
-  return id;
-}
-
 export const sendMemeEmail = async (
   db: AdminDb,
   date: string,
   meme: MemeRequest,
 ) => {
-  // const author = meme.email.split("@spgs.org")[0]; // TODO: Badges
   const code = randomDigits(12);
   const id = await addToDb(db, "submissions", {
     date,

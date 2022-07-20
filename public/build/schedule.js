@@ -16697,6 +16697,10 @@ var schedule = (function () {
             return result;
         return undefined;
     };
+    const getDocId = (year, month) => {
+        const mm = `${month}`.padStart(2, "0");
+        return `${year}-${mm}`;
+    };
 
     const cache = {};
     const queue = new Set();
@@ -16706,8 +16710,7 @@ var schedule = (function () {
         try {
             console.count("DB reads");
             console.count(docId);
-            const theDoc = await ll(Da(db, collectionId, docId));
-            return theDoc.data();
+            return (await ll(Da(db, collectionId, docId))).data();
         }
         catch (err) {
             console.warn("Your DB emulations are likely not running correctly");
@@ -16725,10 +16728,6 @@ var schedule = (function () {
         const today = new Date();
         const currentYear = separateDate(today)[2];
         return firstMonth <= date && year <= currentYear;
-    };
-    const getDocId = (year, month) => {
-        const mm = `${month}`.padStart(2, "0");
-        return `${year}-${mm}`;
     };
     const getMemesOfMonthFromDb = async (year, month, db) => {
         var _a;

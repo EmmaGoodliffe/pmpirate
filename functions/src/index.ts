@@ -3,7 +3,8 @@ import "dotenv/config";
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import * as functions from "firebase-functions";
-import { dateToString, stringToDate } from "./date";
+import { dateToString, getDocId, separateDate, stringToDate } from "./date";
+import { deleteFromDb, getFromDb, setToDb } from "./db";
 import { sendMemeEmail } from "./email";
 import { SubmitMemeCloudFunction } from "./types";
 
@@ -18,6 +19,12 @@ const difference = (a: Date, b: Date) => {
   return diffInDays;
 };
 
+const badDateError = (date: string) =>
+  new functions.https.HttpsError(
+    "invalid-argument",
+    `Could not convert ${date} to date`,
+  );
+
 export const submitMeme = functions
   .region("europe-west2")
   .https.onCall(
@@ -27,10 +34,7 @@ export const submitMeme = functions
     ): Promise<SubmitMemeCloudFunction> => {
       const date = stringToDate(data.date);
       if (date === undefined) {
-        throw new functions.https.HttpsError(
-          "invalid-argument",
-          `Could not convert ${data.date} to date`,
-        );
+        throw badDateError(data.date);
       }
       const diffInDays = difference(date, Timestamp.now().toDate());
       if (!(-3 < diffInDays && diffInDays <= 8)) {
@@ -63,22 +67,39 @@ export const submitMeme = functions
     },
   );
 
-// TODO: Receive confirmations URLs
-// https://europe-west2-<pmpirate>.cloudfunctions.net/widgets/<id>
-// const app = express();
-// app.use(cors({ origin: true }));
-// app.get("/:id", (req, res) => res.send({ message: "whatever" }));
-// exports.widgets = functions.https.onRequest(app);
-
-/*
-const setsAreEqual = <T>(setA: Set<T>, setB: Set<T>) =>
-  [...setA].length === [...setB].length &&
-  [...setA].length === [...new Set([...setA, ...setB])].length;
-
-
-const data = { [date]: meme, ...oldData };
-if (setsAreEqual(new Set(Object.keys(oldData)), new Set(Object.keys(data)))) {
-  console.log("Cancelled a redundant write");
-  return;
-}
-*/
+export const confirmMeme = functions
+  .region("europe-west2")
+  .https.onRequest(async (req, res) => {
+    const [, submissionId, code] = req.params[0].split("/");
+    const submission = await getFromDb(db, "submissions", submissionId);
+    const d = stringToDate(submission.date);
+    if (d === undefined) {
+      throw badDateError(submission.date);
+    }
+    const [date, month, year] = separateDate(d);
+    const author = submission.meme.email.split("@spgs.org")[0]; // TODO: Badges
+    if (parseInt(code) !== submission.code) {
+      throw new functions.https.HttpsError(
+        "permission-denied",
+        "Incorrect code",
+      );
+    }
+    const memeId = getDocId(year, month);
+    const oldData = await getFromDb(db, "memes", memeId);
+    const data = {
+      [date]: {
+        url: submission.meme.url,
+        author,
+        found: submission.meme.found,
+      },
+      ...oldData,
+    };
+    await Promise.all([
+      setToDb(db, "memes", memeId, data),
+      deleteFromDb(db, "submissions", submissionId),
+    ]);
+    res.send({
+      status: 200,
+      message: `Confirmed meme by ${author}`,
+    });
+  });

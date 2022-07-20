@@ -3,18 +3,18 @@ import { httpsCallable } from "firebase/functions";
 import {
   compoundDate,
   dateToString,
+  getDocId,
   separateDate,
 } from "../functions/src/date";
 import type {
   Db,
   Meme,
   MemeRequest,
-  MemeSubmission,
+  MemesOfMonth,
   SubmitMemeCloudFunction,
 } from "../functions/src/types";
 import { functions } from "./common";
 
-type MemesOfMonth = Record<number | string, Meme>;
 const cache: Record<number, Record<number, MemesOfMonth>> = {};
 const queue = new Set<string>();
 
@@ -32,8 +32,7 @@ async function getFromDb(db: Db, collectionId: string, docId: string) {
   try {
     console.count("DB reads");
     console.count(docId);
-    const theDoc = await getDoc(doc(db, collectionId, docId));
-    return theDoc.data();
+    return (await getDoc(doc(db, collectionId, docId))).data();
   } catch (err) {
     console.warn("Your DB emulations are likely not running correctly");
     console.error(err);
@@ -56,11 +55,6 @@ const isMemeMonthPossible = (year: number, month: number) => {
   const today = new Date();
   const currentYear = separateDate(today)[2];
   return firstMonth <= date && year <= currentYear;
-};
-
-const getDocId = (year: number, month: number) => {
-  const mm = `${month}`.padStart(2, "0");
-  return `${year}-${mm}`;
 };
 
 const getMemesOfMonthFromDb = async (year: number, month: number, db: Db) => {

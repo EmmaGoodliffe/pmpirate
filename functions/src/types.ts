@@ -14,6 +14,8 @@ export interface Meme extends MemeBasics {
   author: string;
 }
 
+export type MemesOfMonth = Record<number | string, Meme>;
+
 export interface MemeRequest extends MemeBasics {
   email: string;
 }

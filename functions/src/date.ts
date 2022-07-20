@@ -47,17 +47,30 @@ export const stringToDate = (d: string) => {
   const splitters = ["/", "-", "."];
   for (const splitter of splitters) {
     const [date, month, year] = d.split(splitter).map(toInt);
-    const result = compoundDate(date ?? NaN, month ?? NaN, fixYear(year ?? NaN));
+    const result = compoundDate(
+      date ?? NaN,
+      month ?? NaN,
+      fixYear(year ?? NaN),
+    );
     if (![date, month, year].some(x => !x) && `${result}` !== "Invalid Date")
       return result;
   }
   for (const splitter of splitters) {
     const [year, month, date] = d.split(splitter).map(toInt);
-    const result = compoundDate(date ?? NaN, month ?? NaN, fixYear(year ?? NaN));
+    const result = compoundDate(
+      date ?? NaN,
+      month ?? NaN,
+      fixYear(year ?? NaN),
+    );
     if (![date, month, year].some(x => !x) && `${result}` !== "Invalid Date")
       return result;
   }
   const result = new Date(d);
   if (`${result}` !== "Invalid Date") return result;
   return undefined;
+};
+
+export const getDocId = (year: number, month: number) => {
+  const mm = `${month}`.padStart(2, "0");
+  return `${year}-${mm}`;
 };
