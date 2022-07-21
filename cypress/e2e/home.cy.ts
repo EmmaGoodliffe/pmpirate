@@ -1,3 +1,5 @@
+// TODO: Complete E2E testing
+
 describe("home", () => {
   it("displays all sections", () => {
     cy.visit("http://localhost:3000");
