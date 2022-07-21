@@ -41,6 +41,13 @@ export const submitMeme = functions
           )}`,
         );
       }
+      const domain = data.meme.email.split("@")[1];
+      if (domain !== "spgs.org") {
+        throw new functions.https.HttpsError(
+          "invalid-argument",
+          `Expected domain of email to be spgs.org; received ${domain}`,
+        );
+      }
       try {
         const [response] = await sendMemeEmail(
           db,
@@ -103,7 +110,7 @@ export const confirmMeme = functions
       return;
     }
     const [date, month, year] = separateDate(d);
-    let author = submission.meme.email.split("@spgs.org")[0];
+    let author = submission.meme.email.split("@")[0];
     if (author === "emma.goodliffe") {
       author += " 🏴‍☠️";
     }
