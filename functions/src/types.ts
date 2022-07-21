@@ -6,11 +6,12 @@ export type Db = Firestore;
 export type AdminDb = AdminFirestore;
 
 interface MemeBasics {
-  url: string;
+  path: string;
   found: boolean;
 }
 
 export interface Meme extends MemeBasics {
+  url: string;
   author: string;
 }
 
@@ -24,7 +25,7 @@ export interface MemeRequest extends MemeBasics {
 // Doesn't use interface for overloads of addToDb in functions/src/db.ts
 export type MemeSubmission = {
   date: string;
-  meme: MemeRequest;
+  meme: Meme;
   code: number;
   dateSubmitted: string;
 };
@@ -40,3 +41,7 @@ export type SubmitMemeCloudFunction = CloudFunction<
   { date: string; meme: MemeRequest },
   SgResponse
 >;
+
+// SubmitMemeCloudFunction["request"] => storage, Submission, email
+// submissionId, code => Submission => Meme
+// Meme => url

@@ -17,7 +17,7 @@
 
   let chosenDate: Date = null;
   let files: FileList;
-  let url = "";
+  let path = "";
   let email = "";
   let found = false;
   let isLoading = false;
@@ -61,7 +61,12 @@
     const fileBase64 = window.btoa(
       String.fromCharCode(...new Uint8Array(buffer)),
     );
-    const meme = { email, fileBase64, url, found };
+    const meme = {
+      path,
+      email,
+      fileBase64,
+      found,
+    };
     try {
       const response = await submitMeme(chosenDate, meme);
       message = response.data.message;
@@ -98,8 +103,9 @@
           {/each}
         </select>
         <input type="file" bind:files />
-        <input type="text" placeholder="URL" bind:value={url} />
-        <input type="email" placeholder="Email" bind:value={email} />
+        <!-- TODO: Explain in UI -->
+        <input type="text" placeholder="Path" bind:value={path} />
+        <input type="email" placeholder="SPGS email" bind:value={email} />
         <div>
           <!-- TODO: Explain in UI -->
           <label for="found-box">Found:</label>

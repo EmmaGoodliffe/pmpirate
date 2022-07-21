@@ -54,14 +54,22 @@ export const submitMeme = functions
         );
       }
       // Add meme to storage
-      await bucket
-        .file(data.meme.url)
-        .save(Buffer.from(data.meme.fileBase64, "base64"));
+      const file = bucket.file(data.meme.path);
+      await file.save(Buffer.from(data.meme.fileBase64, "base64"));
       // Add submission to DB
+      let [author] = data.meme.email.split("@");
+      if (author === "emma.goodliffe") {
+        author += " 🏴‍☠️";
+      }
       const code = randomDigits(12);
       const id = await addToDb(db, "submissions", {
         date: dateToString(date),
-        meme: data.meme,
+        meme: {
+          path: data.meme.path,
+          url: file.publicUrl(),
+          found: data.meme.found,
+          author,
+        },
         code,
         dateSubmitted: dateToString(Timestamp.now().toDate()),
       });
@@ -69,7 +77,7 @@ export const submitMeme = functions
       try {
         const [response] = await sendMemeConfirmationEmail(
           data.meme.email,
-          data.meme.url,
+          data.meme.path,
           id,
           code,
         );
@@ -130,10 +138,6 @@ export const confirmMeme = functions
     }
     // Verify code
     const [date, month, year] = separateDate(d);
-    let [author] = submission.meme.email.split("@");
-    if (author === "emma.goodliffe") {
-      author += " 🏴‍☠️";
-    }
     if (parseInt(code) !== submission.code) {
       res.status(400).send({
         status: 400,
@@ -145,11 +149,7 @@ export const confirmMeme = functions
     const memeId = getDocId(year, month);
     const oldData = (await getFromDb(db, "memes", memeId)) ?? {};
     const data = {
-      [date]: {
-        url: submission.meme.url,
-        author,
-        found: submission.meme.found,
-      },
+      [date]: submission.meme,
       ...oldData,
     };
     // Delete the submission
@@ -166,7 +166,7 @@ export const confirmMeme = functions
     await Promise.all([deletionPromise, setToDb(db, "memes", memeId, data)]);
     res.send({
       status: 200,
-      message: `Confirmed meme by ${author}`,
+      message: `Confirmed meme by ${submission.meme.author}`,
     });
     return;
   });

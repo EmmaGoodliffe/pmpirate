@@ -40,7 +40,7 @@ const getRandomSignature = () => {
 
 export const sendMemeConfirmationEmail = async (
   email: string,
-  memeName: string,
+  path: string,
   id: string,
   code: number,
 ) => {
@@ -48,7 +48,7 @@ export const sendMemeConfirmationEmail = async (
   // TODO: Fix line breaks
   const text = `Hi,
   
-Confirm your ${memeName} meme in the schedule: ${url}
+Confirm your ${path} meme in the schedule: ${url}
 
 Yours ${getRandomSignature()},
 PMP 🏴‍☠️`;
