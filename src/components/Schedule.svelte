@@ -82,32 +82,32 @@
 <Header />
 <main>
   <h2>Schedule a Meme</h2>
-  {#if isLoading}
+  {#await optionsPromise}
     <Loader />
-  {:else}
-    {#await optionsPromise}
-      <Loader />
-    {:then options}
-      <div class="max-w-sm">
-        <form class="flex flex-col justify-between h-60">
-          <select class="font-mono" bind:value={chosenDate}>
-            {#each options as option}
-              <option value={option.value} disabled={!option.available}
-                >{option.text}</option
-              >
-            {/each}
-          </select>
-          <input type="text" placeholder="URL" bind:value={url} />
-          <input type="email" placeholder="Email" bind:value={email} />
-          <div>
-            <label for="found-box">Found:</label>
-            <input type="checkbox" id="found-box" bind:checked={found} />
-          </div>
+  {:then options}
+    <div class="max-w-sm">
+      <form class="flex flex-col justify-between h-60">
+        <select class="font-mono" bind:value={chosenDate}>
+          {#each options as option}
+            <option value={option.value} disabled={!option.available}
+              >{option.text}</option
+            >
+          {/each}
+        </select>
+        <input type="text" placeholder="URL" bind:value={url} />
+        <input type="email" placeholder="Email" bind:value={email} />
+        <div>
+          <label for="found-box">Found:</label>
+          <input type="checkbox" id="found-box" bind:checked={found} />
+        </div>
+        {#if isLoading}
+          <Loader />
+        {:else}
           <button class="btn px-4 py-2" on:click={schedule}>Schedule</button>
-        </form>
-        <p class="epilogue">{message}</p>
-      </div>
-    {/await}
-  {/if}
+        {/if}
+      </form>
+      <p class="epilogue">{message}</p>
+    </div>
+  {/await}
 </main>
 <footer />
