@@ -4,6 +4,7 @@ import {
   compoundDate,
   dateToString,
   getDocId,
+  getToday,
   separateDate,
 } from "../functions/src/date";
 import type {
@@ -52,7 +53,7 @@ const cacheMonth = (
 
 const isMemeMonthPossible = (year: number, month: number) => {
   const date = compoundDate(1, month, year);
-  const today = new Date();
+  const today = getToday();
   const currentYear = separateDate(today)[2];
   return firstMonth <= date && year <= currentYear;
 };
