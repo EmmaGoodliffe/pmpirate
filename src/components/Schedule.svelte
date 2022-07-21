@@ -94,9 +94,11 @@
             >
           {/each}
         </select>
+        <!-- TODO: Allow image uploading -->
         <input type="text" placeholder="URL" bind:value={url} />
         <input type="email" placeholder="Email" bind:value={email} />
         <div>
+          <!-- TODO: Explain in UI -->
           <label for="found-box">Found:</label>
           <input type="checkbox" id="found-box" bind:checked={found} />
         </div>
