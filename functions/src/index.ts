@@ -54,13 +54,9 @@ export const submitMeme = functions
         );
       }
       // Add meme to storage
-      console.log([
-        "HERE",
-        data.meme.file,
-        typeof data.meme.file,
-        data.meme.file instanceof ArrayBuffer,
-      ]);
-      await bucket.file(data.meme.url).save(Buffer.from(data.meme.file));
+      await bucket
+        .file(data.meme.url)
+        .save(Buffer.from(data.meme.fileBase64, "base64"));
       // Add submission to DB
       const code = randomDigits(12);
       const id = await addToDb(db, "submissions", {
@@ -106,7 +102,7 @@ export const confirmMeme = functions
   .region("europe-west2")
   .https.onRequest(async (req, res) => {
     // Parse request data
-    const [submissionId, code] = req.params[0].split("/");
+    const [, submissionId, code] = req.params[0].split("/");
     if (!submissionId || !code) {
       res.status(400).send({
         status: 400,

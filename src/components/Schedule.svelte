@@ -57,9 +57,11 @@
   const schedule = async (e: Event) => {
     e.preventDefault();
     isLoading = true;
-    const file = await files[0].arrayBuffer();
-    console.log({ file });
-    const meme = { email, file, url, found };
+    const buffer = await files[0].arrayBuffer();
+    const fileBase64 = window.btoa(
+      String.fromCharCode(...new Uint8Array(buffer)),
+    );
+    const meme = { email, fileBase64, url, found };
     try {
       const response = await submitMeme(chosenDate, meme);
       message = response.data.message;
