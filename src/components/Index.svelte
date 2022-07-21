@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { getToday } from "../../functions/src/date";
   import type { Db } from "../../functions/src/types";
   import { getMemeOtd } from "../db";
   import Doc from "./Doc.svelte";
@@ -8,7 +9,7 @@
 
   export let db: Db;
 
-  const today = new Date();
+  const today = getToday();
   const memeOtdPromise = getMemeOtd(today, db);
 
   const mathsBooks = [

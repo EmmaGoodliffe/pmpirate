@@ -2,7 +2,8 @@
   import {
     compoundDate,
     dateToString,
-    normaliseDate,
+    getToday,
+    getTomorrow,
     separateDate,
     stringToDate,
   } from "../../functions/src/date";
@@ -14,8 +15,8 @@
 
   export let db: Db;
 
-  const today = normaliseDate(new Date());
-  const tomorrow = new Date(Number(today) + 24 * 60 ** 2 * 10 ** 3);
+  const today = getToday();
+  const tomorrow = getTomorrow();
 
   let [, month, year] = separateDate(today);
   let dateQuery = dateToString(today);

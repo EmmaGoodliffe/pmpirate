@@ -3,7 +3,7 @@ import {
   dateToString,
   getLengthOfMonth,
   stringToDate,
-} from "../../src/date";
+} from "../../functions/src/date";
 
 describe("dates", () => {
   const example = new Date("1 Sep 2022");

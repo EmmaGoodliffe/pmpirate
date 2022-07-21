@@ -1,4 +1,4 @@
-import { separateDate } from "../../src/date";
+import { separateDate } from "../../functions/src/date";
 
 describe("home", () => {
   it("displays memes", () => {

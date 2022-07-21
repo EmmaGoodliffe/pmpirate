@@ -3,21 +3,19 @@ import "dotenv/config";
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import * as functions from "firebase-functions";
-import { dateToString, getDocId, separateDate, stringToDate } from "./date";
+import {
+  dateToString,
+  difference,
+  getDocId,
+  separateDate,
+  stringToDate,
+} from "./date";
 import { deleteFromDb, getFromDb, setToDb } from "./db";
 import { sendMemeEmail } from "./email";
 import { SubmitMemeCloudFunction } from "./types";
 
 initializeApp();
 const db = getFirestore();
-
-const difference = (a: Date, b: Date) => {
-  const diffInMilliseconds = Number(a) - Number(b);
-  const diffInSeconds = diffInMilliseconds / 10 ** 3;
-  const diffInHours = diffInSeconds / 60 ** 2;
-  const diffInDays = diffInHours / 24;
-  return diffInDays;
-};
 
 export const submitMeme = functions
   .region("europe-west2")

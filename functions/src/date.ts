@@ -77,4 +77,19 @@ export const getDocId = (year: number, month: number) => {
   return `${year}-${mm}`;
 };
 
-export const normaliseDate = (date: Date) => stringToDate(dateToString(date));
+const normaliseDate = (date: Date) => stringToDate(dateToString(date));
+
+export const difference = (a: Date, b: Date) => {
+  const diffInMilliseconds = Number(a) - Number(b);
+  const diffInSeconds = diffInMilliseconds / 10 ** 3;
+  const diffInHours = diffInSeconds / 60 ** 2;
+  const diffInDays = diffInHours / 24;
+  return diffInDays;
+};
+
+export const getToday = () => normaliseDate(new Date()) as Date;
+
+export const getTomorrow = () => {
+  const [date, month, year] = separateDate(getToday());
+  return compoundDate(date + 1, month, year);
+};

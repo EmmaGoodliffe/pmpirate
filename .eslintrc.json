@@ -10,7 +10,12 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:import/typescript"
   ],
-  "ignorePatterns": ["*.config.js", "*.config.ts", "public/build/*.js"],
+  "ignorePatterns": [
+    "*.config.js",
+    "*.config.ts",
+    "public/build/*.js",
+    "functions/lib/*.js"
+  ],
   "overrides": [
     {
       "files": ["cypress/**/*.ts"],

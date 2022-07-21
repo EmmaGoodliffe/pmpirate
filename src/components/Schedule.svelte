@@ -2,7 +2,7 @@
   import {
     compoundDate,
     dateToString,
-    normaliseDate,
+    getToday,
     separateDate,
   } from "../../functions/src/date";
   import type { Db } from "../../functions/src/types";
@@ -12,7 +12,7 @@
 
   export let db: Db;
 
-  const today = new Date();
+  const today = getToday();
   const [currentDate, currentMonth, currentYear] = separateDate(today);
 
   let chosenDate: Date = null;
@@ -25,7 +25,7 @@
   const getOptions = async () => {
     const options = (
       await Promise.all(
-        new Array(11).fill(0).map(async (x, i) => {
+        new Array(11).fill(0).map(async (_x, i) => {
           const date = compoundDate(
             currentDate + i - 2,
             currentMonth,
@@ -46,9 +46,8 @@
       )
     ).flat();
     chosenDate =
-      options.filter(
-        option => option.value >= normaliseDate(today) && option.available,
-      )[0]?.value ?? null;
+      options.filter(option => option.value >= today && option.available)[0]
+        ?.value ?? null;
     return options;
   };
 
@@ -102,7 +101,7 @@
           <input type="email" placeholder="Email" bind:value={email} />
           <div>
             <label for="found-box">Found:</label>
-            <input type="checkbox" id="found-box" bind:value={found} />
+            <input type="checkbox" id="found-box" bind:checked={found} />
           </div>
           <button class="btn px-4 py-2" on:click={schedule}>Schedule</button>
         </form>
