@@ -1,5 +1,3 @@
-// TODO: Stop other files using vanilla dates
-
 const toInt = (x: string) => {
   const intX = parseInt(x);
   if (!isNaN(intX)) return intX;
@@ -77,8 +75,6 @@ export const getDocId = (year: number, month: number) => {
   return `${year}-${mm}`;
 };
 
-const normaliseDate = (date: Date) => stringToDate(dateToString(date));
-
 export const difference = (a: Date, b: Date) => {
   const diffInMilliseconds = Number(a) - Number(b);
   const diffInSeconds = diffInMilliseconds / 10 ** 3;
@@ -86,6 +82,8 @@ export const difference = (a: Date, b: Date) => {
   const diffInDays = diffInHours / 24;
   return diffInDays;
 };
+
+const normaliseDate = (date: Date) => stringToDate(dateToString(date));
 
 export const getToday = () => normaliseDate(new Date()) as Date;
 

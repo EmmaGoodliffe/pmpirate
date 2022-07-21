@@ -20,6 +20,7 @@ export interface MemeRequest extends MemeBasics {
   email: string;
 }
 
+// Doesn't use interface for overloads of addToDb in functions/src/db.ts
 export type MemeSubmission = {
   date: string;
   meme: MemeRequest;
