@@ -2,6 +2,7 @@
 import "dotenv/config";
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
+import { getStorage } from "firebase-admin/storage";
 import * as functions from "firebase-functions";
 import {
   dateToString,
@@ -10,12 +11,17 @@ import {
   separateDate,
   stringToDate,
 } from "./date";
-import { deleteFromDb, getFromDb, setToDb } from "./db";
-import { sendMemeEmail } from "./email";
+import { addToDb, deleteFromDb, getFromDb, setToDb } from "./db";
+import { sendMemeConfirmationEmail } from "./email";
 import { SubmitMemeCloudFunction } from "./types";
 
 initializeApp();
 const db = getFirestore();
+const storage = getStorage();
+const bucket = storage.bucket();
+
+const randomDigits = (max: number) =>
+  Math.floor(parseFloat(Math.random().toFixed(max)) * 10 ** max);
 
 export const submitMeme = functions
   .region("europe-west2")
@@ -23,6 +29,7 @@ export const submitMeme = functions
     async (
       data: SubmitMemeCloudFunction["request"],
     ): Promise<SubmitMemeCloudFunction> => {
+      // Parse request data
       const date = stringToDate(data.date);
       if (date === undefined) {
         throw new functions.https.HttpsError(
@@ -39,18 +46,36 @@ export const submitMeme = functions
           )}`,
         );
       }
-      const domain = data.meme.email.split("@")[1];
+      const [, domain] = data.meme.email.split("@");
       if (domain !== "spgs.org") {
         throw new functions.https.HttpsError(
           "invalid-argument",
           `Expected domain of email to be spgs.org; received ${domain}`,
         );
       }
+      // Add meme to storage
+      console.log([
+        "HERE",
+        data.meme.file,
+        typeof data.meme.file,
+        data.meme.file instanceof ArrayBuffer,
+      ]);
+      await bucket.file(data.meme.url).save(Buffer.from(data.meme.file));
+      // Add submission to DB
+      const code = randomDigits(12);
+      const id = await addToDb(db, "submissions", {
+        date: dateToString(date),
+        meme: data.meme,
+        code,
+        dateSubmitted: dateToString(Timestamp.now().toDate()),
+      });
+      // Email author the confirmation URL
       try {
-        const [response] = await sendMemeEmail(
-          db,
-          dateToString(date),
-          data.meme,
+        const [response] = await sendMemeConfirmationEmail(
+          data.meme.email,
+          data.meme.url,
+          id,
+          code,
         );
         return {
           status: 200,
@@ -60,10 +85,7 @@ export const submitMeme = functions
         };
       } catch (err) {
         console.error(err);
-        throw new functions.https.HttpsError(
-          "aborted",
-          "Error writing to DB or sending email",
-        );
+        throw new functions.https.HttpsError("aborted", "Error sending email");
       }
     },
   );
@@ -83,6 +105,7 @@ const areNumberKeysTheSame = <T extends Record<number, unknown>>(
 export const confirmMeme = functions
   .region("europe-west2")
   .https.onRequest(async (req, res) => {
+    // Parse request data
     const [submissionId, code] = req.params[0].split("/");
     if (!submissionId || !code) {
       res.status(400).send({
@@ -91,6 +114,7 @@ export const confirmMeme = functions
       });
       return;
     }
+    // Get submission from DB
     const submission = await getFromDb(db, "submissions", submissionId);
     if (submission === undefined) {
       res.status(404).send({
@@ -99,6 +123,7 @@ export const confirmMeme = functions
       });
       return;
     }
+    // Parse submission
     const d = stringToDate(submission.date);
     if (d === undefined) {
       res.status(400).send({
@@ -107,8 +132,9 @@ export const confirmMeme = functions
       });
       return;
     }
+    // Verify code
     const [date, month, year] = separateDate(d);
-    let author = submission.meme.email.split("@")[0];
+    let [author] = submission.meme.email.split("@");
     if (author === "emma.goodliffe") {
       author += " 🏴‍☠️";
     }
@@ -119,6 +145,7 @@ export const confirmMeme = functions
       });
       return;
     }
+    // Generate new meme data
     const memeId = getDocId(year, month);
     const oldData = (await getFromDb(db, "memes", memeId)) ?? {};
     const data = {
@@ -129,7 +156,9 @@ export const confirmMeme = functions
       },
       ...oldData,
     };
+    // Delete the submission
     const deletionPromise = deleteFromDb(db, "submissions", submissionId);
+    // Verify there is not a scheduling conflict
     if (areNumberKeysTheSame(oldData, data)) {
       await deletionPromise;
       res.status(409).send({
@@ -137,6 +166,7 @@ export const confirmMeme = functions
         message: `There was already a meme scheduled for ${submission.date}`,
       });
     }
+    // Set meme data to DB
     await Promise.all([deletionPromise, setToDb(db, "memes", memeId, data)]);
     res.send({
       status: 200,

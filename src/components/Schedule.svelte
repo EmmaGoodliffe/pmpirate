@@ -16,6 +16,7 @@
   const [currentDate, currentMonth, currentYear] = separateDate(today);
 
   let chosenDate: Date = null;
+  let files: FileList;
   let url = "";
   let email = "";
   let found = false;
@@ -53,29 +54,29 @@
 
   const optionsPromise = getOptions();
 
-  const schedule = (e: Event) => {
+  const schedule = async (e: Event) => {
     e.preventDefault();
     isLoading = true;
-    submitMeme(chosenDate, { email, url, found })
-      .then(response => {
-        message = response.data.message;
-        isLoading = false;
-      })
-      .catch(err => {
-        if (
-          err.code === "functions/invalid-argument" ||
-          err.code === "functions/out-of-range"
-        ) {
-          isLoading = false;
-          message = "That date is unavailable";
-          console.warn(err);
-        } else {
-          isLoading = false;
-          message = "Something went wrong";
-          throw err;
-        }
-      });
-    isLoading = true;
+    const file = await files[0].arrayBuffer();
+    console.log({ file });
+    const meme = { email, file, url, found };
+    try {
+      const response = await submitMeme(chosenDate, meme);
+      message = response.data.message;
+      isLoading = false;
+    } catch (err) {
+      isLoading = false;
+      if (
+        err.code === "functions/invalid-argument" ||
+        err.code === "functions/out-of-range"
+      ) {
+        message = "That date is unavailable";
+        console.warn(err);
+      } else {
+        message = "Something went wrong";
+        throw err;
+      }
+    }
   };
 </script>
 
@@ -86,7 +87,7 @@
     <Loader />
   {:then options}
     <div class="max-w-sm">
-      <form class="flex flex-col justify-between h-60">
+      <form class="flex flex-col justify-between h-72">
         <select class="font-mono" bind:value={chosenDate}>
           {#each options as option}
             <option value={option.value} disabled={!option.available}
@@ -94,7 +95,7 @@
             >
           {/each}
         </select>
-        <!-- TODO: Allow image uploading -->
+        <input type="file" bind:files />
         <input type="text" placeholder="URL" bind:value={url} />
         <input type="email" placeholder="Email" bind:value={email} />
         <div>

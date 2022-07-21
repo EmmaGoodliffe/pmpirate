@@ -18,6 +18,7 @@ export type MemesOfMonth = Record<number | string, Meme>;
 
 export interface MemeRequest extends MemeBasics {
   email: string;
+  file: ArrayBuffer;
 }
 
 // Doesn't use interface for overloads of addToDb in functions/src/db.ts

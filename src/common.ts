@@ -2,6 +2,7 @@ import { getAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
+// import { connectStorageEmulator, getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDfGaweLVDXcfxJDZ4ztoMoilhU9fv4uXU",
@@ -17,10 +18,16 @@ const app = initializeApp(firebaseConfig);
 getAnalytics(app);
 const db = getFirestore(app);
 const functions = getFunctions(app, "europe-west2");
+// const storage = getStorage(app);
 const isEmulation =
   location.href.includes("localhost") || location.href.includes("127.0.0.1");
 if (isEmulation) {
   connectFirestoreEmulator(db, "localhost", 8080);
   connectFunctionsEmulator(functions, "localhost", 5001);
+  // connectStorageEmulator(storage, "localhost", 9199);
 }
-export { db, functions };
+export {
+  db,
+  functions,
+  // storage
+};

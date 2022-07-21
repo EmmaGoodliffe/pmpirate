@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build:cloud-functions": "npm --prefix functions run build",
     "build:css": "tailwindcss -i src/index.css -o public/index.css",
     "build:svelte": "rollup -c",
-    "build": "npm run build:css && npm run build:svelte && npm --prefix functions run build",
+    "build": "npm run build:css && npm run build:svelte && npm run build:cloud-functions",
     "deploy": "npm run build && npm  run lint && firebase deploy",
     "dev:css": "npm run build:css -- --watch",
     "dev:functions": "echo \"In another terminal, run: npm --prefix functions run build:watch\"",
