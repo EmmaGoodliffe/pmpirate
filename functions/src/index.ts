@@ -13,6 +13,7 @@ import {
 } from "./date";
 import { addToDb, deleteFromDb, getFromDb, setToDb } from "./db";
 import { sendMemeConfirmationEmail } from "./email";
+import { pipeResizedImage } from "./image";
 import { SubmitMemeCloudFunction } from "./types";
 
 initializeApp();
@@ -54,8 +55,10 @@ export const submitMeme = functions
         );
       }
       // Add meme to storage
-      const file = bucket.file(`memes/${data.meme.path}`);
-      await file.save(Buffer.from(data.meme.fileBase64, "base64"));
+      const file = bucket.file(`memes/${data.meme.name}.jpg`);
+      const buffer = Buffer.from(data.meme.fileBase64, "base64");
+      // await file.save(buffer);
+      await pipeResizedImage(buffer, 64, 64, file.createWriteStream());
       // Add submission to DB
       let [author] = data.meme.email.split("@");
       if (author === "emma.goodliffe") {
@@ -65,7 +68,7 @@ export const submitMeme = functions
       const id = await addToDb(db, "submissions", {
         date: dateToString(date),
         meme: {
-          path: data.meme.path,
+          // path: data.meme.path,
           url: file.publicUrl(),
           found: data.meme.found,
           author,
@@ -77,7 +80,7 @@ export const submitMeme = functions
       try {
         const [response] = await sendMemeConfirmationEmail(
           data.meme.email,
-          data.meme.path,
+          data.meme.name,
           id,
           code,
         );

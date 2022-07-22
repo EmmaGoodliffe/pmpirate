@@ -17,7 +17,7 @@
 
   let chosenDate: Date = null;
   let files: FileList;
-  let path = "";
+  let name = "";
   let email = "";
   let found = false;
   let isLoading = false;
@@ -62,7 +62,7 @@
       String.fromCharCode(...new Uint8Array(buffer)),
     );
     const meme = {
-      path,
+      name,
       email,
       fileBase64,
       found,
@@ -104,7 +104,7 @@
         </select>
         <input type="file" bind:files />
         <!-- TODO: Explain in UI -->
-        <input type="text" placeholder="Path" bind:value={path} />
+        <input type="text" placeholder="Name" bind:value={name} />
         <input type="email" placeholder="SPGS email" bind:value={email} />
         <div>
           <!-- TODO: Explain in UI -->

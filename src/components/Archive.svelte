@@ -56,6 +56,8 @@
 
   $: archivedMemesPromise = getArchivedMemes(db, year, month);
 
+  $: memePromises = Promise.all([archivedMemesPromise, tomorrowMemePromise]);
+
   // TODO: Debounce
   $: queriedMemePromise = getMemeOtd(stringToDate(dateQuery), db);
 </script>
@@ -93,11 +95,11 @@
         <th class="border-2">Meme</th>
       </tr>
     </thead>
-    {#await archivedMemesPromise}
+    {#await memePromises}
       <tfoot>
         <Loader />
       </tfoot>
-    {:then archivedMemes}
+    {:then [archivedMemes, tomorrowMeme]}
       <tbody>
         {#each Object.keys(archivedMemes).map(x => parseInt(x)) as date}
           <Shelf
@@ -105,15 +107,11 @@
             meme={archivedMemes[date]}
           />
         {/each}
-        {#await tomorrowMemePromise}
-          <Loader />
-        {:then tomorrowMeme}
-          {#if tomorrowMeme}
-            <Shelf date={tomorrow} meme={tomorrowMeme} isTomorrow={true} />
-          {/if}
-        {/await}
+        {#if tomorrowMeme && !forwardsEnabled}
+          <Shelf date={tomorrow} meme={tomorrowMeme} isTomorrow={true} />
+        {/if}
       </tbody>
-      {#if !Object.keys(archivedMemes).length}
+      {#if !Object.keys(archivedMemes).length && !tomorrowMeme}
         {#if month === separateDate(today)[1] && year === separateDate(today)[2]}
           <tfoot>No memes yet this month :(</tfoot>
         {:else}
