@@ -14,6 +14,7 @@ import {
 import { addToDb, deleteFromDb, getFromDb, setToDb } from "./db";
 import { sendMemeConfirmationEmail } from "./email";
 import { SubmitMemeCloudFunction } from "./types";
+import { pipeResizedImage } from "./image";
 
 initializeApp();
 const db = getFirestore();
@@ -55,7 +56,10 @@ export const submitMeme = functions
       }
       // Add meme to storage
       const file = bucket.file(`memes/${data.meme.path}`);
-      await file.save(Buffer.from(data.meme.fileBase64, "base64"));
+      const buffer = Buffer.from(data.meme.fileBase64, "base64");
+      // await file.save(buffer);
+      const uploadStream = file.createWriteStream(); // Might need metadata
+      await pipeResizedImage(buffer, 64, 64, uploadStream);
       // Add submission to DB
       let [author] = data.meme.email.split("@");
       if (author === "emma.goodliffe") {
