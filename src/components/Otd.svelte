@@ -2,7 +2,7 @@
   import type { Meme } from "../../functions/src/types";
 
   export let meme: Meme;
-  export let noMemeMessage;
+  export let noMemeMessage: string;
 
   const className = "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto";
 </script>
