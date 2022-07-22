@@ -49,6 +49,37 @@ form select {
   @apply max-w-sm;
 }
 
+.switch {
+  --switch-width: 40px;
+  width: var(--switch-width);
+  @apply h-6 rounded-full flex transition-colors ease-linear;
+}
+
+.switch.off {
+  @apply bg-p;
+}
+
+.switch.on {
+  @apply bg-light-s;
+}
+
+.switch .switch-indicator {
+  --switch-indicator-width: 24px;
+  width: var(--switch-indicator-width);
+  @apply h-6 border-2 rounded-full transition-all;
+}
+
+.switch.off .switch-indicator {
+  @apply bg-light-s border-p;
+}
+
+.switch.on .switch-indicator {
+  transform: translateX(
+    calc(var(--switch-width) - var(--switch-indicator-width))
+  );
+  @apply bg-bg border-light-s;
+}
+
 .btn {
   line-height: normal;
   @apply bg-p mx-auto font-bold text-center flex items-center justify-center py-2 rounded cursor-pointer;

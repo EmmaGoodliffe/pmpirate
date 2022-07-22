@@ -416,7 +416,7 @@ Ensure the default browser behavior of the `hidden` attribute.
   display: none;
 }
 
-.border-2, [type="text"], [type="email"], select, td {
+.border-2, [type="text"], [type="email"], select, .switch-indicator, td {
   --tw-border-opacity: 1;
   border-color: rgb(229 231 235 / var(--tw-border-opacity));
 }
@@ -466,12 +466,16 @@ Ensure the default browser behavior of the `hidden` attribute.
   margin-left: 1rem;
 }
 
-.mb-4 {
-  margin-bottom: 1rem;
-}
-
 .mb-2 {
   margin-bottom: 0.5rem;
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
+.ml-2 {
+  margin-left: 0.5rem;
 }
 
 .inline-block {
@@ -542,6 +546,10 @@ Ensure the default browser behavior of the `hidden` attribute.
 
 .table-auto {
   table-layout: auto;
+}
+
+.flex-row-reverse {
+  flex-direction: row-reverse;
 }
 
 .flex-col {
@@ -686,6 +694,55 @@ input[type="text"], input[type="email"], select {
 
 form input, form select {
   max-width: 24rem;
+}
+
+.switch {
+  --switch-width: 40px;
+  width: var(--switch-width);
+  display: flex;
+  height: 1.5rem;
+  border-radius: 9999px;
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 150ms;
+  transition-timing-function: linear;
+}
+
+.switch.off {
+  --tw-bg-opacity: 1;
+  background-color: rgb(6 182 212 / var(--tw-bg-opacity));
+}
+
+.switch.on {
+  --tw-bg-opacity: 1;
+  background-color: rgb(229 231 235 / var(--tw-bg-opacity));
+}
+
+.switch .switch-indicator {
+  --switch-indicator-width: 24px;
+  width: var(--switch-indicator-width);
+  height: 1.5rem;
+  border-radius: 9999px;
+  border-width: 2px;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.switch.off .switch-indicator {
+  --tw-border-opacity: 1;
+  border-color: rgb(6 182 212 / var(--tw-border-opacity));
+  --tw-bg-opacity: 1;
+  background-color: rgb(229 231 235 / var(--tw-bg-opacity));
+}
+
+.switch.on .switch-indicator {
+  transform: translateX(
+    calc(var(--switch-width) - var(--switch-indicator-width))
+  );
+  --tw-border-opacity: 1;
+  border-color: rgb(229 231 235 / var(--tw-border-opacity));
+  --tw-bg-opacity: 1;
+  background-color: rgb(31 41 55 / var(--tw-bg-opacity));
 }
 
 .btn {

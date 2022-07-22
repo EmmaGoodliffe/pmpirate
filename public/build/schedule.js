@@ -16216,6 +16216,9 @@ var schedule = (function () {
         const selected_option = select.querySelector(':checked') || select.options[0];
         return selected_option && selected_option.__value;
     }
+    function toggle_class(element, name, toggle) {
+        element.classList[toggle ? 'add' : 'remove'](name);
+    }
     function custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
         const e = document.createEvent('CustomEvent');
         e.initCustomEvent(type, bubbles, cancelable, detail);
@@ -17240,16 +17243,19 @@ var schedule = (function () {
     	let t22;
     	let input2;
     	let t23;
-    	let div;
-    	let label2;
+    	let div2;
+    	let span0;
     	let t25;
-    	let input3;
+    	let div1;
+    	let div0;
     	let t26;
+    	let span1;
+    	let t28;
     	let current_block_type_index_1;
     	let if_block1;
-    	let t27;
+    	let t29;
     	let p;
-    	let t28;
+    	let t30;
     	let current;
     	let mounted;
     	let dispose;
@@ -17345,54 +17351,64 @@ var schedule = (function () {
     			t22 = space();
     			input2 = element("input");
     			t23 = space();
-    			div = element("div");
-    			label2 = element("label");
-    			label2.textContent = "Did you make it yourself?";
+    			div2 = element("div");
+    			span0 = element("span");
+    			span0.textContent = "I made it 🧑‍🎨";
     			t25 = space();
-    			input3 = element("input");
+    			div1 = element("div");
+    			div0 = element("div");
     			t26 = space();
+    			span1 = element("span");
+    			span1.textContent = "🏴‍☠️ I stole it";
+    			t28 = space();
     			if_block1.c();
-    			t27 = space();
+    			t29 = space();
     			p = element("p");
-    			t28 = text(/*message*/ ctx[6]);
-    			add_location(h30, file, 94, 6, 3531);
+    			t30 = text(/*message*/ ctx[6]);
+    			add_location(h30, file, 94, 6, 3530);
     			attr_dev(select, "class", "font-mono");
     			if (/*chosenDate*/ ctx[1] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[12].call(select));
-    			add_location(select, file, 95, 6, 3560);
-    			add_location(hr0, file, 102, 6, 3798);
-    			add_location(h31, file, 103, 6, 3811);
+    			add_location(select, file, 95, 6, 3559);
+    			add_location(hr0, file, 102, 6, 3797);
+    			add_location(h31, file, 103, 6, 3810);
     			attr_dev(input0, "id", "file");
     			attr_dev(input0, "type", "file");
-    			add_location(input0, file, 104, 6, 3842);
-    			add_location(hr1, file, 105, 6, 3891);
-    			add_location(h32, file, 106, 6, 3904);
-    			add_location(hr2, file, 112, 6, 4060);
-    			add_location(h33, file, 113, 6, 4073);
+    			add_location(input0, file, 104, 6, 3841);
+    			add_location(hr1, file, 105, 6, 3890);
+    			add_location(h32, file, 106, 6, 3903);
+    			add_location(hr2, file, 112, 6, 4059);
+    			add_location(h33, file, 113, 6, 4072);
     			attr_dev(input1, "id", "name");
     			attr_dev(input1, "type", "text");
     			attr_dev(input1, "placeholder", "Name");
-    			add_location(input1, file, 114, 6, 4114);
+    			add_location(input1, file, 114, 6, 4113);
     			attr_dev(label0, "for", "name");
-    			add_location(label0, file, 115, 6, 4189);
-    			add_location(hr3, file, 121, 6, 4380);
-    			add_location(h34, file, 122, 6, 4393);
+    			add_location(label0, file, 115, 6, 4188);
+    			add_location(hr3, file, 121, 6, 4379);
+    			add_location(h34, file, 122, 6, 4392);
     			attr_dev(label1, "class", "mb-2");
     			attr_dev(label1, "for", "email");
-    			add_location(label1, file, 123, 6, 4415);
+    			add_location(label1, file, 123, 6, 4414);
     			attr_dev(input2, "id", "email");
     			attr_dev(input2, "type", "email");
     			attr_dev(input2, "placeholder", "School email");
-    			add_location(input2, file, 124, 6, 4474);
-    			attr_dev(label2, "for", "found-box");
-    			add_location(label2, file, 131, 8, 4612);
-    			attr_dev(input3, "id", "found-box");
-    			attr_dev(input3, "type", "checkbox");
-    			add_location(input3, file, 132, 8, 4677);
-    			add_location(div, file, 130, 6, 4598);
+    			add_location(input2, file, 124, 6, 4473);
+    			attr_dev(span0, "class", "mr-2");
+    			add_location(span0, file, 131, 8, 4624);
+    			attr_dev(div0, "class", "switch-indicator");
+    			add_location(div0, file, 138, 10, 4820);
+    			attr_dev(div1, "class", "switch");
+    			toggle_class(div1, "off", /*made*/ ctx[4]);
+    			toggle_class(div1, "on", !/*made*/ ctx[4]);
+    			add_location(div1, file, 132, 8, 4674);
+    			attr_dev(span1, "class", "ml-2");
+    			add_location(span1, file, 140, 8, 4876);
+    			attr_dev(div2, "class", "flex");
+    			add_location(div2, file, 130, 6, 4597);
     			attr_dev(form, "class", "flex flex-col");
-    			add_location(form, file, 93, 4, 3496);
+    			add_location(form, file, 93, 4, 3495);
     			attr_dev(p, "class", "epilogue");
-    			add_location(p, file, 140, 4, 4910);
+    			add_location(p, file, 148, 4, 5091);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, form, anchor);
@@ -17440,16 +17456,18 @@ var schedule = (function () {
     			append_dev(form, input2);
     			set_input_value(input2, /*email*/ ctx[3]);
     			append_dev(form, t23);
-    			append_dev(form, div);
-    			append_dev(div, label2);
-    			append_dev(div, t25);
-    			append_dev(div, input3);
-    			input3.checked = /*made*/ ctx[4];
-    			append_dev(form, t26);
+    			append_dev(form, div2);
+    			append_dev(div2, span0);
+    			append_dev(div2, t25);
+    			append_dev(div2, div1);
+    			append_dev(div1, div0);
+    			append_dev(div2, t26);
+    			append_dev(div2, span1);
+    			append_dev(form, t28);
     			if_blocks_1[current_block_type_index_1].m(form, null);
-    			insert_dev(target, t27, anchor);
+    			insert_dev(target, t29, anchor);
     			insert_dev(target, p, anchor);
-    			append_dev(p, t28);
+    			append_dev(p, t30);
     			current = true;
 
     			if (!mounted) {
@@ -17458,7 +17476,7 @@ var schedule = (function () {
     					listen_dev(input0, "change", /*input0_change_handler*/ ctx[13]),
     					listen_dev(input1, "input", /*input1_input_handler*/ ctx[14]),
     					listen_dev(input2, "input", /*input2_input_handler*/ ctx[15]),
-    					listen_dev(input3, "change", /*input3_change_handler*/ ctx[16])
+    					listen_dev(div1, "click", /*click_handler*/ ctx[16], false, false, false)
     				];
 
     				mounted = true;
@@ -17532,7 +17550,11 @@ var schedule = (function () {
     			}
 
     			if (dirty & /*made*/ 16) {
-    				input3.checked = /*made*/ ctx[4];
+    				toggle_class(div1, "off", /*made*/ ctx[4]);
+    			}
+
+    			if (dirty & /*made*/ 16) {
+    				toggle_class(div1, "on", !/*made*/ ctx[4]);
     			}
 
     			let previous_block_index_1 = current_block_type_index_1;
@@ -17561,7 +17583,7 @@ var schedule = (function () {
     				if_block1.m(form, null);
     			}
 
-    			if (!current || dirty & /*message*/ 64) set_data_dev(t28, /*message*/ ctx[6]);
+    			if (!current || dirty & /*message*/ 64) set_data_dev(t30, /*message*/ ctx[6]);
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -17589,7 +17611,7 @@ var schedule = (function () {
     			info.token = null;
     			info = null;
     			if_blocks_1[current_block_type_index_1].d();
-    			if (detaching) detach_dev(t27);
+    			if (detaching) detach_dev(t29);
     			if (detaching) detach_dev(p);
     			mounted = false;
     			run_all(dispose);
@@ -17620,7 +17642,7 @@ var schedule = (function () {
     			option.__value = /*option*/ ctx[25].value;
     			option.value = option.__value;
     			option.disabled = !/*option*/ ctx[25].available;
-    			add_location(option, file, 97, 10, 3655);
+    			add_location(option, file, 97, 10, 3654);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, option, anchor);
@@ -17652,7 +17674,7 @@ var schedule = (function () {
     			p = element("p");
     			p.textContent = "Waiting for image";
     			attr_dev(p, "class", "epilogue");
-    			add_location(p, file, 110, 8, 4000);
+    			add_location(p, file, 110, 8, 3999);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -17830,7 +17852,7 @@ var schedule = (function () {
     	return block;
     }
 
-    // (137:6) {:else}
+    // (145:6) {:else}
     function create_else_block(ctx) {
     	let button;
     	let mounted;
@@ -17841,7 +17863,7 @@ var schedule = (function () {
     			button = element("button");
     			button.textContent = "Schedule";
     			attr_dev(button, "class", "btn px-4 py-2");
-    			add_location(button, file, 137, 8, 4814);
+    			add_location(button, file, 145, 8, 4995);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -17865,14 +17887,14 @@ var schedule = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(137:6) {:else}",
+    		source: "(145:6) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (135:6) {#if isLoading}
+    // (143:6) {#if isLoading}
     function create_if_block(ctx) {
     	let loader;
     	let current;
@@ -17905,7 +17927,7 @@ var schedule = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(135:6) {#if isLoading}",
+    		source: "(143:6) {#if isLoading}",
     		ctx
     	});
 
@@ -17988,9 +18010,9 @@ var schedule = (function () {
     			info.block.c();
     			t3 = space();
     			footer = element("footer");
-    			add_location(h2, file, 89, 2, 3408);
-    			add_location(main, file, 88, 0, 3399);
-    			add_location(footer, file, 143, 0, 4963);
+    			add_location(h2, file, 89, 2, 3407);
+    			add_location(main, file, 88, 0, 3398);
+    			add_location(footer, file, 151, 0, 5144);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -18100,7 +18122,7 @@ var schedule = (function () {
     	let files;
     	let name = "";
     	let email = "";
-    	let made = false;
+    	let made = true;
     	let isLoading = false;
     	let message = "";
 
@@ -18200,10 +18222,7 @@ var schedule = (function () {
     		$$invalidate(3, email);
     	}
 
-    	function input3_change_handler() {
-    		made = this.checked;
-    		$$invalidate(4, made);
-    	}
+    	const click_handler = () => $$invalidate(4, made = !made);
 
     	$$self.$$set = $$props => {
     		if ('db' in $$props) $$invalidate(11, db = $$props.db);
@@ -18280,7 +18299,7 @@ var schedule = (function () {
     		input0_change_handler,
     		input1_input_handler,
     		input2_input_handler,
-    		input3_change_handler
+    		click_handler
     	];
     }
 

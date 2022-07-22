@@ -21,7 +21,7 @@
   let files: FileList;
   let name = "";
   let email = "";
-  let made = false;
+  let made = true;
   let isLoading = false;
   let message = "";
 
@@ -145,9 +145,17 @@
         placeholder="School email"
         bind:value={email}
       />
-      <div>
-        <label for="found-box">Did you make it yourself?</label>
-        <input id="found-box" type="checkbox" bind:checked={made} />
+      <div class="flex">
+        <span class="mr-2">I made it 🧑‍🎨</span>
+        <div
+          class="switch"
+          class:off={made}
+          class:on={!made}
+          on:click={() => (made = !made)}
+        >
+          <div class="switch-indicator" />
+        </div>
+        <span class="ml-2">🏴‍☠️ I stole it</span>
       </div>
       {#if isLoading}
         <Loader />
