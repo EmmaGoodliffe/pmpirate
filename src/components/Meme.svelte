@@ -1,9 +1,11 @@
 <script lang="ts">
   export let url = "";
+  export let width: number = NaN;
 
   let showError = false;
 
-  const className = "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto";
+  let className = "mx-auto w-full sm:w-4/6 md:w-1/2";
+  isNaN(width) && (className += "max-w-md");
   const noMemeMessage = "Couldn't load meme :(";
 
   // Reset error when URL changes
@@ -16,6 +18,7 @@
 {#if url && !showError}
   <img
     class={className}
+    style={width ? `width: ${width}px` : ""}
     src={url}
     alt="Meme"
     on:error={() => {

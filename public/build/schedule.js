@@ -17011,20 +17011,21 @@ var schedule = (function () {
     const { console: console_1$1 } = globals;
     const file$2 = "src/components/Meme.svelte";
 
-    // (22:0) {:else}
+    // (25:0) {:else}
     function create_else_block$1(ctx) {
     	let p;
+    	let p_class_value;
     	let current;
-    	const default_slot_template = /*#slots*/ ctx[3].default;
-    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[2], null);
+    	const default_slot_template = /*#slots*/ ctx[5].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[4], null);
     	const default_slot_or_fallback = default_slot || fallback_block(ctx);
 
     	const block = {
     		c: function create() {
     			p = element("p");
     			if (default_slot_or_fallback) default_slot_or_fallback.c();
-    			attr_dev(p, "class", `${className} text-center`);
-    			add_location(p, file$2, 22, 2, 441);
+    			attr_dev(p, "class", p_class_value = `${/*className*/ ctx[3]} text-center`);
+    			add_location(p, file$2, 25, 2, 542);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -17037,18 +17038,22 @@ var schedule = (function () {
     		},
     		p: function update(ctx, dirty) {
     			if (default_slot) {
-    				if (default_slot.p && (!current || dirty & /*$$scope*/ 4)) {
+    				if (default_slot.p && (!current || dirty & /*$$scope*/ 16)) {
     					update_slot_base(
     						default_slot,
     						default_slot_template,
     						ctx,
-    						/*$$scope*/ ctx[2],
+    						/*$$scope*/ ctx[4],
     						!current
-    						? get_all_dirty_from_scope(/*$$scope*/ ctx[2])
-    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[2], dirty, null),
+    						? get_all_dirty_from_scope(/*$$scope*/ ctx[4])
+    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[4], dirty, null),
     						null
     					);
     				}
+    			}
+
+    			if (!current || dirty & /*className*/ 8 && p_class_value !== (p_class_value = `${/*className*/ ctx[3]} text-center`)) {
+    				attr_dev(p, "class", p_class_value);
     			}
     		},
     		i: function intro(local) {
@@ -17070,16 +17075,17 @@ var schedule = (function () {
     		block,
     		id: create_else_block$1.name,
     		type: "else",
-    		source: "(22:0) {:else}",
+    		source: "(25:0) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (12:0) {#if url && !showError}
+    // (14:0) {#if url && !showError}
     function create_if_block$1(ctx) {
     	let img;
+    	let img_style_value;
     	let img_src_value;
     	let mounted;
     	let dispose;
@@ -17087,20 +17093,29 @@ var schedule = (function () {
     	const block = {
     		c: function create() {
     			img = element("img");
-    			attr_dev(img, "class", className);
+    			attr_dev(img, "class", /*className*/ ctx[3]);
+    			attr_dev(img, "style", img_style_value = /*width*/ ctx[1] ? `width: ${/*width*/ ctx[1]}px` : "");
     			if (!src_url_equal(img.src, img_src_value = /*url*/ ctx[0])) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file$2, 12, 2, 280);
+    			add_location(img, file$2, 14, 2, 336);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
 
     			if (!mounted) {
-    				dispose = listen_dev(img, "error", /*error_handler*/ ctx[4], false, false, false);
+    				dispose = listen_dev(img, "error", /*error_handler*/ ctx[6], false, false, false);
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
+    			if (dirty & /*className*/ 8) {
+    				attr_dev(img, "class", /*className*/ ctx[3]);
+    			}
+
+    			if (dirty & /*width*/ 2 && img_style_value !== (img_style_value = /*width*/ ctx[1] ? `width: ${/*width*/ ctx[1]}px` : "")) {
+    				attr_dev(img, "style", img_style_value);
+    			}
+
     			if (dirty & /*url*/ 1 && !src_url_equal(img.src, img_src_value = /*url*/ ctx[0])) {
     				attr_dev(img, "src", img_src_value);
     			}
@@ -17118,14 +17133,14 @@ var schedule = (function () {
     		block,
     		id: create_if_block$1.name,
     		type: "if",
-    		source: "(12:0) {#if url && !showError}",
+    		source: "(14:0) {#if url && !showError}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (24:10) {noMemeMessage}
+    // (27:10) {noMemeMessage}
     function fallback_block(ctx) {
     	let t;
 
@@ -17146,7 +17161,7 @@ var schedule = (function () {
     		block,
     		id: fallback_block.name,
     		type: "fallback",
-    		source: "(24:10) {noMemeMessage}",
+    		source: "(27:10) {noMemeMessage}",
     		ctx
     	});
 
@@ -17162,7 +17177,7 @@ var schedule = (function () {
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (/*url*/ ctx[0] && !/*showError*/ ctx[1]) return 0;
+    		if (/*url*/ ctx[0] && !/*showError*/ ctx[2]) return 0;
     		return 1;
     	}
 
@@ -17235,35 +17250,46 @@ var schedule = (function () {
     	return block;
     }
 
-    const className = "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto";
     const noMemeMessage = "Couldn't load meme :(";
 
     function instance$2($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Meme', slots, ['default']);
     	let { url = "" } = $$props;
+    	let { width = NaN } = $$props;
     	let showError = false;
-    	const writable_props = ['url'];
+    	let className = "mx-auto w-full sm:w-4/6 md:w-1/2";
+    	isNaN(width) && (className += "max-w-md");
+    	const writable_props = ['url', 'width'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1$1.warn(`<Meme> was created with unknown prop '${key}'`);
     	});
 
     	const error_handler = () => {
-    		$$invalidate(1, showError = true);
+    		$$invalidate(2, showError = true);
     		console.log("Detected error");
     	};
 
     	$$self.$$set = $$props => {
     		if ('url' in $$props) $$invalidate(0, url = $$props.url);
-    		if ('$$scope' in $$props) $$invalidate(2, $$scope = $$props.$$scope);
+    		if ('width' in $$props) $$invalidate(1, width = $$props.width);
+    		if ('$$scope' in $$props) $$invalidate(4, $$scope = $$props.$$scope);
     	};
 
-    	$$self.$capture_state = () => ({ url, showError, className, noMemeMessage });
+    	$$self.$capture_state = () => ({
+    		url,
+    		width,
+    		showError,
+    		className,
+    		noMemeMessage
+    	});
 
     	$$self.$inject_state = $$props => {
     		if ('url' in $$props) $$invalidate(0, url = $$props.url);
-    		if ('showError' in $$props) $$invalidate(1, showError = $$props.showError);
+    		if ('width' in $$props) $$invalidate(1, width = $$props.width);
+    		if ('showError' in $$props) $$invalidate(2, showError = $$props.showError);
+    		if ('className' in $$props) $$invalidate(3, className = $$props.className);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -17274,18 +17300,18 @@ var schedule = (function () {
     		if ($$self.$$.dirty & /*url*/ 1) {
     			// Reset error when URL changes
     			{
-    				$$invalidate(1, showError = false);
+    				$$invalidate(2, showError = false);
     			}
     		}
     	};
 
-    	return [url, showError, $$scope, slots, error_handler];
+    	return [url, width, showError, className, $$scope, slots, error_handler];
     }
 
     class Meme extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$2, create_fragment$2, safe_not_equal, { url: 0 });
+    		init(this, options, instance$2, create_fragment$2, safe_not_equal, { url: 0, width: 1 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -17300,6 +17326,14 @@ var schedule = (function () {
     	}
 
     	set url(value) {
+    		throw new Error("<Meme>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get width() {
+    		throw new Error("<Meme>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set width(value) {
     		throw new Error("<Meme>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
@@ -17488,38 +17522,40 @@ var schedule = (function () {
     	let t7;
     	let h32;
     	let t9;
+    	let p0;
+    	let t11;
     	let current_block_type_index;
     	let if_block0;
-    	let t10;
+    	let t12;
     	let hr2;
-    	let t11;
-    	let h33;
     	let t13;
+    	let h33;
+    	let t15;
     	let input1;
-    	let t14;
-    	let label0;
     	let t16;
-    	let t17;
-    	let hr3;
+    	let label0;
     	let t18;
-    	let h34;
+    	let t19;
+    	let hr3;
     	let t20;
-    	let label1;
+    	let h34;
     	let t22;
+    	let label1;
+    	let t24;
     	let input2;
-    	let t23;
+    	let t25;
     	let div;
     	let span0;
-    	let t25;
+    	let t27;
     	let switch_1;
-    	let t26;
-    	let span1;
     	let t28;
+    	let span1;
+    	let t30;
     	let current_block_type_index_1;
     	let if_block1;
-    	let t29;
-    	let p;
-    	let t30;
+    	let t31;
+    	let p1;
+    	let t32;
     	let current;
     	let mounted;
     	let dispose;
@@ -17600,43 +17636,46 @@ var schedule = (function () {
     			h32 = element("h3");
     			h32.textContent = "Preview image";
     			t9 = space();
-    			if_block0.c();
-    			t10 = space();
-    			hr2 = element("hr");
+    			p0 = element("p");
+    			p0.textContent = "It'll get resized to be 400 by 400 pixels";
     			t11 = space();
+    			if_block0.c();
+    			t12 = space();
+    			hr2 = element("hr");
+    			t13 = space();
     			h33 = element("h3");
     			h33.textContent = "Give it a very short name";
-    			t13 = space();
+    			t15 = space();
     			input1 = element("input");
-    			t14 = space();
+    			t16 = space();
     			label0 = element("label");
     			label0.textContent = "E.g. this one is called \"mugs\"";
-    			t16 = space();
-    			info.block.c();
-    			t17 = space();
-    			hr3 = element("hr");
     			t18 = space();
+    			info.block.c();
+    			t19 = space();
+    			hr3 = element("hr");
+    			t20 = space();
     			h34 = element("h3");
     			h34.textContent = "Credit";
-    			t20 = space();
+    			t22 = space();
     			label1 = element("label");
     			label1.textContent = "Who are you?";
-    			t22 = space();
+    			t24 = space();
     			input2 = element("input");
-    			t23 = space();
+    			t25 = space();
     			div = element("div");
     			span0 = element("span");
     			span0.textContent = "I made it 🧑‍🎨";
-    			t25 = space();
+    			t27 = space();
     			create_component(switch_1.$$.fragment);
-    			t26 = space();
+    			t28 = space();
     			span1 = element("span");
     			span1.textContent = "🏴‍☠️ I stole it";
-    			t28 = space();
+    			t30 = space();
     			if_block1.c();
-    			t29 = space();
-    			p = element("p");
-    			t30 = text(/*message*/ ctx[6]);
+    			t31 = space();
+    			p1 = element("p");
+    			t32 = text(/*message*/ ctx[6]);
     			add_location(h30, file, 95, 6, 3563);
     			attr_dev(select, "class", "font-mono");
     			if (/*chosenDate*/ ctx[1] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[12].call(select));
@@ -17648,35 +17687,36 @@ var schedule = (function () {
     			add_location(input0, file, 105, 6, 3874);
     			add_location(hr1, file, 106, 6, 3923);
     			add_location(h32, file, 107, 6, 3936);
-    			add_location(hr2, file, 113, 6, 4092);
-    			add_location(h33, file, 114, 6, 4105);
+    			add_location(p0, file, 108, 6, 3965);
+    			add_location(hr2, file, 114, 6, 4159);
+    			add_location(h33, file, 115, 6, 4172);
     			attr_dev(input1, "id", "name");
     			attr_dev(input1, "type", "text");
     			attr_dev(input1, "placeholder", "Name");
-    			add_location(input1, file, 115, 6, 4146);
+    			add_location(input1, file, 116, 6, 4213);
     			attr_dev(label0, "for", "name");
-    			add_location(label0, file, 116, 6, 4221);
-    			add_location(hr3, file, 122, 6, 4412);
-    			add_location(h34, file, 123, 6, 4425);
+    			add_location(label0, file, 117, 6, 4288);
+    			add_location(hr3, file, 123, 6, 4479);
+    			add_location(h34, file, 124, 6, 4492);
     			attr_dev(label1, "class", "mb-2");
     			attr_dev(label1, "for", "email");
-    			add_location(label1, file, 124, 6, 4447);
+    			add_location(label1, file, 125, 6, 4514);
     			attr_dev(input2, "id", "email");
     			attr_dev(input2, "type", "email");
     			attr_dev(input2, "placeholder", "School email");
-    			add_location(input2, file, 125, 6, 4506);
+    			add_location(input2, file, 126, 6, 4573);
     			attr_dev(span0, "class", "mr-2");
     			toggle_class(span0, "text-dark-s", /*found*/ ctx[4]);
-    			add_location(span0, file, 132, 8, 4657);
+    			add_location(span0, file, 133, 8, 4724);
     			attr_dev(span1, "class", "ml-2");
     			toggle_class(span1, "text-dark-s", !/*found*/ ctx[4]);
-    			add_location(span1, file, 138, 8, 4874);
+    			add_location(span1, file, 139, 8, 4941);
     			attr_dev(div, "class", "flex");
-    			add_location(div, file, 131, 6, 4630);
+    			add_location(div, file, 132, 6, 4697);
     			attr_dev(form, "class", "flex flex-col");
     			add_location(form, file, 94, 4, 3528);
-    			attr_dev(p, "class", "epilogue");
-    			add_location(p, file, 150, 4, 5187);
+    			attr_dev(p1, "class", "epilogue");
+    			add_location(p1, file, 151, 4, 5254);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, form, anchor);
@@ -17700,41 +17740,43 @@ var schedule = (function () {
     			append_dev(form, t7);
     			append_dev(form, h32);
     			append_dev(form, t9);
-    			if_blocks[current_block_type_index].m(form, null);
-    			append_dev(form, t10);
-    			append_dev(form, hr2);
+    			append_dev(form, p0);
     			append_dev(form, t11);
-    			append_dev(form, h33);
+    			if_blocks[current_block_type_index].m(form, null);
+    			append_dev(form, t12);
+    			append_dev(form, hr2);
     			append_dev(form, t13);
+    			append_dev(form, h33);
+    			append_dev(form, t15);
     			append_dev(form, input1);
     			set_input_value(input1, /*name*/ ctx[2]);
-    			append_dev(form, t14);
-    			append_dev(form, label0);
     			append_dev(form, t16);
+    			append_dev(form, label0);
+    			append_dev(form, t18);
     			info.block.m(form, info.anchor = null);
     			info.mount = () => form;
-    			info.anchor = t17;
-    			append_dev(form, t17);
+    			info.anchor = t19;
+    			append_dev(form, t19);
     			append_dev(form, hr3);
-    			append_dev(form, t18);
-    			append_dev(form, h34);
     			append_dev(form, t20);
-    			append_dev(form, label1);
+    			append_dev(form, h34);
     			append_dev(form, t22);
+    			append_dev(form, label1);
+    			append_dev(form, t24);
     			append_dev(form, input2);
     			set_input_value(input2, /*email*/ ctx[3]);
-    			append_dev(form, t23);
+    			append_dev(form, t25);
     			append_dev(form, div);
     			append_dev(div, span0);
-    			append_dev(div, t25);
+    			append_dev(div, t27);
     			mount_component(switch_1, div, null);
-    			append_dev(div, t26);
+    			append_dev(div, t28);
     			append_dev(div, span1);
-    			append_dev(form, t28);
+    			append_dev(form, t30);
     			if_blocks_1[current_block_type_index_1].m(form, null);
-    			insert_dev(target, t29, anchor);
-    			insert_dev(target, p, anchor);
-    			append_dev(p, t30);
+    			insert_dev(target, t31, anchor);
+    			insert_dev(target, p1, anchor);
+    			append_dev(p1, t32);
     			current = true;
 
     			if (!mounted) {
@@ -17804,7 +17846,7 @@ var schedule = (function () {
     				}
 
     				transition_in(if_block0, 1);
-    				if_block0.m(form, t10);
+    				if_block0.m(form, t12);
     			}
 
     			if (dirty & /*name*/ 4 && input1.value !== /*name*/ ctx[2]) {
@@ -17856,7 +17898,7 @@ var schedule = (function () {
     				if_block1.m(form, null);
     			}
 
-    			if (!current || dirty & /*message*/ 64) set_data_dev(t30, /*message*/ ctx[6]);
+    			if (!current || dirty & /*message*/ 64) set_data_dev(t32, /*message*/ ctx[6]);
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -17887,8 +17929,8 @@ var schedule = (function () {
     			info = null;
     			destroy_component(switch_1);
     			if_blocks_1[current_block_type_index_1].d();
-    			if (detaching) detach_dev(t29);
-    			if (detaching) detach_dev(p);
+    			if (detaching) detach_dev(t31);
+    			if (detaching) detach_dev(p1);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -17941,7 +17983,7 @@ var schedule = (function () {
     	return block;
     }
 
-    // (111:6) {:else}
+    // (112:6) {:else}
     function create_else_block_1(ctx) {
     	let p;
 
@@ -17950,7 +17992,7 @@ var schedule = (function () {
     			p = element("p");
     			p.textContent = "Waiting for image";
     			attr_dev(p, "class", "epilogue");
-    			add_location(p, file, 111, 8, 4032);
+    			add_location(p, file, 112, 8, 4099);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -17967,20 +18009,20 @@ var schedule = (function () {
     		block,
     		id: create_else_block_1.name,
     		type: "else",
-    		source: "(111:6) {:else}",
+    		source: "(112:6) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (109:6) {#if preview}
+    // (110:6) {#if preview}
     function create_if_block_1(ctx) {
     	let meme;
     	let current;
 
     	meme = new Meme({
-    			props: { url: /*preview*/ ctx[7] },
+    			props: { url: /*preview*/ ctx[7], width: 400 },
     			$$inline: true
     		});
 
@@ -18015,7 +18057,7 @@ var schedule = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(109:6) {#if preview}",
+    		source: "(110:6) {#if preview}",
     		ctx
     	});
 
@@ -18044,7 +18086,7 @@ var schedule = (function () {
     	return block;
     }
 
-    // (120:6) {:then firstMeme}
+    // (121:6) {:then firstMeme}
     function create_then_block_1(ctx) {
     	let meme;
     	let current;
@@ -18081,14 +18123,14 @@ var schedule = (function () {
     		block,
     		id: create_then_block_1.name,
     		type: "then",
-    		source: "(120:6) {:then firstMeme}",
+    		source: "(121:6) {:then firstMeme}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (118:31)          <Loader />       {:then firstMeme}
+    // (119:31)          <Loader />       {:then firstMeme}
     function create_pending_block_1(ctx) {
     	let loader;
     	let current;
@@ -18121,14 +18163,14 @@ var schedule = (function () {
     		block,
     		id: create_pending_block_1.name,
     		type: "pending",
-    		source: "(118:31)          <Loader />       {:then firstMeme}",
+    		source: "(119:31)          <Loader />       {:then firstMeme}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (147:6) {:else}
+    // (148:6) {:else}
     function create_else_block(ctx) {
     	let button;
     	let mounted;
@@ -18139,7 +18181,7 @@ var schedule = (function () {
     			button = element("button");
     			button.textContent = "Schedule";
     			attr_dev(button, "class", "btn px-4 py-2");
-    			add_location(button, file, 147, 8, 5091);
+    			add_location(button, file, 148, 8, 5158);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -18163,14 +18205,14 @@ var schedule = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(147:6) {:else}",
+    		source: "(148:6) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (145:6) {#if isLoading}
+    // (146:6) {#if isLoading}
     function create_if_block(ctx) {
     	let loader;
     	let current;
@@ -18203,7 +18245,7 @@ var schedule = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(145:6) {#if isLoading}",
+    		source: "(146:6) {#if isLoading}",
     		ctx
     	});
 
@@ -18288,7 +18330,7 @@ var schedule = (function () {
     			footer = element("footer");
     			add_location(h2, file, 90, 2, 3440);
     			add_location(main, file, 89, 0, 3431);
-    			add_location(footer, file, 153, 0, 5240);
+    			add_location(footer, file, 154, 0, 5307);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");

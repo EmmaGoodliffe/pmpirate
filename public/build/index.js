@@ -16705,20 +16705,21 @@ var index = (function () {
     const { console: console_1 } = globals;
     const file$1 = "src/components/Meme.svelte";
 
-    // (22:0) {:else}
+    // (25:0) {:else}
     function create_else_block(ctx) {
     	let p;
+    	let p_class_value;
     	let current;
-    	const default_slot_template = /*#slots*/ ctx[3].default;
-    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[2], null);
+    	const default_slot_template = /*#slots*/ ctx[5].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[4], null);
     	const default_slot_or_fallback = default_slot || fallback_block(ctx);
 
     	const block = {
     		c: function create() {
     			p = element("p");
     			if (default_slot_or_fallback) default_slot_or_fallback.c();
-    			attr_dev(p, "class", `${className} text-center`);
-    			add_location(p, file$1, 22, 2, 441);
+    			attr_dev(p, "class", p_class_value = `${/*className*/ ctx[3]} text-center`);
+    			add_location(p, file$1, 25, 2, 542);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -16731,18 +16732,22 @@ var index = (function () {
     		},
     		p: function update(ctx, dirty) {
     			if (default_slot) {
-    				if (default_slot.p && (!current || dirty & /*$$scope*/ 4)) {
+    				if (default_slot.p && (!current || dirty & /*$$scope*/ 16)) {
     					update_slot_base(
     						default_slot,
     						default_slot_template,
     						ctx,
-    						/*$$scope*/ ctx[2],
+    						/*$$scope*/ ctx[4],
     						!current
-    						? get_all_dirty_from_scope(/*$$scope*/ ctx[2])
-    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[2], dirty, null),
+    						? get_all_dirty_from_scope(/*$$scope*/ ctx[4])
+    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[4], dirty, null),
     						null
     					);
     				}
+    			}
+
+    			if (!current || dirty & /*className*/ 8 && p_class_value !== (p_class_value = `${/*className*/ ctx[3]} text-center`)) {
+    				attr_dev(p, "class", p_class_value);
     			}
     		},
     		i: function intro(local) {
@@ -16764,16 +16769,17 @@ var index = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(22:0) {:else}",
+    		source: "(25:0) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (12:0) {#if url && !showError}
+    // (14:0) {#if url && !showError}
     function create_if_block(ctx) {
     	let img;
+    	let img_style_value;
     	let img_src_value;
     	let mounted;
     	let dispose;
@@ -16781,20 +16787,29 @@ var index = (function () {
     	const block = {
     		c: function create() {
     			img = element("img");
-    			attr_dev(img, "class", className);
+    			attr_dev(img, "class", /*className*/ ctx[3]);
+    			attr_dev(img, "style", img_style_value = /*width*/ ctx[1] ? `width: ${/*width*/ ctx[1]}px` : "");
     			if (!src_url_equal(img.src, img_src_value = /*url*/ ctx[0])) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file$1, 12, 2, 280);
+    			add_location(img, file$1, 14, 2, 336);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
 
     			if (!mounted) {
-    				dispose = listen_dev(img, "error", /*error_handler*/ ctx[4], false, false, false);
+    				dispose = listen_dev(img, "error", /*error_handler*/ ctx[6], false, false, false);
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
+    			if (dirty & /*className*/ 8) {
+    				attr_dev(img, "class", /*className*/ ctx[3]);
+    			}
+
+    			if (dirty & /*width*/ 2 && img_style_value !== (img_style_value = /*width*/ ctx[1] ? `width: ${/*width*/ ctx[1]}px` : "")) {
+    				attr_dev(img, "style", img_style_value);
+    			}
+
     			if (dirty & /*url*/ 1 && !src_url_equal(img.src, img_src_value = /*url*/ ctx[0])) {
     				attr_dev(img, "src", img_src_value);
     			}
@@ -16812,14 +16827,14 @@ var index = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(12:0) {#if url && !showError}",
+    		source: "(14:0) {#if url && !showError}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (24:10) {noMemeMessage}
+    // (27:10) {noMemeMessage}
     function fallback_block(ctx) {
     	let t;
 
@@ -16840,7 +16855,7 @@ var index = (function () {
     		block,
     		id: fallback_block.name,
     		type: "fallback",
-    		source: "(24:10) {noMemeMessage}",
+    		source: "(27:10) {noMemeMessage}",
     		ctx
     	});
 
@@ -16856,7 +16871,7 @@ var index = (function () {
     	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (/*url*/ ctx[0] && !/*showError*/ ctx[1]) return 0;
+    		if (/*url*/ ctx[0] && !/*showError*/ ctx[2]) return 0;
     		return 1;
     	}
 
@@ -16929,35 +16944,46 @@ var index = (function () {
     	return block;
     }
 
-    const className = "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto";
     const noMemeMessage = "Couldn't load meme :(";
 
     function instance$1($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Meme', slots, ['default']);
     	let { url = "" } = $$props;
+    	let { width = NaN } = $$props;
     	let showError = false;
-    	const writable_props = ['url'];
+    	let className = "mx-auto w-full sm:w-4/6 md:w-1/2";
+    	isNaN(width) && (className += "max-w-md");
+    	const writable_props = ['url', 'width'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<Meme> was created with unknown prop '${key}'`);
     	});
 
     	const error_handler = () => {
-    		$$invalidate(1, showError = true);
+    		$$invalidate(2, showError = true);
     		console.log("Detected error");
     	};
 
     	$$self.$$set = $$props => {
     		if ('url' in $$props) $$invalidate(0, url = $$props.url);
-    		if ('$$scope' in $$props) $$invalidate(2, $$scope = $$props.$$scope);
+    		if ('width' in $$props) $$invalidate(1, width = $$props.width);
+    		if ('$$scope' in $$props) $$invalidate(4, $$scope = $$props.$$scope);
     	};
 
-    	$$self.$capture_state = () => ({ url, showError, className, noMemeMessage });
+    	$$self.$capture_state = () => ({
+    		url,
+    		width,
+    		showError,
+    		className,
+    		noMemeMessage
+    	});
 
     	$$self.$inject_state = $$props => {
     		if ('url' in $$props) $$invalidate(0, url = $$props.url);
-    		if ('showError' in $$props) $$invalidate(1, showError = $$props.showError);
+    		if ('width' in $$props) $$invalidate(1, width = $$props.width);
+    		if ('showError' in $$props) $$invalidate(2, showError = $$props.showError);
+    		if ('className' in $$props) $$invalidate(3, className = $$props.className);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -16968,18 +16994,18 @@ var index = (function () {
     		if ($$self.$$.dirty & /*url*/ 1) {
     			// Reset error when URL changes
     			{
-    				$$invalidate(1, showError = false);
+    				$$invalidate(2, showError = false);
     			}
     		}
     	};
 
-    	return [url, showError, $$scope, slots, error_handler];
+    	return [url, width, showError, className, $$scope, slots, error_handler];
     }
 
     class Meme extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { url: 0 });
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { url: 0, width: 1 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -16994,6 +17020,14 @@ var index = (function () {
     	}
 
     	set url(value) {
+    		throw new Error("<Meme>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get width() {
+    		throw new Error("<Meme>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set width(value) {
     		throw new Error("<Meme>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }

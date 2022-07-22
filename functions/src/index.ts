@@ -58,7 +58,7 @@ export const submitMeme = functions
       const file = bucket.file(`memes/${data.meme.name}.jpg`);
       const buffer = Buffer.from(data.meme.fileBase64, "base64");
       // await file.save(buffer);
-      await pipeResizedImage(buffer, 64, 64, file.createWriteStream());
+      await pipeResizedImage(buffer, 400, 400, file.createWriteStream());
       // Add submission to DB
       let [author] = data.meme.email.split("@");
       if (author === "emma.goodliffe") {

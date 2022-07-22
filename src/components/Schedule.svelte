@@ -123,8 +123,9 @@
       <input id="file" type="file" bind:files />
       <hr />
       <h3>Preview image</h3>
+      <p>It'll get resized to be 400 by 400 pixels</p>
       {#if preview}
-        <Meme url={preview} />
+        <Meme url={preview} width={400} />
       {:else}
         <p class="epilogue">Waiting for image</p>
       {/if}
