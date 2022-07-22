@@ -6,11 +6,11 @@ export type Db = Firestore;
 export type AdminDb = AdminFirestore;
 
 interface MemeBasics {
-  path: string;
   found: boolean;
 }
 
 export interface Meme extends MemeBasics {
+  // path: string;
   url: string;
   author: string;
 }
@@ -19,6 +19,7 @@ export type MemesOfMonth = Record<number | string, Meme>;
 
 export interface MemeRequest extends MemeBasics {
   email: string;
+  name: string;
   fileBase64: string;
 }
 

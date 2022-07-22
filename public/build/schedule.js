@@ -17057,7 +17057,7 @@ var schedule = (function () {
     			attr_dev(input0, "type", "file");
     			add_location(input0, file, 90, 8, 3396);
     			attr_dev(input1, "type", "text");
-    			attr_dev(input1, "placeholder", "Path");
+    			attr_dev(input1, "placeholder", "Name");
     			add_location(input1, file, 92, 8, 3474);
     			attr_dev(input2, "type", "email");
     			attr_dev(input2, "placeholder", "SPGS email");
@@ -17089,7 +17089,7 @@ var schedule = (function () {
     			append_dev(form, input0);
     			append_dev(form, t1);
     			append_dev(form, input1);
-    			set_input_value(input1, /*path*/ ctx[2]);
+    			set_input_value(input1, /*name*/ ctx[2]);
     			append_dev(form, t2);
     			append_dev(form, input2);
     			set_input_value(input2, /*email*/ ctx[3]);
@@ -17147,8 +17147,8 @@ var schedule = (function () {
     				select_option(select, /*chosenDate*/ ctx[0]);
     			}
 
-    			if (dirty & /*path*/ 4 && input1.value !== /*path*/ ctx[2]) {
-    				set_input_value(input1, /*path*/ ctx[2]);
+    			if (dirty & /*name*/ 4 && input1.value !== /*name*/ ctx[2]) {
+    				set_input_value(input1, /*name*/ ctx[2]);
     			}
 
     			if (dirty & /*email*/ 8 && input2.value !== /*email*/ ctx[3]) {
@@ -17518,7 +17518,7 @@ var schedule = (function () {
     	const [currentDate, currentMonth, currentYear] = separateDate(today);
     	let chosenDate = null;
     	let files;
-    	let path = "";
+    	let name = "";
     	let email = "";
     	let found = false;
     	let isLoading = false;
@@ -17564,7 +17564,7 @@ var schedule = (function () {
     		$$invalidate(5, isLoading = true);
     		const buffer = yield files[0].arrayBuffer();
     		const fileBase64 = window.btoa(String.fromCharCode(...new Uint8Array(buffer)));
-    		const meme = { path, email, fileBase64, found };
+    		const meme = { name, email, fileBase64, found };
 
     		try {
     			const response = yield submitMeme(chosenDate, meme);
@@ -17601,8 +17601,8 @@ var schedule = (function () {
     	}
 
     	function input1_input_handler() {
-    		path = this.value;
-    		$$invalidate(2, path);
+    		name = this.value;
+    		$$invalidate(2, name);
     	}
 
     	function input2_input_handler() {
@@ -17636,7 +17636,7 @@ var schedule = (function () {
     		currentYear,
     		chosenDate,
     		files,
-    		path,
+    		name,
     		email,
     		found,
     		isLoading,
@@ -17651,7 +17651,7 @@ var schedule = (function () {
     		if ('db' in $$props) $$invalidate(9, db = $$props.db);
     		if ('chosenDate' in $$props) $$invalidate(0, chosenDate = $$props.chosenDate);
     		if ('files' in $$props) $$invalidate(1, files = $$props.files);
-    		if ('path' in $$props) $$invalidate(2, path = $$props.path);
+    		if ('name' in $$props) $$invalidate(2, name = $$props.name);
     		if ('email' in $$props) $$invalidate(3, email = $$props.email);
     		if ('found' in $$props) $$invalidate(4, found = $$props.found);
     		if ('isLoading' in $$props) $$invalidate(5, isLoading = $$props.isLoading);
@@ -17665,7 +17665,7 @@ var schedule = (function () {
     	return [
     		chosenDate,
     		files,
-    		path,
+    		name,
     		email,
     		found,
     		isLoading,

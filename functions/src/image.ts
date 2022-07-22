@@ -6,7 +6,7 @@ export const pipeResizedImage = (
   width: number,
   height: number,
   writable: Writable,
-  ) =>
+) =>
   new Promise<void>((resolve, reject) => {
     if (readable instanceof Buffer) {
       readable = Readable.from(readable);
@@ -17,17 +17,3 @@ export const pipeResizedImage = (
     readable.on("end", resolve);
     readable.on("error", reject);
   });
-
-// const rsToBuffer = (rs: ReadStream) =>
-//   new Promise<Buffer>((resolve, reject) => {
-//     const buffers: Buffer[] = [];
-//     rs.on("data", chunk => {
-//       if (typeof chunk === "string") {
-//         reject("The chunk was a string");
-//       } else {
-//         buffers.push(chunk);
-//       }
-//     });
-//     rs.on("end", () => resolve(Buffer.concat(buffers)));
-//     rs.on("error", err => reject(`error converting stream - ${err}`));
-//   });
