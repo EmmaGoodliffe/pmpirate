@@ -6,24 +6,31 @@
     separateDate,
   } from "../../functions/src/date";
   import type { Db } from "../../functions/src/types";
-  import { getMemeOtd, submitMeme } from "../db";
+  import { firstMemeDate, getMemeOtd, submitMeme } from "../db";
   import Header from "./Header.svelte";
   import Loader from "./Loader.svelte";
+  import Meme from "./Meme.svelte";
 
   export let db: Db;
 
   const today = getToday();
   const [currentDate, currentMonth, currentYear] = separateDate(today);
+  const firstMemePromise = getMemeOtd(firstMemeDate, db);
 
-  let chosenDate: Date = null;
+  let chosenDate: Date | null = null;
   let files: FileList;
   let name = "";
   let email = "";
-  let found = false;
+  let made = false;
   let isLoading = false;
   let message = "";
 
   const getOptions = async () => {
+    const optionSeparator = {
+      value: null,
+      text: "".padStart(10, "-"),
+      available: false,
+    };
     const options = (
       await Promise.all(
         new Array(11).fill(0).map(async (_x, i) => {
@@ -38,17 +45,15 @@
             available: !(await getMemeOtd(date, db)),
           };
           return dateToString(option.value) === dateToString(today)
-            ? [
-                { value: null, text: "".padStart(10, "-"), available: false },
-                option,
-              ]
+            ? [optionSeparator, option, optionSeparator]
             : option;
         }),
       )
     ).flat();
     chosenDate =
-      options.filter(option => option.value >= today && option.available)[0]
-        ?.value ?? null;
+      options.filter(
+        option => option.value && option.value >= today && option.available,
+      )[0]?.value ?? null;
     return options;
   };
 
@@ -65,26 +70,36 @@
       name,
       email,
       fileBase64,
-      found,
+      found: !made,
     };
+    if (!chosenDate) {
+      message = "Invalid date";
+      isLoading = false;
+      return;
+    }
     try {
       const response = await submitMeme(chosenDate, meme);
       message = response.data.message;
       isLoading = false;
     } catch (err) {
       isLoading = false;
-      if (
-        err.code === "functions/invalid-argument" ||
-        err.code === "functions/out-of-range"
-      ) {
-        message = "That date is unavailable";
-        console.warn(err);
-      } else {
-        message = "Something went wrong";
-        throw err;
+      if (err && typeof err === "object") {
+        const { code } = err as { code: string };
+        if (
+          code === "functions/invalid-argument" ||
+          code === "functions/out-of-range"
+        ) {
+          message = "That date is unavailable";
+          console.warn(err);
+          return;
+        }
       }
+      message = "Something went wrong";
+      throw err;
     }
   };
+
+  $: preview = files && files[0] ? URL.createObjectURL(files[0]) : "";
 </script>
 
 <Header />
@@ -93,32 +108,50 @@
   {#await optionsPromise}
     <Loader />
   {:then options}
-    <div class="max-w-sm">
-      <form class="flex flex-col justify-between h-72">
-        <select class="font-mono" bind:value={chosenDate}>
-          {#each options as option}
-            <option value={option.value} disabled={!option.available}
-              >{option.text}</option
-            >
-          {/each}
-        </select>
-        <input type="file" bind:files />
-        <!-- TODO: Explain in UI -->
-        <input type="text" placeholder="Name" bind:value={name} />
-        <input type="email" placeholder="SPGS email" bind:value={email} />
-        <div>
-          <!-- TODO: Explain in UI -->
-          <label for="found-box">Found:</label>
-          <input type="checkbox" id="found-box" bind:checked={found} />
-        </div>
-        {#if isLoading}
-          <Loader />
-        {:else}
-          <button class="btn px-4 py-2" on:click={schedule}>Schedule</button>
-        {/if}
-      </form>
-      <p class="epilogue">{message}</p>
-    </div>
+    <form class="flex flex-col">
+      <h3>Select a Date</h3>
+      <select class="font-mono" bind:value={chosenDate}>
+        {#each options as option}
+          <option value={option.value} disabled={!option.available}
+            >{option.text}</option
+          >
+        {/each}
+      </select>
+      <hr />
+      <h3>Select an image</h3>
+      <input id="file" type="file" bind:files />
+      <hr />
+      <h3>Preview image</h3>
+      <img src={preview} alt="Preview" />
+      <hr />
+      <h3>Give it a very short name</h3>
+      <input id="name" type="text" placeholder="Name" bind:value={name} />
+      <label for="name">E.g. this one is called "mugs"</label>
+      {#await firstMemePromise}
+        <Loader />
+      {:then firstMeme}
+        <Meme url={firstMeme?.url} noMemeMessage="Something went wrong :(" />
+      {/await}
+      <hr />
+      <h3>Credit</h3>
+      <label for="email">Who are you?</label>
+      <input
+        id="email"
+        type="email"
+        placeholder="School email"
+        bind:value={email}
+      />
+      <div>
+        <label for="found-box">Did you make it yourself?</label>
+        <input id="found-box" type="checkbox" bind:checked={made} />
+      </div>
+      {#if isLoading}
+        <Loader />
+      {:else}
+        <button class="btn px-4 py-2" on:click={schedule}>Schedule</button>
+      {/if}
+    </form>
+    <p class="epilogue">{message}</p>
   {/await}
 </main>
 <footer />

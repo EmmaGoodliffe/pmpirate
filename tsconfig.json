@@ -1,5 +1,8 @@
 {
   "extends": "@tsconfig/svelte/tsconfig.json",
   "include": ["src/**/*.ts", "src/**/*.svelte", "functions/src/date.ts"],
-  "exclude": ["public", "cypress"]
+  "exclude": ["public", "cypress"],
+  "compilerOptions": {
+    "strict": true
+  }
 }

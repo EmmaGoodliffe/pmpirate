@@ -20,6 +20,7 @@ const cache: Record<number, Record<number, MemesOfMonth>> = {};
 const queue = new Set<string>();
 
 export const firstMonth = compoundDate(1, 9, 2021);
+export const firstMemeDate = compoundDate(12, 10, 2021);
 
 const delay = (time: number) =>
   new Promise(resolve => setTimeout(resolve, time * 10 ** 3));
@@ -85,7 +86,7 @@ export const getMemesOfMonth = (year: number, month: number, db: Db) =>
   getMemesOfMonthFromCache(year, month) ??
   getMemesOfMonthFromDb(year, month, db);
 
-export const getMemeOtd = async (d: Date, db: Db, n = 0): Promise<Meme> => {
+export const getMemeOtd = async (d: Date | undefined, db: Db, n = 0): Promise<Meme | null | undefined> => {
   if (!d) return null;
   if (n >= 12) throw new Error("DB recursion");
   const [date, month, year] = separateDate(d);

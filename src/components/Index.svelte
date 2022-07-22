@@ -5,7 +5,7 @@
   import Doc from "./Doc.svelte";
   import Header from "./Header.svelte";
   import Loader from "./Loader.svelte";
-  import Otd from "./Otd.svelte";
+  import Meme from "./Meme.svelte";
 
   export let db: Db;
 
@@ -79,7 +79,7 @@
   {#await memeOtdPromise}
     <Loader />
   {:then memeOtd}
-    <Otd meme={memeOtd} noMemeMessage="No meme today :( ... Send suggestions" />
+    <Meme url={memeOtd?.url} noMemeMessage="No meme today :( ... Send suggestions" />
   {/await}
 </section>
 <hr />

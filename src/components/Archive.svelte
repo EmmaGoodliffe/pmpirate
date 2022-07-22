@@ -11,7 +11,7 @@
   import { firstMonth, getMemeOtd, getMemesOfMonth } from "../db";
   import Header from "./Header.svelte";
   import Loader from "./Loader.svelte";
-  import Otd from "./Otd.svelte";
+  import Meme from "./Meme.svelte";
   import Shelf from "./Shelf.svelte";
 
   export let db: Db;
@@ -26,7 +26,7 @@
   let backwardsEnabled = true;
 
   const getArchivedMemes = async (db: Db, year: number, month: number) => {
-    const memesOfMonth = await getMemesOfMonth(year, month, db);
+    const memesOfMonth = (await getMemesOfMonth(year, month, db)) ?? {};
     const archivedDates = Object.keys(memesOfMonth)
       .map(x => parseInt(x))
       .sort((a, b) => a - b)
@@ -129,7 +129,7 @@
   {#await queriedMemePromise}
     <Loader />
   {:then queriedMeme}
-    <Otd meme={queriedMeme} noMemeMessage="No memes that day :(" />
+    <Meme url={queriedMeme?.url} noMemeMessage="No memes that day :(" />
   {/await}
 </section>
 <hr />

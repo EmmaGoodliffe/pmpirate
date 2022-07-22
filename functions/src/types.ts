@@ -10,7 +10,6 @@ interface MemeBasics {
 }
 
 export interface Meme extends MemeBasics {
-  // path: string;
   url: string;
   author: string;
 }

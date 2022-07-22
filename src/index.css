@@ -14,8 +14,16 @@ h2 {
   @apply text-xl font-bold my-4;
 }
 
+h3 {
+  @apply text-lg text-[1.05rem] font-bold my-2;
+}
+
 hr {
-  @apply mx-auto my-8 text-dark-s opacity-50;
+  @apply w-full mx-auto my-8 text-dark-s opacity-50;
+}
+
+form hr {
+  @apply my-6;
 }
 
 .book-section {
@@ -34,6 +42,11 @@ input[type="text"],
 input[type="email"],
 select {
   @apply bg-bg border-white border px-2 py-1 rounded-sm;
+}
+
+form input,
+form select {
+  @apply max-w-sm;
 }
 
 .btn {
