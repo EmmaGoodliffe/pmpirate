@@ -41,7 +41,3 @@ export type SubmitMemeCloudFunction = CloudFunction<
   { date: string; meme: MemeRequest },
   SgResponse
 >;
-
-// SubmitMemeCloudFunction["request"] => storage, Submission, email
-// submissionId, code => Submission => Meme
-// Meme => url
