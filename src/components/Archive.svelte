@@ -11,6 +11,7 @@
   import { firstMonth, getMemeOtd, getMemesOfMonth } from "../db";
   import Header from "./Header.svelte";
   import Loader from "./Loader.svelte";
+import Otd from "./Otd.svelte";
   import Shelf from "./Shelf.svelte";
 
   export let db: Db;
@@ -47,7 +48,7 @@
 </script>
 
 <Header />
-<main>
+<main class="min-w-min">
   <h2>Meme Archive</h2>
   <div class="flex sm:w-1/4 mx-auto my-4">
     <div class="w-1/4">
@@ -117,17 +118,7 @@
   {#await queriedMemePromise}
     <Loader />
   {:then queriedMeme}
-    {#if queriedMeme}
-      <img
-        class="max-w-sm mx-auto w-1/2 sm:w-auto"
-        src={`memes/${queriedMeme.url}`}
-        alt="Meme"
-      />
-    {:else}
-      <p class="w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto text-center">
-        No memes that day :(
-      </p>
-    {/if}
+    <Otd meme={queriedMeme} noMemeMessage="No memes that day :(" />
   {/await}
 </section>
 <hr />

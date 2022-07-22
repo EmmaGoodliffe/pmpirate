@@ -502,6 +502,16 @@ Ensure the default browser behavior of the `hidden` attribute.
   width: 50%;
 }
 
+.min-w-\[12rem\] {
+  min-width: 12rem;
+}
+
+.min-w-min {
+  min-width: -webkit-min-content;
+  min-width: -moz-min-content;
+  min-width: min-content;
+}
+
 .max-w-\[5rem\] {
   max-width: 5rem;
 }

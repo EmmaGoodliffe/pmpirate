@@ -10,7 +10,7 @@
     "build": "npm run build:css && npm run build:svelte && npm run build:server",
     "deploy": "npm run build && npm  run lint && firebase deploy",
     "dev:css": "npm run build:css -- --watch",
-    "dev:server": "echo \"In another terminal, run: npm --prefix functions run build:watch\"",
+    "dev:server": "echo \"Remember to re-build the server when you make changes\"",
     "dev:svelte": "rollup -c -w",
     "dev": "concurrently \"npm:dev:*\" -c \"bold\"",
     "e2e": "cypress open",

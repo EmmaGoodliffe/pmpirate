@@ -19,8 +19,8 @@
   </td>
   <td>
     <img
-      class="max-w-sm mx-auto w-1/2 sm:w-auto"
-      src={`memes/${meme.url}`}
+      class="min-w-[12rem] max-w-sm mx-auto w-1/2 sm:w-auto"
+      src={meme.url}
       alt="Meme"
     />
   </td>
