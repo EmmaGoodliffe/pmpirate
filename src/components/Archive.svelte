@@ -7,22 +7,36 @@
     separateDate,
     stringToDate,
   } from "../../functions/src/date";
-  import type { Db } from "../../functions/src/types";
+  import type { Db, MemesOfMonth } from "../../functions/src/types";
   import { firstMonth, getMemeOtd, getMemesOfMonth } from "../db";
   import Header from "./Header.svelte";
   import Loader from "./Loader.svelte";
-import Otd from "./Otd.svelte";
+  import Otd from "./Otd.svelte";
   import Shelf from "./Shelf.svelte";
 
   export let db: Db;
 
   const today = getToday();
   const tomorrow = getTomorrow();
+  const tomorrowMemePromise = getMemeOtd(tomorrow, db);
 
   let [, month, year] = separateDate(today);
   let dateQuery = dateToString(today);
   let forwardsEnabled = true;
   let backwardsEnabled = true;
+
+  const getArchivedMemes = async (db: Db, year: number, month: number) => {
+    const memesOfMonth = await getMemesOfMonth(year, month, db);
+    const archivedDates = Object.keys(memesOfMonth)
+      .map(x => parseInt(x))
+      .sort((a, b) => a - b)
+      .filter(date => compoundDate(date, month, year) <= today);
+    const result: MemesOfMonth = {};
+    for (const date of archivedDates) {
+      result[date] = memesOfMonth[date];
+    }
+    return result;
+  };
 
   $: {
     if (month < 1) {
@@ -40,9 +54,7 @@ import Otd from "./Otd.svelte";
 
   $: backwardsEnabled = firstMonth < compoundDate(1, month, year);
 
-  $: archivedMemesPromise = getMemesOfMonth(year, month, db);
-
-  $: tomorrowMemePromise = getMemeOtd(tomorrow, db);
+  $: archivedMemesPromise = getArchivedMemes(db, year, month);
 
   // TODO: Debounce
   $: queriedMemePromise = getMemeOtd(stringToDate(dateQuery), db);
@@ -87,15 +99,11 @@ import Otd from "./Otd.svelte";
       </tfoot>
     {:then archivedMemes}
       <tbody>
-        {#each Object.keys(archivedMemes)
-          .map(x => parseInt(x))
-          .sort((a, b) => a - b) as date}
-          {#if compoundDate(date, month, year) <= today}
-            <Shelf
-              date={compoundDate(date, month, year)}
-              meme={archivedMemes[date]}
-            />
-          {/if}
+        {#each Object.keys(archivedMemes).map(x => parseInt(x)) as date}
+          <Shelf
+            date={compoundDate(date, month, year)}
+            meme={archivedMemes[date]}
+          />
         {/each}
         {#await tomorrowMemePromise}
           <Loader />
@@ -106,7 +114,11 @@ import Otd from "./Otd.svelte";
         {/await}
       </tbody>
       {#if !Object.keys(archivedMemes).length}
-        <tfoot>No memes that month :(</tfoot>
+        {#if month === separateDate(today)[1] && year === separateDate(today)[2]}
+          <tfoot>No memes yet this month :(</tfoot>
+        {:else}
+          <tfoot>No memes that month :(</tfoot>
+        {/if}
       {/if}
     {/await}
   </table>

@@ -24,6 +24,7 @@ export const firstMonth = compoundDate(1, 9, 2021);
 const delay = (time: number) =>
   new Promise(resolve => setTimeout(resolve, time * 10 ** 3));
 
+// TODO: Make DB the first argument in every relevant function
 async function getFromDb(
   db: Db,
   collectionId: "memes",

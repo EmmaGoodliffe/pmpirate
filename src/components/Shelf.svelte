@@ -5,14 +5,15 @@
   export let date: Date;
   export let meme: Meme;
   export let isTomorrow = false;
-
-  $: credit = meme.found ? "Found by" : "By";
 </script>
 
 <tr>
   <td class="text-center">
     <p>{dateToString(date, "/")}</p>
-    <p>{credit} <span class="font-bold italic">{meme.author}</span></p>
+    <p>
+      {meme.found ? "Found by" : "By"}
+      <span class="font-bold italic">{meme.author}</span>
+    </p>
     {#if isTomorrow}
       <p>(Sneak peek)</p>
     {/if}
