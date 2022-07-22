@@ -5,22 +5,23 @@
   export let date: Date;
   export let meme: Meme;
   export let isTomorrow = false;
-
-  $: credit = meme.found ? "Found by" : "By";
 </script>
 
 <tr>
   <td class="text-center">
     <p>{dateToString(date, "/")}</p>
-    <p>{credit} <span class="font-bold italic">{meme.author}</span></p>
+    <p>
+      {meme.found ? "Found by" : "By"}
+      <span class="font-bold italic">{meme.author}</span>
+    </p>
     {#if isTomorrow}
       <p>(Sneak peek)</p>
     {/if}
   </td>
   <td>
     <img
-      class="max-w-sm mx-auto w-1/2 sm:w-auto"
-      src={`memes/${meme.url}`}
+      class="min-w-[12rem] max-w-sm mx-auto w-1/2 sm:w-auto"
+      src={meme.url}
       alt="Meme"
     />
   </td>

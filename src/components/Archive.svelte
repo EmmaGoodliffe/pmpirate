@@ -7,21 +7,36 @@
     separateDate,
     stringToDate,
   } from "../../functions/src/date";
-  import type { Db } from "../../functions/src/types";
+  import type { Db, MemesOfMonth } from "../../functions/src/types";
   import { firstMonth, getMemeOtd, getMemesOfMonth } from "../db";
   import Header from "./Header.svelte";
   import Loader from "./Loader.svelte";
+  import Otd from "./Otd.svelte";
   import Shelf from "./Shelf.svelte";
 
   export let db: Db;
 
   const today = getToday();
   const tomorrow = getTomorrow();
+  const tomorrowMemePromise = getMemeOtd(tomorrow, db);
 
   let [, month, year] = separateDate(today);
   let dateQuery = dateToString(today);
   let forwardsEnabled = true;
   let backwardsEnabled = true;
+
+  const getArchivedMemes = async (db: Db, year: number, month: number) => {
+    const memesOfMonth = await getMemesOfMonth(year, month, db);
+    const archivedDates = Object.keys(memesOfMonth)
+      .map(x => parseInt(x))
+      .sort((a, b) => a - b)
+      .filter(date => compoundDate(date, month, year) <= today);
+    const result: MemesOfMonth = {};
+    for (const date of archivedDates) {
+      result[date] = memesOfMonth[date];
+    }
+    return result;
+  };
 
   $: {
     if (month < 1) {
@@ -39,15 +54,16 @@
 
   $: backwardsEnabled = firstMonth < compoundDate(1, month, year);
 
-  $: archivedMemesPromise = getMemesOfMonth(year, month, db);
+  $: archivedMemesPromise = getArchivedMemes(db, year, month);
 
-  $: tomorrowMemePromise = getMemeOtd(tomorrow, db);
+  $: memePromises = Promise.all([archivedMemesPromise, tomorrowMemePromise]);
 
+  // TODO: Debounce
   $: queriedMemePromise = getMemeOtd(stringToDate(dateQuery), db);
 </script>
 
 <Header />
-<main>
+<main class="min-w-min">
   <h2>Meme Archive</h2>
   <div class="flex sm:w-1/4 mx-auto my-4">
     <div class="w-1/4">
@@ -79,32 +95,28 @@
         <th class="border-2">Meme</th>
       </tr>
     </thead>
-    {#await archivedMemesPromise}
+    {#await memePromises}
       <tfoot>
         <Loader />
       </tfoot>
-    {:then archivedMemes}
+    {:then [archivedMemes, tomorrowMeme]}
       <tbody>
-        {#each Object.keys(archivedMemes)
-          .map(x => parseInt(x))
-          .sort((a, b) => a - b) as date}
-          {#if compoundDate(date, month, year) <= today}
-            <Shelf
-              date={compoundDate(date, month, year)}
-              meme={archivedMemes[date]}
-            />
-          {/if}
+        {#each Object.keys(archivedMemes).map(x => parseInt(x)) as date}
+          <Shelf
+            date={compoundDate(date, month, year)}
+            meme={archivedMemes[date]}
+          />
         {/each}
-        {#await tomorrowMemePromise}
-          <Loader />
-        {:then tomorrowMeme}
-          {#if tomorrowMeme}
-            <Shelf date={tomorrow} meme={tomorrowMeme} isTomorrow={true} />
-          {/if}
-        {/await}
+        {#if tomorrowMeme && !forwardsEnabled}
+          <Shelf date={tomorrow} meme={tomorrowMeme} isTomorrow={true} />
+        {/if}
       </tbody>
-      {#if !Object.keys(archivedMemes).length}
-        <tfoot>No memes that month :(</tfoot>
+      {#if !Object.keys(archivedMemes).length && !tomorrowMeme}
+        {#if month === separateDate(today)[1] && year === separateDate(today)[2]}
+          <tfoot>No memes yet this month :(</tfoot>
+        {:else}
+          <tfoot>No memes that month :(</tfoot>
+        {/if}
       {/if}
     {/await}
   </table>
@@ -117,17 +129,7 @@
   {#await queriedMemePromise}
     <Loader />
   {:then queriedMeme}
-    {#if queriedMeme}
-      <img
-        class="max-w-sm mx-auto w-1/2 sm:w-auto"
-        src={`memes/${queriedMeme.url}`}
-        alt="Meme"
-      />
-    {:else}
-      <p class="w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto text-center">
-        No memes that day :(
-      </p>
-    {/if}
+    <Otd meme={queriedMeme} noMemeMessage="No memes that day :(" />
   {/await}
 </section>
 <hr />

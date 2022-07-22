@@ -79,7 +79,7 @@
   {#await memeOtdPromise}
     <Loader />
   {:then memeOtd}
-    <Otd meme={memeOtd} />
+    <Otd meme={memeOtd} noMemeMessage="No meme today :( ... Send suggestions" />
   {/await}
 </section>
 <hr />

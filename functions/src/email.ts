@@ -1,9 +1,4 @@
-/* eslint-disable import/no-unresolved */
 import sgMail from "@sendgrid/mail";
-import { Timestamp } from "firebase-admin/firestore";
-import { dateToString } from "./date";
-import { addToDb } from "./db";
-import { AdminDb, MemeRequest } from "./types";
 
 const sgKey = process.env.SENDGRID_API_KEY;
 if (sgKey) {
@@ -13,6 +8,12 @@ if (sgKey) {
 }
 
 const sendEmail = (email: string, subject: string, text: string) => {
+  const [, domain] = email.split("@");
+  if (domain !== "spgs.org") {
+    throw new Error(
+      `Expected domain of email to be spgs.org; received ${domain}`,
+    );
+  }
   return sgMail.send({
     to: email,
     from: "emma.goodliffe@spgs.org",
@@ -21,9 +22,6 @@ const sendEmail = (email: string, subject: string, text: string) => {
     html: text,
   });
 };
-
-const randomDigits = (max: number) =>
-  Math.floor(parseFloat(Math.random().toFixed(max)) * 10 ** max);
 
 const getRandomSignature = () => {
   const signatures = [
@@ -40,24 +38,19 @@ const getRandomSignature = () => {
   return signatures[Math.floor(Math.random() * signatures.length)];
 };
 
-export const sendMemeEmail = async (
-  db: AdminDb,
-  date: string,
-  meme: MemeRequest,
+export const sendMemeConfirmationEmail = async (
+  email: string,
+  name: string,
+  id: string,
+  code: number,
 ) => {
-  const code = randomDigits(12);
-  const id = await addToDb(db, "submissions", {
-    date,
-    meme,
-    code,
-    dateSubmitted: dateToString(Timestamp.now().toDate()),
-  });
   const url = `https://europe-west2-<pmpirate>.cloudfunctions.net/confirmMeme/${id}/${code}`;
+  // TODO: Fix line breaks
   const text = `Hi,
   
-Confirm your ${meme.url} meme in the schedule: ${url}
+Confirm your ${name} meme in the schedule: ${url}
 
 Yours ${getRandomSignature()},
 PMP 🏴‍☠️`;
-  return sendEmail(meme.email, "PMP meme", text);
+  return sendEmail(email, "PMP meme", text);
 };
