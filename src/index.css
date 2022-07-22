@@ -41,7 +41,7 @@ footer {
 input[type="text"],
 input[type="email"],
 select {
-  @apply bg-bg border-white border px-2 py-1 rounded-sm;
+  @apply bg-bg mb-4 px-2 py-1 border-white border rounded-sm;
 }
 
 form input,

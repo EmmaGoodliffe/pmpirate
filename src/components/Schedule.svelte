@@ -122,7 +122,11 @@
       <input id="file" type="file" bind:files />
       <hr />
       <h3>Preview image</h3>
-      <img src={preview} alt="Preview" />
+      {#if preview}
+        <Meme url={preview} />
+      {:else}
+        <p class="epilogue">Waiting for image</p>
+      {/if}
       <hr />
       <h3>Give it a very short name</h3>
       <input id="name" type="text" placeholder="Name" bind:value={name} />
@@ -130,11 +134,11 @@
       {#await firstMemePromise}
         <Loader />
       {:then firstMeme}
-        <Meme url={firstMeme?.url} noMemeMessage="Something went wrong :(" />
+        <Meme url={firstMeme?.url} />
       {/await}
       <hr />
       <h3>Credit</h3>
-      <label for="email">Who are you?</label>
+      <label class="mb-2" for="email">Who are you?</label>
       <input
         id="email"
         type="email"

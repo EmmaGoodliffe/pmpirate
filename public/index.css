@@ -466,6 +466,14 @@ Ensure the default browser behavior of the `hidden` attribute.
   margin-left: 1rem;
 }
 
+.mb-4 {
+  margin-bottom: 1rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
 .inline-block {
   display: inline-block;
 }
@@ -663,6 +671,7 @@ footer {
 }
 
 input[type="text"], input[type="email"], select {
+  margin-bottom: 1rem;
   border-radius: 0.125rem;
   border-width: 1px;
   --tw-border-opacity: 1;
