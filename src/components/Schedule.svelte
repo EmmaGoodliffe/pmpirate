@@ -147,12 +147,16 @@
         bind:value={email}
       />
       <div class="flex">
-        <span class="mr-2" class:glow={!found} class:text-dark-s={found}
-          >I made it 🧑‍🎨</span
+        <span
+          class="mr-2"
+          class:text-dark-s={found}
+          on:click={() => (found = false)}>I made it 🧑‍🎨</span
         >
         <Switch state={found} onUpdate={state => (found = state)} />
-        <span class="ml-2" class:glow={found} class:text-dark-s={!found}
-          >🏴‍☠️ I stole it</span
+        <span
+          class="ml-2"
+          class:text-dark-s={!found}
+          on:click={() => (found = true)}>🏴‍☠️ I stole it</span
         >
       </div>
       {#if isLoading}

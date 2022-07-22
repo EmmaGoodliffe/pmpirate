@@ -17314,7 +17314,7 @@ var schedule = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[25] = list[i];
+    	child_ctx[27] = list[i];
     	return child_ctx;
     }
 
@@ -17392,7 +17392,7 @@ var schedule = (function () {
     	let current;
     	let mounted;
     	let dispose;
-    	let each_value = /*options*/ ctx[23];
+    	let each_value = /*options*/ ctx[25];
     	validate_each_argument(each_value);
     	let each_blocks = [];
 
@@ -17419,7 +17419,7 @@ var schedule = (function () {
     		pending: create_pending_block_1,
     		then: create_then_block_1,
     		catch: create_catch_block,
-    		value: 24,
+    		value: 26,
     		blocks: [,,,]
     	};
 
@@ -17428,7 +17428,7 @@ var schedule = (function () {
     	switch_1 = new Switch({
     			props: {
     				state: /*found*/ ctx[4],
-    				onUpdate: /*func*/ ctx[16]
+    				onUpdate: /*func*/ ctx[17]
     			},
     			$$inline: true
     		});
@@ -17535,19 +17535,17 @@ var schedule = (function () {
     			attr_dev(input2, "placeholder", "School email");
     			add_location(input2, file, 125, 6, 4506);
     			attr_dev(span0, "class", "mr-2");
-    			toggle_class(span0, "glow", !/*found*/ ctx[4]);
     			toggle_class(span0, "text-dark-s", /*found*/ ctx[4]);
     			add_location(span0, file, 132, 8, 4657);
     			attr_dev(span1, "class", "ml-2");
-    			toggle_class(span1, "glow", /*found*/ ctx[4]);
     			toggle_class(span1, "text-dark-s", !/*found*/ ctx[4]);
-    			add_location(span1, file, 136, 8, 4842);
+    			add_location(span1, file, 138, 8, 4874);
     			attr_dev(div, "class", "flex");
     			add_location(div, file, 131, 6, 4630);
     			attr_dev(form, "class", "flex flex-col");
     			add_location(form, file, 94, 4, 3528);
     			attr_dev(p, "class", "epilogue");
-    			add_location(p, file, 146, 4, 5123);
+    			add_location(p, file, 150, 4, 5187);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, form, anchor);
@@ -17613,7 +17611,9 @@ var schedule = (function () {
     					listen_dev(select, "change", /*select_change_handler*/ ctx[12]),
     					listen_dev(input0, "change", /*input0_change_handler*/ ctx[13]),
     					listen_dev(input1, "input", /*input1_input_handler*/ ctx[14]),
-    					listen_dev(input2, "input", /*input2_input_handler*/ ctx[15])
+    					listen_dev(input2, "input", /*input2_input_handler*/ ctx[15]),
+    					listen_dev(span0, "click", /*click_handler*/ ctx[16], false, false, false),
+    					listen_dev(span1, "click", /*click_handler_1*/ ctx[18], false, false, false)
     				];
 
     				mounted = true;
@@ -17623,7 +17623,7 @@ var schedule = (function () {
     			ctx = new_ctx;
 
     			if (dirty & /*optionsPromise*/ 512) {
-    				each_value = /*options*/ ctx[23];
+    				each_value = /*options*/ ctx[25];
     				validate_each_argument(each_value);
     				let i;
 
@@ -17687,21 +17687,13 @@ var schedule = (function () {
     			}
 
     			if (dirty & /*found*/ 16) {
-    				toggle_class(span0, "glow", !/*found*/ ctx[4]);
-    			}
-
-    			if (dirty & /*found*/ 16) {
     				toggle_class(span0, "text-dark-s", /*found*/ ctx[4]);
     			}
 
     			const switch_1_changes = {};
     			if (dirty & /*found*/ 16) switch_1_changes.state = /*found*/ ctx[4];
-    			if (dirty & /*found*/ 16) switch_1_changes.onUpdate = /*func*/ ctx[16];
+    			if (dirty & /*found*/ 16) switch_1_changes.onUpdate = /*func*/ ctx[17];
     			switch_1.$set(switch_1_changes);
-
-    			if (dirty & /*found*/ 16) {
-    				toggle_class(span1, "glow", /*found*/ ctx[4]);
-    			}
 
     			if (dirty & /*found*/ 16) {
     				toggle_class(span1, "text-dark-s", !/*found*/ ctx[4]);
@@ -17785,16 +17777,16 @@ var schedule = (function () {
     // (98:8) {#each options as option}
     function create_each_block(ctx) {
     	let option;
-    	let t_value = /*option*/ ctx[25].text + "";
+    	let t_value = /*option*/ ctx[27].text + "";
     	let t;
 
     	const block = {
     		c: function create() {
     			option = element("option");
     			t = text(t_value);
-    			option.__value = /*option*/ ctx[25].value;
+    			option.__value = /*option*/ ctx[27].value;
     			option.value = option.__value;
-    			option.disabled = !/*option*/ ctx[25].available;
+    			option.disabled = !/*option*/ ctx[27].available;
     			add_location(option, file, 98, 10, 3687);
     		},
     		m: function mount(target, anchor) {
@@ -17927,7 +17919,7 @@ var schedule = (function () {
     	let current;
 
     	meme = new Meme({
-    			props: { url: /*firstMeme*/ ctx[24]?.url },
+    			props: { url: /*firstMeme*/ ctx[26]?.url },
     			$$inline: true
     		});
 
@@ -18005,7 +17997,7 @@ var schedule = (function () {
     	return block;
     }
 
-    // (143:6) {:else}
+    // (147:6) {:else}
     function create_else_block(ctx) {
     	let button;
     	let mounted;
@@ -18016,7 +18008,7 @@ var schedule = (function () {
     			button = element("button");
     			button.textContent = "Schedule";
     			attr_dev(button, "class", "btn px-4 py-2");
-    			add_location(button, file, 143, 8, 5027);
+    			add_location(button, file, 147, 8, 5091);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -18040,14 +18032,14 @@ var schedule = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(143:6) {:else}",
+    		source: "(147:6) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (141:6) {#if isLoading}
+    // (145:6) {#if isLoading}
     function create_if_block(ctx) {
     	let loader;
     	let current;
@@ -18080,7 +18072,7 @@ var schedule = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(141:6) {#if isLoading}",
+    		source: "(145:6) {#if isLoading}",
     		ctx
     	});
 
@@ -18146,7 +18138,7 @@ var schedule = (function () {
     		pending: create_pending_block,
     		then: create_then_block,
     		catch: create_catch_block_1,
-    		value: 23,
+    		value: 25,
     		blocks: [,,,]
     	};
 
@@ -18165,7 +18157,7 @@ var schedule = (function () {
     			footer = element("footer");
     			add_location(h2, file, 90, 2, 3440);
     			add_location(main, file, 89, 0, 3431);
-    			add_location(footer, file, 149, 0, 5176);
+    			add_location(footer, file, 153, 0, 5240);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -18375,7 +18367,9 @@ var schedule = (function () {
     		$$invalidate(3, email);
     	}
 
+    	const click_handler = () => $$invalidate(4, found = false);
     	const func = state => $$invalidate(4, found = state);
+    	const click_handler_1 = () => $$invalidate(4, found = true);
 
     	$$self.$$set = $$props => {
     		if ('db' in $$props) $$invalidate(11, db = $$props.db);
@@ -18453,7 +18447,9 @@ var schedule = (function () {
     		input0_change_handler,
     		input1_input_handler,
     		input2_input_handler,
-    		func
+    		click_handler,
+    		func,
+    		click_handler_1
     	];
     }
 
