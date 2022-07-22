@@ -86,7 +86,11 @@ export const getMemesOfMonth = (year: number, month: number, db: Db) =>
   getMemesOfMonthFromCache(year, month) ??
   getMemesOfMonthFromDb(year, month, db);
 
-export const getMemeOtd = async (d: Date | undefined, db: Db, n = 0): Promise<Meme | null | undefined> => {
+export const getMemeOtd = async (
+  d: Date | undefined,
+  db: Db,
+  n = 0,
+): Promise<Meme | null | undefined> => {
   if (!d) return null;
   if (n >= 12) throw new Error("DB recursion");
   const [date, month, year] = separateDate(d);
