@@ -129,7 +129,7 @@
   {#await queriedMemePromise}
     <Loader />
   {:then queriedMeme}
-    <Meme url={queriedMeme?.url} noMemeMessage="No memes that day :(" />
+    <Meme url={queriedMeme?.url}>No memes that day :(</Meme>
   {/await}
 </section>
 <hr />

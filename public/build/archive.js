@@ -15717,6 +15717,12 @@ var archive = (function () {
     }
 
     function noop() { }
+    function assign(tar, src) {
+        // @ts-ignore
+        for (const k in src)
+            tar[k] = src[k];
+        return tar;
+    }
     function is_promise(value) {
         return value && typeof value === 'object' && typeof value.then === 'function';
     }
@@ -15750,6 +15756,52 @@ var archive = (function () {
     }
     function is_empty(obj) {
         return Object.keys(obj).length === 0;
+    }
+    function create_slot(definition, ctx, $$scope, fn) {
+        if (definition) {
+            const slot_ctx = get_slot_context(definition, ctx, $$scope, fn);
+            return definition[0](slot_ctx);
+        }
+    }
+    function get_slot_context(definition, ctx, $$scope, fn) {
+        return definition[1] && fn
+            ? assign($$scope.ctx.slice(), definition[1](fn(ctx)))
+            : $$scope.ctx;
+    }
+    function get_slot_changes(definition, $$scope, dirty, fn) {
+        if (definition[2] && fn) {
+            const lets = definition[2](fn(dirty));
+            if ($$scope.dirty === undefined) {
+                return lets;
+            }
+            if (typeof lets === 'object') {
+                const merged = [];
+                const len = Math.max($$scope.dirty.length, lets.length);
+                for (let i = 0; i < len; i += 1) {
+                    merged[i] = $$scope.dirty[i] | lets[i];
+                }
+                return merged;
+            }
+            return $$scope.dirty | lets;
+        }
+        return $$scope.dirty;
+    }
+    function update_slot_base(slot, slot_definition, ctx, $$scope, slot_changes, get_slot_context_fn) {
+        if (slot_changes) {
+            const slot_context = get_slot_context(slot_definition, ctx, $$scope, get_slot_context_fn);
+            slot.p(slot_context, slot_changes);
+        }
+    }
+    function get_all_dirty_from_scope($$scope) {
+        if ($$scope.ctx.length > 32) {
+            const dirty = [];
+            const length = $$scope.ctx.length / 32;
+            for (let i = 0; i < length; i++) {
+                dirty[i] = -1;
+            }
+            return dirty;
+        }
+        return -1;
     }
     function append(target, node) {
         target.appendChild(node);
@@ -16538,24 +16590,55 @@ var archive = (function () {
     // (22:0) {:else}
     function create_else_block$1(ctx) {
     	let p;
-    	let t;
+    	let current;
+    	const default_slot_template = /*#slots*/ ctx[3].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[2], null);
+    	const default_slot_or_fallback = default_slot || fallback_block(ctx);
 
     	const block = {
     		c: function create() {
     			p = element("p");
-    			t = text(/*noMemeMessage*/ ctx[1]);
+    			if (default_slot_or_fallback) default_slot_or_fallback.c();
     			attr_dev(p, "class", `${className} text-center`);
-    			add_location(p, file$2, 22, 2, 446);
+    			add_location(p, file$2, 22, 2, 441);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
-    			append_dev(p, t);
+
+    			if (default_slot_or_fallback) {
+    				default_slot_or_fallback.m(p, null);
+    			}
+
+    			current = true;
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*noMemeMessage*/ 2) set_data_dev(t, /*noMemeMessage*/ ctx[1]);
+    			if (default_slot) {
+    				if (default_slot.p && (!current || dirty & /*$$scope*/ 4)) {
+    					update_slot_base(
+    						default_slot,
+    						default_slot_template,
+    						ctx,
+    						/*$$scope*/ ctx[2],
+    						!current
+    						? get_all_dirty_from_scope(/*$$scope*/ ctx[2])
+    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[2], dirty, null),
+    						null
+    					);
+    				}
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(default_slot_or_fallback, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(default_slot_or_fallback, local);
+    			current = false;
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(p);
+    			if (default_slot_or_fallback) default_slot_or_fallback.d(detaching);
     		}
     	};
 
@@ -16583,13 +16666,13 @@ var archive = (function () {
     			attr_dev(img, "class", className);
     			if (!src_url_equal(img.src, img_src_value = /*url*/ ctx[0])) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Meme");
-    			add_location(img, file$2, 12, 2, 285);
+    			add_location(img, file$2, 12, 2, 280);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, img, anchor);
 
     			if (!mounted) {
-    				dispose = listen_dev(img, "error", /*error_handler*/ ctx[3], false, false, false);
+    				dispose = listen_dev(img, "error", /*error_handler*/ ctx[4], false, false, false);
     				mounted = true;
     			}
     		},
@@ -16598,6 +16681,8 @@ var archive = (function () {
     				attr_dev(img, "src", img_src_value);
     			}
     		},
+    		i: noop,
+    		o: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(img);
     			mounted = false;
@@ -16616,16 +16701,49 @@ var archive = (function () {
     	return block;
     }
 
+    // (24:10) {noMemeMessage}
+    function fallback_block(ctx) {
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			t = text(noMemeMessage);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    		},
+    		p: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: fallback_block.name,
+    		type: "fallback",
+    		source: "(24:10) {noMemeMessage}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
     function create_fragment$2(ctx) {
+    	let current_block_type_index;
+    	let if_block;
     	let if_block_anchor;
+    	let current;
+    	const if_block_creators = [create_if_block$2, create_else_block$1];
+    	const if_blocks = [];
 
     	function select_block_type(ctx, dirty) {
-    		if (/*url*/ ctx[0] && !/*showError*/ ctx[2]) return create_if_block$2;
-    		return create_else_block$1;
+    		if (/*url*/ ctx[0] && !/*showError*/ ctx[1]) return 0;
+    		return 1;
     	}
 
-    	let current_block_type = select_block_type(ctx);
-    	let if_block = current_block_type(ctx);
+    	current_block_type_index = select_block_type(ctx);
+    	if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
 
     	const block = {
     		c: function create() {
@@ -16636,26 +16754,48 @@ var archive = (function () {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			if_block.m(target, anchor);
+    			if_blocks[current_block_type_index].m(target, anchor);
     			insert_dev(target, if_block_anchor, anchor);
+    			current = true;
     		},
     		p: function update(ctx, [dirty]) {
-    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block) {
-    				if_block.p(ctx, dirty);
-    			} else {
-    				if_block.d(1);
-    				if_block = current_block_type(ctx);
+    			let previous_block_index = current_block_type_index;
+    			current_block_type_index = select_block_type(ctx);
 
-    				if (if_block) {
+    			if (current_block_type_index === previous_block_index) {
+    				if_blocks[current_block_type_index].p(ctx, dirty);
+    			} else {
+    				group_outros();
+
+    				transition_out(if_blocks[previous_block_index], 1, 1, () => {
+    					if_blocks[previous_block_index] = null;
+    				});
+
+    				check_outros();
+    				if_block = if_blocks[current_block_type_index];
+
+    				if (!if_block) {
+    					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
     					if_block.c();
-    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				} else {
+    					if_block.p(ctx, dirty);
     				}
+
+    				transition_in(if_block, 1);
+    				if_block.m(if_block_anchor.parentNode, if_block_anchor);
     			}
     		},
-    		i: noop,
-    		o: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
     		d: function destroy(detaching) {
-    			if_block.d(detaching);
+    			if_blocks[current_block_type_index].d(detaching);
     			if (detaching) detach_dev(if_block_anchor);
     		}
     	};
@@ -16672,35 +16812,34 @@ var archive = (function () {
     }
 
     const className = "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto";
+    const noMemeMessage = "Couldn't load meme :(";
 
     function instance$2($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
-    	validate_slots('Meme', slots, []);
+    	validate_slots('Meme', slots, ['default']);
     	let { url = "" } = $$props;
-    	let { noMemeMessage = "Couldn't load meme :(" } = $$props;
     	let showError = false;
-    	const writable_props = ['url', 'noMemeMessage'];
+    	const writable_props = ['url'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<Meme> was created with unknown prop '${key}'`);
     	});
 
     	const error_handler = () => {
-    		$$invalidate(2, showError = true);
+    		$$invalidate(1, showError = true);
     		console.log("Detected error");
     	};
 
     	$$self.$$set = $$props => {
     		if ('url' in $$props) $$invalidate(0, url = $$props.url);
-    		if ('noMemeMessage' in $$props) $$invalidate(1, noMemeMessage = $$props.noMemeMessage);
+    		if ('$$scope' in $$props) $$invalidate(2, $$scope = $$props.$$scope);
     	};
 
-    	$$self.$capture_state = () => ({ url, noMemeMessage, showError, className });
+    	$$self.$capture_state = () => ({ url, showError, className, noMemeMessage });
 
     	$$self.$inject_state = $$props => {
     		if ('url' in $$props) $$invalidate(0, url = $$props.url);
-    		if ('noMemeMessage' in $$props) $$invalidate(1, noMemeMessage = $$props.noMemeMessage);
-    		if ('showError' in $$props) $$invalidate(2, showError = $$props.showError);
+    		if ('showError' in $$props) $$invalidate(1, showError = $$props.showError);
     	};
 
     	if ($$props && "$$inject" in $$props) {
@@ -16711,18 +16850,18 @@ var archive = (function () {
     		if ($$self.$$.dirty & /*url*/ 1) {
     			// Reset error when URL changes
     			{
-    				$$invalidate(2, showError = false);
+    				$$invalidate(1, showError = false);
     			}
     		}
     	};
 
-    	return [url, noMemeMessage, showError, error_handler];
+    	return [url, showError, $$scope, slots, error_handler];
     }
 
     class Meme extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$2, create_fragment$2, safe_not_equal, { url: 0, noMemeMessage: 1 });
+    		init(this, options, instance$2, create_fragment$2, safe_not_equal, { url: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -16737,14 +16876,6 @@ var archive = (function () {
     	}
 
     	set url(value) {
-    		throw new Error("<Meme>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	get noMemeMessage() {
-    		throw new Error("<Meme>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
-    	}
-
-    	set noMemeMessage(value) {
     		throw new Error("<Meme>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
@@ -17463,7 +17594,8 @@ var archive = (function () {
     	meme = new Meme({
     			props: {
     				url: /*queriedMeme*/ ctx[18]?.url,
-    				noMemeMessage: "No memes that day :("
+    				$$slots: { default: [create_default_slot] },
+    				$$scope: { ctx }
     			},
     			$$inline: true
     		});
@@ -17479,6 +17611,11 @@ var archive = (function () {
     		p: function update(ctx, dirty) {
     			const meme_changes = {};
     			if (dirty & /*queriedMemePromise*/ 32) meme_changes.url = /*queriedMeme*/ ctx[18]?.url;
+
+    			if (dirty & /*$$scope*/ 33554432) {
+    				meme_changes.$$scope = { dirty, ctx };
+    			}
+
     			meme.$set(meme_changes);
     		},
     		i: function intro(local) {
@@ -17500,6 +17637,33 @@ var archive = (function () {
     		id: create_then_block.name,
     		type: "then",
     		source: "(121:2) {:then queriedMeme}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (122:4) <Meme url={queriedMeme?.url}>
+    function create_default_slot(ctx) {
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			t = text("No memes that day :(");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_default_slot.name,
+    		type: "slot",
+    		source: "(122:4) <Meme url={queriedMeme?.url}>",
     		ctx
     	});
 
@@ -17726,15 +17890,15 @@ var archive = (function () {
     			attr_dev(p1, "class", "my-4");
     			add_location(p1, file, 117, 2, 4200);
     			add_location(section0, file, 114, 0, 4115);
-    			add_location(hr1, file, 124, 0, 4407);
-    			add_location(h22, file, 126, 2, 4426);
+    			add_location(hr1, file, 124, 0, 4395);
+    			add_location(h22, file, 126, 2, 4414);
     			attr_dev(a, "class", "hover:underline");
     			attr_dev(a, "href", "schedule.html");
-    			add_location(a, file, 128, 4, 4478);
+    			add_location(a, file, 128, 4, 4466);
     			attr_dev(p2, "class", "epilogue");
-    			add_location(p2, file, 127, 2, 4453);
-    			add_location(section1, file, 125, 0, 4414);
-    			add_location(footer, file, 131, 0, 4564);
+    			add_location(p2, file, 127, 2, 4441);
+    			add_location(section1, file, 125, 0, 4402);
+    			add_location(footer, file, 131, 0, 4552);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");

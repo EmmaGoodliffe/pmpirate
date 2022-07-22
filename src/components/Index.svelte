@@ -79,7 +79,13 @@
   {#await memeOtdPromise}
     <Loader />
   {:then memeOtd}
-    <Meme url={memeOtd?.url} noMemeMessage="No meme today :( ... Send suggestions" />
+    <Meme url={memeOtd?.url}
+      >No meme today :( ... <a
+        class="hover:underline"
+        href="mailto:emma.goodliffe@spgs.org">Send suggestions</a
+      >
+      or <a class="hover:underline" href="schedule.html">upload one</a></Meme
+    >
   {/await}
 </section>
 <hr />

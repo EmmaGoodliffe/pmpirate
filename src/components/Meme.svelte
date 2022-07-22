@@ -1,10 +1,10 @@
 <script lang="ts">
   export let url = "";
-  export let noMemeMessage = "Couldn't load meme :(";
 
   let showError = false;
 
   const className = "w-full sm:w-4/6 md:w-1/2 max-w-md mx-auto";
+  const noMemeMessage = "Couldn't load meme :(";
 
   // Reset error when URL changes
   $: {
@@ -24,5 +24,7 @@
     }}
   />
 {:else}
-  <p class={`${className} text-center`}>{noMemeMessage}</p>
+  <p class={`${className} text-center`}>
+    <slot>{noMemeMessage}</slot>
+  </p>
 {/if}
