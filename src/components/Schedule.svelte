@@ -10,6 +10,7 @@
   import Header from "./Header.svelte";
   import Loader from "./Loader.svelte";
   import Meme from "./Meme.svelte";
+  import Switch from "./Switch.svelte";
 
   export let db: Db;
 
@@ -21,7 +22,7 @@
   let files: FileList;
   let name = "";
   let email = "";
-  let made = true;
+  let found = false;
   let isLoading = false;
   let message = "";
 
@@ -70,7 +71,7 @@
       name,
       email,
       fileBase64,
-      found: !made,
+      found,
     };
     if (!chosenDate) {
       message = "Invalid date";
@@ -146,16 +147,13 @@
         bind:value={email}
       />
       <div class="flex">
-        <span class="mr-2">I made it 🧑‍🎨</span>
-        <div
-          class="switch"
-          class:off={made}
-          class:on={!made}
-          on:click={() => (made = !made)}
+        <span class="mr-2" class:glow={!found} class:text-dark-s={found}
+          >I made it 🧑‍🎨</span
         >
-          <div class="switch-indicator" />
-        </div>
-        <span class="ml-2">🏴‍☠️ I stole it</span>
+        <Switch state={found} onUpdate={state => (found = state)} />
+        <span class="ml-2" class:glow={found} class:text-dark-s={!found}
+          >🏴‍☠️ I stole it</span
+        >
       </div>
       {#if isLoading}
         <Loader />

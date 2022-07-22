@@ -1,0 +1,3 @@
+.switch.svelte-b5dti6.svelte-b5dti6{--switch-width:40px;width:var(--switch-width);@apply h-6 rounded-full flex transition-colors ease-linear;}.switch.off.svelte-b5dti6.svelte-b5dti6{@apply bg-p;}.switch.on.svelte-b5dti6.svelte-b5dti6{@apply bg-light-s;}.switch.svelte-b5dti6 .switch-indicator.svelte-b5dti6{--switch-indicator-width:24px;width:var(--switch-indicator-width);@apply h-6 border-2 rounded-full transition-all;}.switch.off.svelte-b5dti6 .switch-indicator.svelte-b5dti6{@apply bg-light-s border-p;}.switch.on.svelte-b5dti6 .switch-indicator.svelte-b5dti6{transform:translateX(
+      calc(var(--switch-width) - var(--switch-indicator-width))
+    );@apply bg-bg border-light-s;}
