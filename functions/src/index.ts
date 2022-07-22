@@ -54,7 +54,7 @@ export const submitMeme = functions
         );
       }
       // Add meme to storage
-      const file = bucket.file(data.meme.path);
+      const file = bucket.file(`memes/${data.meme.path}`);
       await file.save(Buffer.from(data.meme.fileBase64, "base64"));
       // Add submission to DB
       let [author] = data.meme.email.split("@");
@@ -106,6 +106,7 @@ const areNumberKeysTheSame = <T extends Record<number, unknown>>(
   );
 };
 
+// TODO: Default to text success responses
 export const confirmMeme = functions
   .region("europe-west2")
   .https.onRequest(async (req, res) => {

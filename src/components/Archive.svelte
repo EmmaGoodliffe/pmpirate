@@ -44,6 +44,7 @@ import Otd from "./Otd.svelte";
 
   $: tomorrowMemePromise = getMemeOtd(tomorrow, db);
 
+  // TODO: Debounce
   $: queriedMemePromise = getMemeOtd(stringToDate(dateQuery), db);
 </script>
 
