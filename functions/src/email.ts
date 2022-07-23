@@ -7,7 +7,12 @@ if (sgKey) {
   throw new Error("No SG API key");
 }
 
-const sendEmail = (email: string, subject: string, text: string) => {
+const sendEmail = (
+  email: string,
+  subject: string,
+  html: string,
+  text: string,
+) => {
   const [, domain] = email.split("@");
   if (domain !== "spgs.org") {
     throw new Error(
@@ -18,8 +23,8 @@ const sendEmail = (email: string, subject: string, text: string) => {
     to: email,
     from: "emma.goodliffe@spgs.org",
     subject,
+    html,
     text,
-    html: text,
   });
 };
 
@@ -44,13 +49,23 @@ export const sendMemeConfirmationEmail = async (
   id: string,
   code: number,
 ) => {
-  const url = `https://europe-west2-<pmpirate>.cloudfunctions.net/confirmMeme/${id}/${code}`;
-  // TODO: Fix line breaks
-  const text = `Hi,
-  
-Confirm your ${name} meme in the schedule: ${url}
-
-Yours ${getRandomSignature()},
-PMP 🏴‍☠️`;
-  return sendEmail(email, "PMP meme", text);
+  const url = `https://europe-west2-pmpirate.cloudfunctions.net/confirmMeme/${id}/${code}`;
+  const getContent = (isHtml: boolean) =>
+    isHtml
+      ? `Confirm your <strong>${name}</strong> meme in the schedule <a href="${url}">here</a>.`
+      : `Confirm your ${name} meme in the schedule: ${url} .`;
+  const getLines = (isHtml: boolean) => [
+    "Hi,",
+    "",
+    getContent(isHtml),
+    "",
+    `Yours ${getRandomSignature()},`,
+    "PMP 🏴‍☠️",
+    "",
+  ];
+  const html = getLines(true)
+    .map(x => `<p>${x}</p>`)
+    .join("");
+  const text = getLines(false).join("\n");
+  return sendEmail(email, "PMP meme", html, text);
 };

@@ -62,7 +62,13 @@
 
   const schedule = async (e: Event) => {
     e.preventDefault();
+    message = "";
     isLoading = true;
+    if (!files || !files[0]) {
+      message = "Invalid image";
+      isLoading = false;
+      return;
+    }
     const buffer = await files[0].arrayBuffer();
     const fileBase64 = window.btoa(
       String.fromCharCode(...new Uint8Array(buffer)),
