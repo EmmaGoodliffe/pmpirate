@@ -1,5 +1,6 @@
 /* eslint-disable import/no-unresolved */
 import "dotenv/config";
+import { hogan } from "consolidate";
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, Timestamp } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
@@ -47,7 +48,7 @@ export const submitMeme = functions
           )}`,
         );
       }
-      const [, domain] = data.meme.email.split("@");
+      const [username, domain] = data.meme.email.split("@");
       if (domain !== "spgs.org") {
         throw new functions.https.HttpsError(
           "invalid-argument",
@@ -60,7 +61,7 @@ export const submitMeme = functions
       // await file.save(buffer);
       await pipeResizedImage(buffer, 400, 400, file.createWriteStream());
       // Add submission to DB
-      let [author] = data.meme.email.split("@");
+      let author = username;
       if (author === "emma.goodliffe") {
         author += " 🏴‍☠️";
       }
@@ -71,7 +72,7 @@ export const submitMeme = functions
           // path: data.meme.path,
           url: file.publicUrl(),
           found: data.meme.found,
-          author,
+          author: author,
         },
         code,
         dateSubmitted: dateToString(Timestamp.now().toDate()),
@@ -168,10 +169,11 @@ export const confirmMeme = functions
     // Set meme data to DB
     await Promise.all([deletionPromise, setToDb(db, "memes", memeId, data)]);
     // Send response to client
-    // TODO: Send response as HTML
-    res.send({
-      status: 200,
-      message: `Confirmed meme by ${submission.meme.author}`,
+    req.app.engine("html", hogan);
+    req.app.set("view engine", "html");
+    req.app.set("views", `${__dirname}/../assets`);
+    res.render("200", {
+      message: `Confirmed meme by <span class="author">${submission.meme.author}</span>`,
     });
     return;
   });

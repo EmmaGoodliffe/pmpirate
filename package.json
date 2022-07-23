@@ -12,7 +12,7 @@
     "dev:css": "npm run build:css -- --watch",
     "dev:server": "echo \"Remember to re-build the server when you make changes\"",
     "dev:svelte": "rollup -c -w",
-    "dev": "concurrently \"npm:dev:*\" -c \"bold\"",
+    "dev": "concurrently \"npm:dev:*\" -c \"blue,yellow,red\"",
     "e2e": "cypress open",
     "lint": "eslint \".\" --fix && svelte-check && npm run build:server -- -- --noEmit && prettier \".\" --write",
     "start": "firebase emulators:start",

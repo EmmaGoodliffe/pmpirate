@@ -597,14 +597,6 @@ Ensure the default browser behavior of the `hidden` attribute.
   line-height: 1.75rem;
 }
 
-.font-bold {
-  font-weight: 700;
-}
-
-.italic {
-  font-style: italic;
-}
-
 .text-dark-s {
   --tw-text-opacity: 1;
   color: rgb(156 163 175 / var(--tw-text-opacity));
@@ -781,6 +773,11 @@ table tfoot {
   display: inline-block;
   padding: 1rem;
   text-align: center;
+}
+
+.author {
+  font-weight: 700;
+  font-style: italic;
 }
 
 .hover\:underline:hover {

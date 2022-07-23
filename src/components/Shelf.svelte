@@ -12,7 +12,7 @@
     <p>{dateToString(date, "/")}</p>
     <p>
       {meme.found ? "Found by" : "By"}
-      <span class="font-bold italic">{meme.author}</span>
+      <span class="author">{meme.author}</span>
     </p>
     {#if isTomorrow}
       <p>(Sneak peek)</p>
