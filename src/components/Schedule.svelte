@@ -16,7 +16,7 @@
 
   const today = getToday();
   const [currentDate, currentMonth, currentYear] = separateDate(today);
-  const firstMemePromise = getMemeOtd(firstMemeDate, db);
+  const firstMemePromise = getMemeOtd(db, firstMemeDate);
 
   let chosenDate: Date | null = null;
   let files: FileList;
@@ -43,7 +43,7 @@
           const option = {
             value: date,
             text: dateToString(date),
-            available: !(await getMemeOtd(date, db)),
+            available: !(await getMemeOtd(db, date)),
           };
           return dateToString(option.value) === dateToString(today)
             ? [optionSeparator, option, optionSeparator]

@@ -25,7 +25,6 @@ export const firstMemeDate = compoundDate(12, 10, 2021);
 const delay = (time: number) =>
   new Promise(resolve => setTimeout(resolve, time * 10 ** 3));
 
-// TODO: Make DB the first argument in every relevant function
 async function getFromDb(
   db: Db,
   collectionId: "memes",
@@ -60,7 +59,7 @@ const isMemeMonthPossible = (year: number, month: number) => {
   return firstMonth <= date && year <= currentYear;
 };
 
-const getMemesOfMonthFromDb = async (year: number, month: number, db: Db) => {
+const getMemesOfMonthFromDb = async (db: Db, year: number, month: number) => {
   if (!isMemeMonthPossible(year, month)) return null;
   const docId = getDocId(year, month);
   if (queue.has(docId)) {
@@ -84,11 +83,11 @@ const getMemesOfMonthFromCache = (year: number, month: number) => {
 
 export const getMemesOfMonth = (year: number, month: number, db: Db) =>
   getMemesOfMonthFromCache(year, month) ??
-  getMemesOfMonthFromDb(year, month, db);
+  getMemesOfMonthFromDb(db, year, month);
 
 export const getMemeOtd = async (
-  d: Date | undefined,
   db: Db,
+  d: Date | undefined,
   n = 0,
 ): Promise<Meme | null | undefined> => {
   if (!d) return null;
@@ -101,7 +100,7 @@ export const getMemeOtd = async (
     console.count("Cache errors");
   }
   await getMemesOfMonth(year, month, db);
-  return getMemeOtd(d, db, n + 1);
+  return getMemeOtd(db, d, n + 1);
 };
 
 async function callCloudFunction(

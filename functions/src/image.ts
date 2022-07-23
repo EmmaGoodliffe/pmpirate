@@ -1,6 +1,7 @@
 import sharp from "sharp";
 import { Readable, Writable } from "stream";
 
+// TODO: Deal with images that aren't square
 export const pipeResizedImage = (
   readable: Readable | Buffer,
   width: number,

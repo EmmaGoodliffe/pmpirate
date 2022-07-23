@@ -10,7 +10,7 @@
   export let db: Db;
 
   const today = getToday();
-  const memeOtdPromise = getMemeOtd(today, db);
+  const memeOtdPromise = getMemeOtd(db, today);
 
   const mathsBooks = [
     "Pure Year 1",

@@ -18,7 +18,7 @@
 
   const today = getToday();
   const tomorrow = getTomorrow();
-  const tomorrowMemePromise = getMemeOtd(tomorrow, db);
+  const tomorrowMemePromise = getMemeOtd(db, tomorrow);
 
   let [, month, year] = separateDate(today);
   let dateQuery = dateToString(today);
@@ -59,7 +59,7 @@
   $: memePromises = Promise.all([archivedMemesPromise, tomorrowMemePromise]);
 
   // TODO: Debounce
-  $: queriedMemePromise = getMemeOtd(stringToDate(dateQuery), db);
+  $: queriedMemePromise = getMemeOtd(db, stringToDate(dateQuery));
 </script>
 
 <Header />
