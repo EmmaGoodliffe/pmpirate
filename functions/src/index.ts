@@ -109,7 +109,6 @@ const areNumberKeysTheSame = <T extends Record<number, unknown>>(
   );
 };
 
-// TODO: Default to text success responses
 export const confirmMeme = functions
   .region("europe-west2")
   .https.onRequest(async (req, res) => {
