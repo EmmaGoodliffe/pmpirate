@@ -167,6 +167,8 @@ export const confirmMeme = functions
     }
     // Set meme data to DB
     await Promise.all([deletionPromise, setToDb(db, "memes", memeId, data)]);
+    // Send response to client
+    // TODO: Send response as HTML
     res.send({
       status: 200,
       message: `Confirmed meme by ${submission.meme.author}`,
