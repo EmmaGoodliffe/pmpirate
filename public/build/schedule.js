@@ -16879,12 +16879,13 @@ var schedule = (function () {
     			set_style(img, "height", "2.5em");
     			if (!src_url_equal(img.src, img_src_value = "./favicon.png")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Logo");
-    			add_location(img, file$4, 2, 4, 46);
+    			add_location(img, file$4, 2, 4, 54);
     			attr_dev(h1, "class", "inline-block ml-4");
-    			add_location(h1, file$4, 8, 4, 161);
+    			add_location(h1, file$4, 8, 4, 169);
+    			attr_dev(a, "class", "flex");
     			attr_dev(a, "href", "/");
-    			add_location(a, file$4, 1, 2, 29);
-    			attr_dev(header, "class", "my-8 flex");
+    			add_location(a, file$4, 1, 2, 24);
+    			attr_dev(header, "class", "my-8");
     			add_location(header, file$4, 0, 0, 0);
     		},
     		l: function claim(nodes) {
@@ -17549,7 +17550,6 @@ var schedule = (function () {
     	let p1;
     	let t31;
     	let t32;
-    	let t33;
     	let current_block_type_index_1;
     	let if_block1;
     	let current;
@@ -17669,9 +17669,8 @@ var schedule = (function () {
     			span1.textContent = "🏴‍☠️ I stole it";
     			t30 = space();
     			p1 = element("p");
-    			t31 = text("Bla: ");
-    			t32 = text(/*message*/ ctx[6]);
-    			t33 = space();
+    			t31 = text(/*message*/ ctx[6]);
+    			t32 = space();
     			if_block1.c();
     			add_location(h30, file, 101, 6, 3696);
     			attr_dev(select, "class", "font-mono");
@@ -17772,8 +17771,7 @@ var schedule = (function () {
     			append_dev(form, t30);
     			append_dev(form, p1);
     			append_dev(p1, t31);
-    			append_dev(p1, t32);
-    			append_dev(form, t33);
+    			append_dev(form, t32);
     			if_blocks_1[current_block_type_index_1].m(form, null);
     			current = true;
 
@@ -17870,7 +17868,7 @@ var schedule = (function () {
     				toggle_class(span1, "text-dark-fg", !/*found*/ ctx[4]);
     			}
 
-    			if (!current || dirty & /*message*/ 64) set_data_dev(t32, /*message*/ ctx[6]);
+    			if (!current || dirty & /*message*/ 64) set_data_dev(t31, /*message*/ ctx[6]);
     			let previous_block_index_1 = current_block_type_index_1;
     			current_block_type_index_1 = select_block_type_1(ctx);
 
@@ -18176,7 +18174,7 @@ var schedule = (function () {
     			button = element("button");
     			button.textContent = "Schedule";
     			attr_dev(button, "class", "btn my-8 px-4 py-2");
-    			add_location(button, file, 155, 8, 5356);
+    			add_location(button, file, 155, 8, 5351);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -18325,7 +18323,7 @@ var schedule = (function () {
     			footer = element("footer");
     			add_location(h2, file, 96, 2, 3573);
     			add_location(main, file, 95, 0, 3564);
-    			add_location(footer, file, 160, 0, 5472);
+    			add_location(footer, file, 160, 0, 5467);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");

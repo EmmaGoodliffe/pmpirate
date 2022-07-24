@@ -16573,12 +16573,13 @@ var index = (function () {
     			set_style(img, "height", "2.5em");
     			if (!src_url_equal(img.src, img_src_value = "./favicon.png")) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "Logo");
-    			add_location(img, file$3, 2, 4, 46);
+    			add_location(img, file$3, 2, 4, 54);
     			attr_dev(h1, "class", "inline-block ml-4");
-    			add_location(h1, file$3, 8, 4, 161);
+    			add_location(h1, file$3, 8, 4, 169);
+    			attr_dev(a, "class", "flex");
     			attr_dev(a, "href", "/");
-    			add_location(a, file$3, 1, 2, 29);
-    			attr_dev(header, "class", "my-8 flex");
+    			add_location(a, file$3, 1, 2, 24);
+    			attr_dev(header, "class", "my-8");
     			add_location(header, file$3, 0, 0, 0);
     		},
     		l: function claim(nodes) {

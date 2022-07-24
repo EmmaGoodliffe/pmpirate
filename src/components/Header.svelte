@@ -1,5 +1,5 @@
-<header class="my-8 flex">
-  <a href="/">
+<header class="my-8">
+  <a class="flex" href="/">
     <img
       class="inline-block"
       style="height: 2.5em;"
