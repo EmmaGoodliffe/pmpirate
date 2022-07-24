@@ -77,6 +77,7 @@ const options = {
   },
 };
 
+// TODO: Ensure .js.map files are not being uploaded to hosting
 const bundles = ["index", "archive", "schedule"].map(bundle => ({
   ...options,
   input: `src/routes/${bundle}.ts`,

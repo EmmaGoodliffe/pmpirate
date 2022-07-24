@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply bg-bg text-light-s;
+  @apply bg-bg text-s;
 }
 
 h1 {
@@ -41,7 +41,7 @@ footer {
 input[type="text"],
 input[type="email"],
 select {
-  @apply bg-bg mb-4 px-2 py-1 border-white border rounded-sm;
+  @apply bg-bg mb-4 px-2 py-1 border-light-s border rounded-sm;
 }
 
 form input,
@@ -60,7 +60,7 @@ form select {
 }
 
 .switch.on {
-  @apply bg-light-s;
+  @apply bg-s;
 }
 
 .switch .switch-indicator {
@@ -70,14 +70,14 @@ form select {
 }
 
 .switch.off .switch-indicator {
-  @apply bg-light-s border-p;
+  @apply bg-s border-p;
 }
 
 .switch.on .switch-indicator {
   transform: translateX(
     calc(var(--switch-width) - var(--switch-indicator-width))
   );
-  @apply bg-bg border-light-s;
+  @apply bg-bg border-s;
 }
 
 .btn {

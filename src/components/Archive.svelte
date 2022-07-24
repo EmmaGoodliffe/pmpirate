@@ -88,7 +88,7 @@
       </div>
     </div>
   </div>
-  <table class="table-auto w-full max-w-4xl mx-auto border-white border-2">
+  <table class="table-auto w-full max-w-4xl mx-auto border-light-s border-2">
     <thead>
       <tr>
         <th class="border-2">Date</th>
