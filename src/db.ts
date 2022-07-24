@@ -10,7 +10,6 @@ import {
 import type {
   Db,
   Meme,
-  MemeRequest,
   MemesOfMonth,
   SubmitMemeCloudFunction,
 } from "../functions/src/types";
@@ -111,7 +110,10 @@ async function callCloudFunction(func: string, data: unknown) {
   return httpsCallable(functions, func)(data);
 }
 
-export const submitMeme = async (date: Date, meme: MemeRequest) => {
+export const submitMeme = async (
+  date: Date,
+  meme: SubmitMemeCloudFunction["request"]["meme"],
+) => {
   const response = await callCloudFunction("submitMeme", {
     date: dateToString(date),
     meme,

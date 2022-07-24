@@ -14,15 +14,11 @@ export interface Meme extends MemeBasics {
   author: string;
 }
 
+// DB: memes/{yyyy-mm}
 export type MemesOfMonth = Record<number | string, Meme>;
 
-export interface MemeRequest extends MemeBasics {
-  email: string;
-  name: string;
-  fileBase64: string;
-}
-
 // Doesn't use interface for overloads of addToDb in functions/src/db.ts
+// DB: submissions/{id}
 export type MemeSubmission = {
   date: string;
   meme: Meme;
@@ -37,7 +33,15 @@ interface CloudFunction<Req, Res> {
   response: Res;
 }
 
+// CF: submitMeme
 export type SubmitMemeCloudFunction = CloudFunction<
-  { date: string; meme: MemeRequest },
+  {
+    date: string;
+    meme: MemeBasics & {
+      email: string;
+      name: string;
+      fileBase64: string;
+    };
+  },
   SgResponse
 >;
