@@ -156,13 +156,13 @@
       <div class="flex">
         <span
           class="mr-2"
-          class:text-dark-s={found}
+          class:text-dark-sec={found}
           on:click={() => (found = false)}>I made it 🧑‍🎨</span
         >
         <Switch state={found} onUpdate={state => (found = state)} />
         <span
           class="ml-2"
-          class:text-dark-s={!found}
+          class:text-dark-sec={!found}
           on:click={() => (found = true)}>🏴‍☠️ I stole it</span
         >
       </div>

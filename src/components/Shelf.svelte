@@ -1,9 +1,9 @@
 <script lang="ts">
   import { dateToString } from "../../functions/src/date";
-  import type { Meme } from "../../functions/src/types";
+  import type { MemesOfMonth } from "../../functions/src/types";
 
   export let date: Date;
-  export let meme: Meme;
+  export let meme: MemesOfMonth[number];
   export let isTomorrow = false;
 </script>
 

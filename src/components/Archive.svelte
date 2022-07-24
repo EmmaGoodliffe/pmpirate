@@ -65,10 +65,10 @@
 <Header />
 <main class="min-w-min">
   <h2>Meme Archive</h2>
-  <div class="flex sm:w-1/4 mx-auto my-4">
-    <div class="w-1/4">
+  <div class="flex sm:w-2/3 md:w-1/2 lg:w-1/4 mx-auto my-4">
+    <div>
       <div
-        class="flex-1 btn max-w-[5rem] h-full font-mono text-3xl"
+        class="flex-1 btn min-w-[3rem] max-w-[5rem] h-[3rem] max-h-full font-mono text-3xl"
         on:click={() => backwardsEnabled && month--}
         disabled={!backwardsEnabled}
       >
@@ -78,9 +78,9 @@
     <p class="flex-1 my-2 text-lg text-center">
       {`${month}`.padStart(2, "0")}/{year}
     </p>
-    <div class="w-1/4">
+    <div>
       <div
-        class="flex-1 btn max-w-[5rem] h-full font-mono text-3xl"
+        class="flex-1 btn min-w-[3rem] max-w-[5rem] h-[3rem] max-h-full font-mono text-3xl"
         on:click={() => forwardsEnabled && month++}
         disabled={!forwardsEnabled}
       >
@@ -88,7 +88,7 @@
       </div>
     </div>
   </div>
-  <table class="table-auto w-full max-w-4xl mx-auto border-light-s border-2">
+  <table class="table-auto w-full max-w-4xl mx-auto border-light-sec border-2">
     <thead>
       <tr>
         <th class="border-2">Date</th>

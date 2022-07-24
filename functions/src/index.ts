@@ -15,7 +15,7 @@ import {
 import { addToDb, deleteFromDb, getFromDb, setToDb } from "./db";
 import { sendMemeConfirmationEmail } from "./email";
 import { pipeResizedImage } from "./image";
-import { SubmitMemeCloudFunction } from "./types";
+import { SubmitMemeCf } from "./types";
 
 initializeApp();
 const db = getFirestore();
@@ -28,9 +28,7 @@ const randomDigits = (max: number) =>
 export const submitMeme = functions
   .region("europe-west2")
   .https.onCall(
-    async (
-      data: SubmitMemeCloudFunction["request"],
-    ): Promise<SubmitMemeCloudFunction> => {
+    async (data: SubmitMemeCf["request"]): Promise<SubmitMemeCf> => {
       // Parse request data
       const date = stringToDate(data.date);
       if (date === undefined) {

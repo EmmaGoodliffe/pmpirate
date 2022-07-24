@@ -9,7 +9,7 @@ interface MemeBasics {
   found: boolean;
 }
 
-export interface Meme extends MemeBasics {
+interface Meme extends MemeBasics {
   url: string;
   author: string;
 }
@@ -26,7 +26,7 @@ export type MemeSubmission = {
   dateSubmitted: string;
 };
 
-interface CloudFunction<Req, Res> {
+interface Cf<Req, Res> {
   status: number;
   message: string;
   request: Req;
@@ -34,14 +34,10 @@ interface CloudFunction<Req, Res> {
 }
 
 // CF: submitMeme
-export type SubmitMemeCloudFunction = CloudFunction<
+export type SubmitMemeCf = Cf<
   {
     date: string;
-    meme: MemeBasics & {
-      email: string;
-      name: string;
-      fileBase64: string;
-    };
+    meme: MemeBasics & { email: string; name: string; fileBase64: string };
   },
   SgResponse
 >;

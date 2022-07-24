@@ -7,12 +7,7 @@ import {
   getToday,
   separateDate,
 } from "../functions/src/date";
-import type {
-  Db,
-  Meme,
-  MemesOfMonth,
-  SubmitMemeCloudFunction,
-} from "../functions/src/types";
+import type { Db, MemesOfMonth, SubmitMemeCf } from "../functions/src/types";
 import { functions } from "./common";
 
 const cache: Record<number, Record<number, MemesOfMonth>> = {};
@@ -88,7 +83,7 @@ export const getMemeOtd = async (
   db: Db,
   d: Date | undefined,
   n = 0,
-): Promise<Meme | null | undefined> => {
+): Promise<MemesOfMonth[number] | null | undefined> => {
   if (!d) return null;
   if (n >= 12) throw new Error("DB recursion");
   const [date, month, year] = separateDate(d);
@@ -102,19 +97,19 @@ export const getMemeOtd = async (
   return getMemeOtd(db, d, n + 1);
 };
 
-async function callCloudFunction(
+async function callCf(
   func: "submitMeme",
-  data: SubmitMemeCloudFunction["request"],
-): Promise<{ data: SubmitMemeCloudFunction }>;
-async function callCloudFunction(func: string, data: unknown) {
+  data: SubmitMemeCf["request"],
+): Promise<{ data: SubmitMemeCf }>;
+async function callCf(func: string, data: unknown) {
   return httpsCallable(functions, func)(data);
 }
 
 export const submitMeme = async (
   date: Date,
-  meme: SubmitMemeCloudFunction["request"]["meme"],
+  meme: SubmitMemeCf["request"]["meme"],
 ) => {
-  const response = await callCloudFunction("submitMeme", {
+  const response = await callCf("submitMeme", {
     date: dateToString(date),
     meme,
   });
