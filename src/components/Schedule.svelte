@@ -166,13 +166,13 @@
           on:click={() => (found = true)}>🏴‍☠️ I stole it</span
         >
       </div>
+      <p class="my-4 flex flex-row-reverse">{message}</p>
       {#if isLoading}
         <Loader />
       {:else}
-        <button class="btn px-4 py-2" on:click={schedule}>Schedule</button>
+        <button class="btn my-8 px-4 py-2" on:click={schedule}>Schedule</button>
       {/if}
     </form>
-    <p class="epilogue">{message}</p>
   {/await}
 </main>
 <footer />

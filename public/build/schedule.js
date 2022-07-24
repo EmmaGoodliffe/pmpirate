@@ -17546,11 +17546,12 @@ var schedule = (function () {
     	let t28;
     	let span1;
     	let t30;
+    	let p1;
+    	let t31;
+    	let t32;
+    	let t33;
     	let current_block_type_index_1;
     	let if_block1;
-    	let t31;
-    	let p1;
-    	let t32;
     	let current;
     	let mounted;
     	let dispose;
@@ -17667,10 +17668,11 @@ var schedule = (function () {
     			span1 = element("span");
     			span1.textContent = "🏴‍☠️ I stole it";
     			t30 = space();
-    			if_block1.c();
-    			t31 = space();
     			p1 = element("p");
+    			t31 = text("Bla: ");
     			t32 = text(/*message*/ ctx[6]);
+    			t33 = space();
+    			if_block1.c();
     			add_location(h30, file, 101, 6, 3696);
     			attr_dev(select, "class", "font-mono");
     			if (/*chosenDate*/ ctx[1] === void 0) add_render_callback(() => /*select_change_handler*/ ctx[12].call(select));
@@ -17708,10 +17710,10 @@ var schedule = (function () {
     			add_location(span1, file, 145, 8, 5075);
     			attr_dev(div, "class", "flex");
     			add_location(div, file, 138, 6, 4830);
+    			attr_dev(p1, "class", "my-4 flex flex-row-reverse");
+    			add_location(p1, file, 151, 6, 5236);
     			attr_dev(form, "class", "flex flex-col");
     			add_location(form, file, 100, 4, 3661);
-    			attr_dev(p1, "class", "epilogue");
-    			add_location(p1, file, 157, 4, 5389);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, form, anchor);
@@ -17768,10 +17770,11 @@ var schedule = (function () {
     			append_dev(div, t28);
     			append_dev(div, span1);
     			append_dev(form, t30);
-    			if_blocks_1[current_block_type_index_1].m(form, null);
-    			insert_dev(target, t31, anchor);
-    			insert_dev(target, p1, anchor);
+    			append_dev(form, p1);
+    			append_dev(p1, t31);
     			append_dev(p1, t32);
+    			append_dev(form, t33);
+    			if_blocks_1[current_block_type_index_1].m(form, null);
     			current = true;
 
     			if (!mounted) {
@@ -17867,6 +17870,7 @@ var schedule = (function () {
     				toggle_class(span1, "text-dark-fg", !/*found*/ ctx[4]);
     			}
 
+    			if (!current || dirty & /*message*/ 64) set_data_dev(t32, /*message*/ ctx[6]);
     			let previous_block_index_1 = current_block_type_index_1;
     			current_block_type_index_1 = select_block_type_1(ctx);
 
@@ -17892,8 +17896,6 @@ var schedule = (function () {
     				transition_in(if_block1, 1);
     				if_block1.m(form, null);
     			}
-
-    			if (!current || dirty & /*message*/ 64) set_data_dev(t32, /*message*/ ctx[6]);
     		},
     		i: function intro(local) {
     			if (current) return;
@@ -17924,8 +17926,6 @@ var schedule = (function () {
     			info = null;
     			destroy_component(switch_1);
     			if_blocks_1[current_block_type_index_1].d();
-    			if (detaching) detach_dev(t31);
-    			if (detaching) detach_dev(p1);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -18165,7 +18165,7 @@ var schedule = (function () {
     	return block;
     }
 
-    // (154:6) {:else}
+    // (155:6) {:else}
     function create_else_block(ctx) {
     	let button;
     	let mounted;
@@ -18175,8 +18175,8 @@ var schedule = (function () {
     		c: function create() {
     			button = element("button");
     			button.textContent = "Schedule";
-    			attr_dev(button, "class", "btn px-4 py-2");
-    			add_location(button, file, 154, 8, 5293);
+    			attr_dev(button, "class", "btn my-8 px-4 py-2");
+    			add_location(button, file, 155, 8, 5356);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -18200,14 +18200,14 @@ var schedule = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(154:6) {:else}",
+    		source: "(155:6) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (152:6) {#if isLoading}
+    // (153:6) {#if isLoading}
     function create_if_block(ctx) {
     	let loader;
     	let current;
@@ -18240,7 +18240,7 @@ var schedule = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(152:6) {#if isLoading}",
+    		source: "(153:6) {#if isLoading}",
     		ctx
     	});
 
@@ -18325,7 +18325,7 @@ var schedule = (function () {
     			footer = element("footer");
     			add_location(h2, file, 96, 2, 3573);
     			add_location(main, file, 95, 0, 3564);
-    			add_location(footer, file, 160, 0, 5442);
+    			add_location(footer, file, 160, 0, 5472);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
