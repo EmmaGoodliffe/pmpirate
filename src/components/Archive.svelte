@@ -24,6 +24,7 @@
   let dateQuery = dateToString(today);
   let forwardsEnabled = true;
   let backwardsEnabled = true;
+  let noMemes = false;
 
   const getArchivedMemes = async (db: Db, year: number, month: number) => {
     const memesOfMonth = (await getMemesOfMonth(year, month, db)) ?? {};
@@ -56,7 +57,14 @@
 
   $: archivedMemesPromise = getArchivedMemes(db, year, month);
 
-  $: memePromises = Promise.all([archivedMemesPromise, tomorrowMemePromise]);
+  $: memePromises = Promise.all([
+    archivedMemesPromise,
+    tomorrowMemePromise,
+  ]).then(results => {
+    const [archivedMemes, tomorrowMeme] = results;
+    noMemes = !Object.keys(archivedMemes).length && !tomorrowMeme;
+    return results;
+  });
 
   // TODO: Debounce
   $: queriedMemePromise = getMemeOtd(db, stringToDate(dateQuery));
@@ -91,8 +99,8 @@
   <table class="table-auto w-full max-w-4xl mx-auto border-light-sec border-2">
     <thead>
       <tr>
-        <th class="border-2">Date</th>
-        <th class="border-2">Meme</th>
+        <th class={"border-2" + (noMemes ? " w-1/2" : "")}>Date</th>
+        <th class={"border-2" + (noMemes ? " w-1/2" : "")}>Meme</th>
       </tr>
     </thead>
     {#await memePromises}
@@ -111,7 +119,7 @@
           <Shelf date={tomorrow} meme={tomorrowMeme} isTomorrow={true} />
         {/if}
       </tbody>
-      {#if !Object.keys(archivedMemes).length && !tomorrowMeme}
+      {#if noMemes}
         {#if month === separateDate(today)[1] && year === separateDate(today)[2]}
           <tfoot>No memes yet this month :(</tfoot>
         {:else}
