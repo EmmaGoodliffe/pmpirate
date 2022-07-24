@@ -10,6 +10,7 @@
   import type { Db, MemesOfMonth } from "../../functions/src/types";
   import { firstMonth, getMemeOtd, getMemesOfMonth } from "../db";
   import Header from "./Header.svelte";
+  import Footer from "./Footer.svelte";
   import Loader from "./Loader.svelte";
   import Meme from "./Meme.svelte";
   import Shelf from "./Shelf.svelte";
@@ -147,4 +148,4 @@
     <a class="hover:underline" href="schedule.html">Schedule a Meme</a>
   </p>
 </section>
-<footer />
+<Footer />

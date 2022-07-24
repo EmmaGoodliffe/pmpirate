@@ -4,6 +4,7 @@
   import { getMemeOtd } from "../db";
   import Doc from "./Doc.svelte";
   import Header from "./Header.svelte";
+  import Footer from "./Footer.svelte";
   import Loader from "./Loader.svelte";
   import Meme from "./Meme.svelte";
 
@@ -95,4 +96,4 @@
     <a class="hover:underline" href="archive.html">Meme Archive</a>
   </p>
 </section>
-<footer />
+<Footer />

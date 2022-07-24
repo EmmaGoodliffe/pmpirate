@@ -8,6 +8,7 @@
   import type { Db } from "../../functions/src/types";
   import { firstMemeDate, getMemeOtd, submitMeme } from "../db";
   import Header from "./Header.svelte";
+  import Footer from "./Footer.svelte";
   import Loader from "./Loader.svelte";
   import Meme from "./Meme.svelte";
   import Switch from "./Switch.svelte";
@@ -175,4 +176,4 @@
     </form>
   {/await}
 </main>
-<footer />
+<Footer />
