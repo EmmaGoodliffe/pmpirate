@@ -17207,7 +17207,7 @@ var archive = (function () {
     			t1 = space();
     			if (if_block1) if_block1.c();
     			if_block1_anchor = empty();
-    			add_location(tbody, file, 100, 6, 3718);
+    			add_location(tbody, file, 100, 6, 3717);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tbody, anchor);
@@ -17495,7 +17495,7 @@ var archive = (function () {
     		c: function create() {
     			tfoot = element("tfoot");
     			tfoot.textContent = "No memes that month :(";
-    			add_location(tfoot, file, 115, 10, 4265);
+    			add_location(tfoot, file, 115, 10, 4264);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tfoot, anchor);
@@ -17524,7 +17524,7 @@ var archive = (function () {
     		c: function create() {
     			tfoot = element("tfoot");
     			tfoot.textContent = "No memes yet this month :(";
-    			add_location(tfoot, file, 113, 10, 4197);
+    			add_location(tfoot, file, 113, 10, 4196);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tfoot, anchor);
@@ -17556,7 +17556,7 @@ var archive = (function () {
     		c: function create() {
     			tfoot = element("tfoot");
     			create_component(loader.$$.fragment);
-    			add_location(tfoot, file, 96, 6, 3628);
+    			add_location(tfoot, file, 96, 6, 3627);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, tfoot, anchor);
@@ -17902,31 +17902,31 @@ var archive = (function () {
     			attr_dev(div4, "class", "flex sm:w-2/3 md:w-1/2 lg:w-1/4 mx-auto my-4");
     			add_location(div4, file, 65, 2, 2610);
     			attr_dev(th0, "class", th0_class_value = "border-2" + (/*noMemes*/ ctx[5] ? " w-1/2" : ""));
-    			add_location(th0, file, 91, 8, 3441);
+    			add_location(th0, file, 91, 8, 3440);
     			attr_dev(th1, "class", th1_class_value = "border-2" + (/*noMemes*/ ctx[5] ? " w-1/2" : ""));
-    			add_location(th1, file, 92, 8, 3510);
-    			add_location(tr, file, 90, 6, 3428);
-    			add_location(thead, file, 89, 4, 3414);
-    			attr_dev(table, "class", "table-auto w-full max-w-4xl mx-auto border-light-sec border-2");
+    			add_location(th1, file, 92, 8, 3509);
+    			add_location(tr, file, 90, 6, 3427);
+    			add_location(thead, file, 89, 4, 3413);
+    			attr_dev(table, "class", "table-auto w-full max-w-4xl mx-auto border-light-fg border-2");
     			add_location(table, file, 88, 2, 3332);
     			attr_dev(main, "class", "min-w-min");
     			add_location(main, file, 63, 0, 2559);
-    			add_location(hr0, file, 121, 0, 4361);
-    			add_location(h21, file, 123, 2, 4380);
+    			add_location(hr0, file, 121, 0, 4360);
+    			add_location(h21, file, 123, 2, 4379);
     			attr_dev(input, "type", "text");
-    			add_location(input, file, 124, 2, 4406);
+    			add_location(input, file, 124, 2, 4405);
     			attr_dev(p1, "class", "my-4");
-    			add_location(p1, file, 125, 2, 4453);
-    			add_location(section0, file, 122, 0, 4368);
-    			add_location(hr1, file, 132, 0, 4648);
-    			add_location(h22, file, 134, 2, 4667);
+    			add_location(p1, file, 125, 2, 4452);
+    			add_location(section0, file, 122, 0, 4367);
+    			add_location(hr1, file, 132, 0, 4647);
+    			add_location(h22, file, 134, 2, 4666);
     			attr_dev(a, "class", "hover:underline");
     			attr_dev(a, "href", "schedule.html");
-    			add_location(a, file, 136, 4, 4719);
+    			add_location(a, file, 136, 4, 4718);
     			attr_dev(p2, "class", "epilogue");
-    			add_location(p2, file, 135, 2, 4694);
-    			add_location(section1, file, 133, 0, 4655);
-    			add_location(footer, file, 139, 0, 4805);
+    			add_location(p2, file, 135, 2, 4693);
+    			add_location(section1, file, 133, 0, 4654);
+    			add_location(footer, file, 139, 0, 4804);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");

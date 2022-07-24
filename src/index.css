@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply min-w-min bg-bg text-sec;
+  @apply min-w-min bg-bg text-fg;
 }
 
 h1 {
@@ -19,7 +19,7 @@ h3 {
 }
 
 hr {
-  @apply w-full mx-auto my-8 text-dark-sec opacity-50;
+  @apply w-full mx-auto my-8 text-dark-fg opacity-50;
 }
 
 form hr {
@@ -41,7 +41,7 @@ footer {
 input[type="text"],
 input[type="email"],
 select {
-  @apply bg-bg mb-4 px-2 py-1 border-light-sec border rounded-sm;
+  @apply bg-bg mb-4 px-2 py-1 border-light-fg border rounded-sm;
 }
 
 form input,
@@ -60,7 +60,7 @@ form select {
 }
 
 .switch.on {
-  @apply bg-sec;
+  @apply bg-fg;
 }
 
 .switch .switch-indicator {
@@ -70,14 +70,14 @@ form select {
 }
 
 .switch.off .switch-indicator {
-  @apply bg-sec border-pri;
+  @apply bg-fg border-pri;
 }
 
 .switch.on .switch-indicator {
   transform: translateX(
     calc(var(--switch-width) - var(--switch-indicator-width))
   );
-  @apply bg-bg border-sec;
+  @apply bg-bg border-fg;
 }
 
 .btn {
@@ -87,7 +87,7 @@ form select {
 
 .btn:disabled,
 .btn[disabled="true"] {
-  @apply bg-dark-pri text-dark-sec cursor-not-allowed;
+  @apply bg-dark-pri text-dark-fg cursor-not-allowed;
 }
 
 table tbody tr td {

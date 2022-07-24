@@ -17701,17 +17701,17 @@ var schedule = (function () {
     			attr_dev(input2, "placeholder", "School email");
     			add_location(input2, file, 132, 6, 4706);
     			attr_dev(span0, "class", "mr-2");
-    			toggle_class(span0, "text-dark-sec", /*found*/ ctx[4]);
+    			toggle_class(span0, "text-dark-fg", /*found*/ ctx[4]);
     			add_location(span0, file, 139, 8, 4857);
     			attr_dev(span1, "class", "ml-2");
-    			toggle_class(span1, "text-dark-sec", !/*found*/ ctx[4]);
-    			add_location(span1, file, 145, 8, 5076);
+    			toggle_class(span1, "text-dark-fg", !/*found*/ ctx[4]);
+    			add_location(span1, file, 145, 8, 5075);
     			attr_dev(div, "class", "flex");
     			add_location(div, file, 138, 6, 4830);
     			attr_dev(form, "class", "flex flex-col");
     			add_location(form, file, 100, 4, 3661);
     			attr_dev(p1, "class", "epilogue");
-    			add_location(p1, file, 157, 4, 5391);
+    			add_location(p1, file, 157, 4, 5389);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, form, anchor);
@@ -17855,7 +17855,7 @@ var schedule = (function () {
     			}
 
     			if (dirty & /*found*/ 16) {
-    				toggle_class(span0, "text-dark-sec", /*found*/ ctx[4]);
+    				toggle_class(span0, "text-dark-fg", /*found*/ ctx[4]);
     			}
 
     			const switch_1_changes = {};
@@ -17864,7 +17864,7 @@ var schedule = (function () {
     			switch_1.$set(switch_1_changes);
 
     			if (dirty & /*found*/ 16) {
-    				toggle_class(span1, "text-dark-sec", !/*found*/ ctx[4]);
+    				toggle_class(span1, "text-dark-fg", !/*found*/ ctx[4]);
     			}
 
     			let previous_block_index_1 = current_block_type_index_1;
@@ -18176,7 +18176,7 @@ var schedule = (function () {
     			button = element("button");
     			button.textContent = "Schedule";
     			attr_dev(button, "class", "btn px-4 py-2");
-    			add_location(button, file, 154, 8, 5295);
+    			add_location(button, file, 154, 8, 5293);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
@@ -18325,7 +18325,7 @@ var schedule = (function () {
     			footer = element("footer");
     			add_location(h2, file, 96, 2, 3573);
     			add_location(main, file, 95, 0, 3564);
-    			add_location(footer, file, 160, 0, 5444);
+    			add_location(footer, file, 160, 0, 5442);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");

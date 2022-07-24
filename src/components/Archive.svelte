@@ -96,7 +96,7 @@
       </div>
     </div>
   </div>
-  <table class="table-auto w-full max-w-4xl mx-auto border-light-sec border-2">
+  <table class="table-auto w-full max-w-4xl mx-auto border-light-fg border-2">
     <thead>
       <tr>
         <th class={"border-2" + (noMemes ? " w-1/2" : "")}>Date</th>
